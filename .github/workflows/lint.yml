@@ -4,13 +4,9 @@ on:
   workflow_call:
     inputs:
       file_glob:
-        description: "which openAPI 3.x files to lint"
+        description: "which openAPI 3.x file(s) to lint"
         type: string
         default: "build/resources/main/static/*.json"
-      spectral_ruleset:
-        description: "Which spectral ruleset to use"
-        type: string
-        default: "https://gist.githubusercontent.com/henriktre/43be6678ad4c85868053744818633238/raw/d212b973a7134f5e1f59de5e90badb75ffce901a/entur-spectral-rules"
 
 jobs:
   lint:
@@ -20,10 +16,15 @@ jobs:
       contents: read
     env:
       GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
-      GHA_API_LINT_SPECTRAL_RULESET: ${{ inputs.spectral_ruleset }}
     steps:
       - uses: actions/checkout@v4
+      - name: Checkout guidelines
+        uses: actions/checkout@v4
+        with:
+          repository: entur/api-guidelines
+          sparse-checkout: |
+            .spectral.yml
       - uses: stoplightio/spectral-action@v0.8.9
         with:
           file_glob: ${{ env.GHA_API_LINT_FILE_GLOB }}
-          spectral_ruleset: ${{ env.GHA_API_LINT_SPECTRAL_RULESET }}
+          spectral_ruleset: .spectral.yml
