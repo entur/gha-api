@@ -1,0 +1,29 @@
+name: Entur/Api/Lint
+
+on:
+  workflow_call:
+    inputs:
+      file_glob:
+        description: "which openAPI 3.x files to lint"
+        type: string
+        default: "build/resources/main/static/*.json"
+      spectral_ruleset:
+        description: "Which spectral ruleset to use"
+        type: string
+        default: ".spectral.yml"
+
+jobs:
+  lint:
+    name: OpenAPI Lint
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    env:
+      GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
+      GHA_API_LINT_SPECTRAL_RULESET: ${{ inputs.spectral_ruleset }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: stoplightio/spectral-action@v0.8.9
+        with:
+          file_glob: ${{ env.GHA_API_LINT_FILE_GLOB }}
+          spectral_ruleset: ${{ env.GHA_API_LINT_SPECTRAL_RULESET }}
