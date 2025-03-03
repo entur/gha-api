@@ -10,7 +10,7 @@ on:
       spectral_ruleset:
         description: "Which spectral ruleset to use"
         type: string
-        default: ".spectral.yml"
+        default: "https://gist.githubusercontent.com/henriktre/43be6678ad4c85868053744818633238/raw/d212b973a7134f5e1f59de5e90badb75ffce901a/entur-spectral-rules"
 
 jobs:
   lint:
