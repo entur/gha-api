@@ -21,11 +21,12 @@ jobs:
       - name: Checkout guidelines
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT }}
           repository: entur/api-guidelines
+          path: ruleset
           sparse-checkout: |
             .spectral.yml
       - uses: stoplightio/spectral-action@v0.8.9
         with:
           file_glob: ${{ env.GHA_API_LINT_FILE_GLOB }}
-          spectral_ruleset: .spectral.yml
+          spectral_ruleset: ruleset/.spectral.yml
