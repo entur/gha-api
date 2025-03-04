@@ -41,3 +41,11 @@ jobs:
           echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
           echo "Found $ERRORS errors and $WARNINGS warnings."
         shell: bash
+
+      - name: Authenticate with the cloud provider
+        id: auth
+        uses: entur/gha-meta/.github/actions/cloud-auth@v1
+        with:
+          environment: 'dev'
+          gcp_workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          gcp_service_account: ${{ vars.SERVICE_ACCOUNT }}
