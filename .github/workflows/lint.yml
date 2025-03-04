@@ -26,7 +26,25 @@ jobs:
           path: ruleset
           sparse-checkout: |
             .spectral.yml
-      - uses: stoplightio/spectral-action@v0.8.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          file_glob: ${{ env.GHA_API_LINT_FILE_GLOB }}
-          spectral_ruleset: ruleset/.spectral.yml
+          node-version: '16'
+
+      - name: Install Spectral CLI
+        run: npm install -g @stoplight/spectral-cli
+
+      - name: Run Spectral Linting
+        id: linting
+        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} -r ruleset/.spectral.yml -o lint-result.json -f json --quiet || true
+
+      - name: Count Errors and Warnings
+        id: count
+        run: |
+          ERRORS=$(jq '[.[] | select(.severity == 0)] | length' lint-result.json)
+          WARNINGS=$(jq '[.[] | select(.severity == 1)] | length' lint-result.json)
+          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+          echo "Found $ERRORS errors and $WARNINGS warnings."
+        shell: bash
