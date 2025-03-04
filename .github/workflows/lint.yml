@@ -27,7 +27,7 @@ jobs:
 
       - name: Run Spectral Linting
         id: linting
-        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} -r ruleset/..spectral.yml -o lint-result.json -f json --quiet || true
+        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} -r .spectral.yml -o lint-result.json -f json --quiet || true
 
       - name: Count Errors and Warnings
         id: count
