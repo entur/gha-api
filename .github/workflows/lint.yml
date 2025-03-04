@@ -9,7 +9,7 @@ on:
         default: "build/resources/main/static/*.json"
 
 jobs:
-  lint:
+  lint-and-store-result:
     name: OpenAPI Lint
     runs-on: ubuntu-24.04
     environment: dev
@@ -31,11 +31,11 @@ jobs:
         run: npm install -g @stoplight/spectral-cli
 
       - name: Run Spectral Linting
-        id: linting
+        id: lint
         run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} -o lint-result.json -f json --quiet || true
 
       - name: Count Errors and Warnings
-        id: count
+        id: count-errors-and-warnings
         run: |
           ERRORS=$(jq '[.[] | select(.severity == 0)] | length' lint-result.json)
           WARNINGS=$(jq '[.[] | select(.severity == 1)] | length' lint-result.json)
@@ -44,10 +44,22 @@ jobs:
           echo "Found $ERRORS errors and $WARNINGS warnings."
         shell: bash
 
-      - name: Authenticate with the cloud provider
-        id: auth
+      - name: Authenticate with GCP
+        id: auth-gcp
         uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
           environment: 'dev'
           gcp_workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
           gcp_service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+
+      - id: write-to-bigquery
+        name: Write to BigQuery
+        shell: bash
+        run: |
+          curl --request POST \
+            'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/ent-apidata-dev.test/tables/test/insertAll' \
+            --header 'Authorization: Bearer ${{ steps.auth-gcp.outputs.access_token }}' \
+            --header 'Accept: application/json' \
+            --header 'Content-Type: application/json' \
+            --data '{"rows":[{"json": ${{env.payload_json}} }]}' \
+            --compressed
