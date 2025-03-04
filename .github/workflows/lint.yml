@@ -17,15 +17,6 @@ jobs:
     env:
       GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
     steps:
-      - name: Checkout guidelines
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.PAT }}
-          repository: entur/api-guidelines
-          path: ruleset
-          sparse-checkout: |
-            .spectral.yml
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -36,7 +27,7 @@ jobs:
 
       - name: Run Spectral Linting
         id: linting
-        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} -r ruleset/.spectral.yml -o lint-result.json -f json --quiet || true
+        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} -r ruleset/..spectral.yml -o lint-result.json -f json --quiet || true
 
       - name: Count Errors and Warnings
         id: count
