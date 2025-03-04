@@ -17,7 +17,6 @@ jobs:
     env:
       GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
     steps:
-      - uses: actions/checkout@v4
       - name: Checkout guidelines
         uses: actions/checkout@v4
         with:
