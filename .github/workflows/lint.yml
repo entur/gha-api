@@ -69,5 +69,5 @@ jobs:
             --header 'Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
-            --data '{"rows":[{"json": ${{env.payload_json}} }]}' \
+            --data '{"rows":[{"json": {"str": "HELLO"}   }]}' \
             --compressed
