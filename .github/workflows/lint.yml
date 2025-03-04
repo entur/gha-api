@@ -13,7 +13,7 @@ jobs:
     name: OpenAPI Lint
     runs-on: ubuntu-24.04
     permissions:
-      contents: write
+      contents: read
     env:
       GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
     steps:
@@ -27,7 +27,7 @@ jobs:
 
       - name: Run Spectral Linting
         id: linting
-        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} -r .spectral.yml -o lint-result.json -f json --quiet || true
+        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} -o lint-result.json -f json --quiet || true
 
       - name: Count Errors and Warnings
         id: count
