@@ -44,21 +44,29 @@ jobs:
           echo "Found $ERRORS errors and $WARNINGS warnings."
         shell: bash
 
-      - name: Authenticate with GCP
-        id: auth-gcp
-        uses: entur/gha-meta/.github/actions/cloud-auth@v1
+#      - name: Authenticate with GCP
+#        id: auth-gcp
+#        uses: entur/gha-meta/.github/actions/cloud-auth@v1
+#        with:
+#          environment: 'dev'
+#          gcp_workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
+#          gcp_service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+
+      - id: login-gcp
+        name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2.1.2
         with:
-          environment: 'dev'
-          gcp_workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
-          gcp_service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ inputs.gcp_workload_identity_provider }}
+          service_account: ${{ inputs.gcp_service_account }}
+          token_format: 'access_token'
 
       - id: write-to-bigquery
         name: Write to BigQuery
         shell: bash
         run: |
           curl --request POST \
-            'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/ent-apidata-dev.test/tables/test/insertAll' \
-            --header 'Authorization: Bearer ${{ steps.auth-gcp.outputs.access_token }}' \
+            'https://bigquery.googleapis.com/bigquery/v2/projects/${{ env.GCP_PROJECT }}/datasets/ent-apidata-dev.test/tables/test/insertAll' \
+            --header 'Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             --data '{"rows":[{"json": ${{env.payload_json}} }]}' \
