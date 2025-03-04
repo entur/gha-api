@@ -65,7 +65,7 @@ jobs:
         shell: bash
         run: |
           curl --request POST \
-            'https://bigquery.googleapis.com/bigquery/v2/projects/${{ steps.login-gcp.outputs.project_id }}/datasets/test/tables/test/insertAll' \
+            'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/test/tables/test/insertAll' \
             --header 'Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
