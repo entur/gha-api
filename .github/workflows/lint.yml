@@ -12,8 +12,10 @@ jobs:
   lint:
     name: OpenAPI Lint
     runs-on: ubuntu-24.04
+    environment: dev
     permissions:
       contents: read
+      id-token: write
     env:
       GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
     steps:
