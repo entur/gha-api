@@ -56,8 +56,8 @@ jobs:
         name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2.1.2
         with:
-          workload_identity_provider: ${{ inputs.gcp_workload_identity_provider }}
-          service_account: ${{ inputs.gcp_service_account }}
+          workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
           token_format: 'access_token'
 
       - id: write-to-bigquery
