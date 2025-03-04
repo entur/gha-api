@@ -5,7 +5,7 @@ on: [push]
 jobs:
   spectral-lint:
     permissions:
-      contents: write
+      contents: read
     uses: ./.github/workflows/lint.yml
     with:
       file_glob: test-api.yaml
