@@ -6,6 +6,7 @@ jobs:
   spectral-lint:
     permissions:
       contents: read
+      id-token: write
     uses: ./.github/workflows/lint.yml
     with:
       file_glob: test-api.yaml
