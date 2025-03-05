@@ -59,9 +59,9 @@ jobs:
 
       - name: Insert Data into BigQuery using bq CLI
         run: |
-          bq query --use_legacy_sql=false \
-            'INSERT INTO `ent-apidata-dev.test.test` (str)
-             VALUES ("value1")'
+          bq --project_id=ent-apidata-dev --dataset_id=test query --use_legacy_sql=false \
+            'INSERT INTO `test` (str)
+             VALUES ("value3")'
 
 #      - id: login-gcp
 #        name: Authenticate with Google Cloud
