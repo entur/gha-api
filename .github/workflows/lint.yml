@@ -13,10 +13,9 @@ jobs:
     name: OpenAPI Lint
     runs-on: ubuntu-24.04
     permissions:
-      contents: write
+      contents: read
     env:
       GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -32,3 +31,4 @@ jobs:
         with:
           file_glob: ${{ env.GHA_API_LINT_FILE_GLOB }}
           spectral_ruleset: rulesets/.spectral.yml
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
