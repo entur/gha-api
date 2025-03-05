@@ -52,14 +52,15 @@ jobs:
           gcp_workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
           gcp_service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
 
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
         with:
           version: '>= 363.0.0'
+          project_id: ent-apidata-dev
 
       - name: Insert Data into BigQuery using bq CLI
         run: |
-          bq --project_id=ent-apidata-dev --dataset_id=test query --use_legacy_sql=false \
+          bq --dataset_id=test query --use_legacy_sql=false \
             'INSERT INTO `test` (str)
              VALUES ("value3")'
 
