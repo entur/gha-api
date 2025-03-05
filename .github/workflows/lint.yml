@@ -16,6 +16,8 @@ jobs:
       contents: write
     env:
       GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - uses: actions/checkout@v4
       - name: Checkout guidelines
