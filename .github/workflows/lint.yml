@@ -57,8 +57,11 @@ jobs:
         with:
           version: '>= 363.0.0'
 
-      - name: 'Use gcloud CLI'
-        run: 'gcloud info'
+      - name: Insert Data into BigQuery using bq CLI
+        run: |
+          bq query --use_legacy_sql=false \
+            'INSERT INTO `ent-apidata-dev.test.test` (str)
+             VALUES ("value1")'
 
 #      - id: login-gcp
 #        name: Authenticate with Google Cloud
