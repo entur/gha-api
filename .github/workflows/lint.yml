@@ -60,7 +60,7 @@ jobs:
 
       - name: Insert Data into BigQuery using bq CLI
         run: |
-          bq --dataset_id=test query --use_legacy_sql=false \
+          bq --project_id=ent-apidata-dev --dataset_id=test query --use_legacy_sql=false \
             'INSERT INTO `test` (str)
              VALUES ("value3")'
 
