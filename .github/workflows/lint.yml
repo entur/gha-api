@@ -44,30 +44,38 @@ jobs:
           echo "Found $ERRORS errors and $WARNINGS warnings."
         shell: bash
 
-#      - name: Authenticate with GCP
-#        id: auth-gcp
-#        uses: entur/gha-meta/.github/actions/cloud-auth@v1
-#        with:
-#          environment: 'dev'
-#          gcp_workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
-#          gcp_service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
-
-      - id: login-gcp
-        name: Authenticate with Google Cloud
-        uses: google-github-actions/auth@v2.1.2
+      - name: Authenticate with GCP
+        id: auth-gcp
+        uses: entur/gha-meta/.github/actions/cloud-auth@v1
         with:
-          workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
-          token_format: 'access_token'
+          environment: 'dev'
+          gcp_workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
+          gcp_service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
 
-      - id: write-to-bigquery
-        name: Write to BigQuery
-        shell: bash
-        run: |
-          curl --request POST \
-            'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/test/tables/test/insertAll' \
-            --header 'Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}' \
-            --header 'Accept: application/json' \
-            --header 'Content-Type: application/json' \
-            --data '{"rows":[{"json": {"str": "HELLO"}   }]}' \
-            --compressed
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '>= 363.0.0'
+
+      - name: 'Use gcloud CLI'
+        run: 'gcloud info'
+
+#      - id: login-gcp
+#        name: Authenticate with Google Cloud
+#        uses: google-github-actions/auth@v2.1.2
+#        with:
+#          workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
+#          service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+#          token_format: 'access_token'
+
+#      - id: write-to-bigquery
+#        name: Write to BigQuery
+#        shell: bash
+#        run: |
+#          curl --request POST \
+#            'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/test/tables/test/insertAll' \
+#            --header 'Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}' \
+#            --header 'Accept: application/json' \
+#            --header 'Content-Type: application/json' \
+#            --data '{"rows":[{"json": {"str": "HELLO"}   }]}' \
+#            --compressed
