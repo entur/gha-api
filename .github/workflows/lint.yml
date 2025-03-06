@@ -52,34 +52,23 @@ jobs:
           gcp_workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
           gcp_service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+
+      - id: login-gcp
+        name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2.1.2
         with:
-          version: '>= 363.0.0'
-          project_id: ent-apidata-dev
+          workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+          token_format: 'access_token'
 
-      - name: Insert Data into BigQuery using bq CLI
+      - id: write-to-bigquery
+        name: Write to BigQuery
+        shell: bash
         run: |
-          bq --project_id=ent-apidata-dev --dataset_id=test query --use_legacy_sql=false \
-            'INSERT INTO `test` (str)
-             VALUES ("value3")'
-
-#      - id: login-gcp
-#        name: Authenticate with Google Cloud
-#        uses: google-github-actions/auth@v2.1.2
-#        with:
-#          workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
-#          service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
-#          token_format: 'access_token'
-
-#      - id: write-to-bigquery
-#        name: Write to BigQuery
-#        shell: bash
-#        run: |
-#          curl --request POST \
-#            'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/test/tables/test/insertAll' \
-#            --header 'Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}' \
-#            --header 'Accept: application/json' \
-#            --header 'Content-Type: application/json' \
-#            --data '{"rows":[{"json": {"str": "HELLO"}   }]}' \
-#            --compressed
+          curl --request POST \
+            'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/test/tables/test/insertAll' \
+            --header 'Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}' \
+            --header 'Accept: application/json' \
+            --header 'Content-Type: application/json' \
+            --data '{"rows": [{"json": {"date": "2025-03-06", "service": "Test8", "rules_hash": "abc", "spec_hash": "def", "result": [{"rule": "entur-openapi-version", "category": "general", "severity": 0}]}}]}' \
+            --compressed
