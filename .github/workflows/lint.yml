@@ -56,10 +56,10 @@ jobs:
         name: Write to BigQuery
         shell: bash
         run: |
-            curl --request POST \
-            'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/api_lint/tables/lint_result/insertAll' \
-          --header 'Authorization: Bearer ya29.a0AeXRPp6j7N_7JKFE7HlDY07eic0E1_fWHDkejIiQkTLvaJnO4Dsr92q7EAxcjSOIrNCBf7h82K0oHugha4YB6hJkFJ9CmuM6KbNmuCxEW3UTk5IoEfzDdl-U4iip5050LtIS7cbUFWAIBVM7JS9kMSG6gah2MvHsbz97Pa2dxuL71LYaCgYKARESARISFQHGX2MiLLyBLqnkpYfeBEbdilbPMg0182' \
+          curl --request POST \
+          'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/api_lint/tables/lint_result/insertAll' \
+          --header 'Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}' \
           --header 'Accept: application/json' \
           --header 'Content-Type: application/json' \
           --data '{"rows": [{"json": {"date": "2025-03-06", "service": "Test8", "rules_hash": "abc", "spec_hash": "def", "result": [{"rule": "entur-openapi-version", "category": "general", "severity": 0}]}}]}' \
-            --compressed          
+            --compressed
