@@ -1,12 +1,8 @@
+# Lint OpenAPI files found in /specs and store the result in BigQuery
+
 name: Entur/Api/Lint
 
-on:
-  workflow_call:
-    inputs:
-      file_glob:
-        description: "which openAPI 3.x file(s) to lint"
-        type: string
-        default: "build/resources/main/static/*.json"
+on: [push]
 
 jobs:
   lint-and-store-result:
@@ -16,23 +12,20 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    env:
-      GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
     steps:
       - name: Checkout host repository
         uses: actions/checkout@v4
 
+      # Setup Node.js, install Spectral CLI, and run Spectral Linting
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-
       - name: Install Spectral CLI
         run: npm install -g @stoplight/spectral-cli
-
       - name: Run Spectral Linting
         id: lint
-        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} -o lint-result.json -f json --quiet || true
+        run: spectral lint specs/* -o lint-result.json -f json --quiet || true
 
       - name: Count Errors and Warnings
         id: count-errors-and-warnings
@@ -45,6 +38,7 @@ jobs:
         shell: bash
 
       - id: login-gcp
+        if: false #disabled for now
         name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2.1.2
         with:
@@ -53,6 +47,7 @@ jobs:
           token_format: 'access_token'
 
       - id: write-to-bigquery
+        if: false #disabled for now
         name: Write to BigQuery
         shell: bash
         run: |
