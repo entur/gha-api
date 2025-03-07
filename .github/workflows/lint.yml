@@ -27,7 +27,7 @@ jobs:
         id: lint
         run: spectral lint ./specs/* -o lint-result.json -f json --quiet || true
 
-      - id: dump result
+      - id: dump-result
         shell: bash
         run: cat lint-result.json
 
