@@ -15,7 +15,7 @@ tags:
 servers:
   - url: https://api.entur.no/sales/v1
     description: Production
-  - url: http://staging.api.entur.no/sales/v1
+  - url: https://staging.api.entur.no/sales/v1
     description: Staging
 
 components:
@@ -46,7 +46,7 @@ components:
           type: string
 
 paths:
-  /orders:
+  /orders-NotKebab:
     parameters:
       - $ref: '#/components/parameters/Entur-Distribution-Channel'
     get:
