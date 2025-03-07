@@ -31,15 +31,37 @@ jobs:
         shell: bash
         run: cat lint-result.json
 
-      - name: Count Errors and Warnings
-        id: count-errors-and-warnings
+      - name: Transform lint results into grouped JSON
         run: |
-          ERRORS=$(jq '[.[] | select(.severity == 0)] | length' lint-result.json)
-          WARNINGS=$(jq '[.[] | select(.severity == 1)] | length' lint-result.json)
-          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
-          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
-          echo "Found $ERRORS errors and $WARNINGS warnings."
-        shell: bash
+          # Get the unique source file paths from lint-result.json
+          sources=$(jq -r '.[].source' lint-result.json | sort -u)
+          
+          # Initialize an empty array to hold our row objects
+          rows_array=()
+          
+          # Iterate over each unique source
+          while IFS= read -r src; do
+            echo "Processing spec file: $src"
+          
+            # Extract the service name from the YAML file (using yq)
+            service=$(yq e '.info.title' "$src")
+          
+            # Filter lint-result.json for entries with this source and map each to {rule, severity}
+            results=$(jq --arg src "$src" '[.[] | select(.source == $src) | {rule: .code, severity: .severity}]' lint-result.json)
+          
+            # Build a row JSON object with the extracted service name and the result array
+            row=$(jq -n --arg service "$service" --argjson results "$results" '{json: {service: $service, result: $results}}')
+          
+            # Append the row to our rows_array
+            rows_array+=("$row")
+          done <<< "$sources"
+          
+          # Combine all rows into the final JSON structure
+          combined=$(printf '%s\n' "${rows_array[@]}" | jq -s '{rows: .}')
+          
+          # Write the output to a file (or you could use it further in your workflow)
+          echo "$combined" > transformed.json
+          cat transformed.json
 
       - id: login-gcp
         if: false #disabled for now
