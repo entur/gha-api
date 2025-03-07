@@ -1,6 +1,6 @@
 openapi: "3.0.0"
 info:
-  title: Test-API 1
+  title: Test-API 2
   version: 1.0.0
   description: |
     A long and descriptive description
