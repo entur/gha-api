@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      pull-requests: write
     env:
       GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
 
@@ -22,7 +23,6 @@ jobs:
       - name: Checkout guidelines
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           repository: entur/api-guidelines
           path: rulesets
           sparse-checkout: |
@@ -31,4 +31,3 @@ jobs:
         with:
           file_glob: ${{ env.GHA_API_LINT_FILE_GLOB }}
           spectral_ruleset: rulesets/.spectral.yml
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
