@@ -62,10 +62,7 @@ jobs:
           
           # Write the output to a file (or you could use it further in your workflow)
           echo "$combined" > transformed.json
-          #cat transformed.json
-
       - id: login-gcp
-        #if: false #disabled
         name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2.1.2
         with:
@@ -74,7 +71,6 @@ jobs:
           token_format: 'access_token'
 
       - id: write-to-bigquery
-        #if: false #disabled
         name: Write to BigQuery
         shell: bash
         run: |
