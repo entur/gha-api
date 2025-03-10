@@ -33,7 +33,7 @@ jobs:
 
       - name: Transform lint results into grouped JSON
         run: |
-          # Get the unique source file paths from lint-result.json
+          # Get the spec source file paths from lint-result.json
           sources=$(jq -r '.[].source' lint-result.json | sort -u)
           
           # Initialize an empty array to hold our row objects
@@ -43,10 +43,15 @@ jobs:
           while IFS= read -r src; do
             echo "Processing spec file: $src"
           
-            # Extract the service name from the YAML file (using yq)
-            service=$(yq e '.info.title' "$src")
+            if [[ "$src" == *.json ]]; then
+              # If the file is JSON, use jq to extract the service name.
+              service=$(jq -r '.info.title' "$src")
+            else
+              # Otherwise, assume it's YAML and use yq.
+              service=$(yq e '.info.title' "$src")
+            fi          
           
-            # Filter lint-result.json for entries with this source and map each to {rule, severity}
+            # Get rule violations from lint-result.json for entries with this source and map each to {rule, severity}
             results=$(jq --arg src "$src" '[.[] | select(.source == $src) | {rule: .code, severity: .severity}]' lint-result.json)
           
             # Build a row JSON object with the extracted service name and the result array
@@ -82,5 +87,5 @@ jobs:
           --header 'Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}' \
           --header 'Accept: application/json' \
           --header 'Content-Type: application/json' \
-          --data '{"rows": [{"json": {"date": "2025-03-06", "service": "Test9", "rules_hash": "abc", "spec_hash": "def", "result": [{"rule": "entur-openapi-version", "category": "general", "severity": 0}]}}]}' \
+          --data @transformed.json \
             --compressed
