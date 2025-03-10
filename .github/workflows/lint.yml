@@ -1,8 +1,8 @@
-# Lint OpenAPI files found in /specs and store the result in BigQuery
-
 name: Entur/Api/Lint
 
-on: [push]
+on:
+  schedule:
+    - cron: '*/1 * * * *'
 
 jobs:
   lint-and-store-result:
@@ -13,26 +13,84 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Checkout host repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Setup Node.js, install Spectral CLI, and run Spectral Linting
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Authenticate with Google Cloud
+        id: login-gcp
+        uses: google-github-actions/auth@v2.1.2
         with:
-          node-version: '16'
-      - name: Install Spectral CLI
-        run: npm install -g @stoplight/spectral-cli
-      - name: Run Spectral Linting
+          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.SERVICE_ACCOUNT }}
+          token_format: 'access_token'
+
+      - name: Check Spec Hashes and Identify Changed Specs
+        id: check-hashes
+        shell: bash
+        run: |
+          # Initialize an empty array to hold changed spec file paths.
+          changed_specs=()
+
+          # Loop over each file in the /specs directory.
+          for spec in ./specs/*; do
+            echo "Processing spec file: $spec"
+
+            # Compute a SHA256 hash for the spec file.
+            computed_hash=$(sha256sum "$spec" | awk '{print $1}')
+            echo "Computed hash: $computed_hash"
+          
+            # Extract the service name from the spec.
+            if [[ "$spec" == *.json ]]; then
+              service=$(jq -r '.info.title' "$spec")
+            else
+              service=$(yq e '.info.title' "$spec")
+            fi
+            echo "Service: $service"
+          
+            # Query BigQuery for the latest stored hash for this service.
+            query="SELECT spec_hash FROM \`ent-apidata-dev.api.rest_api_lint\` WHERE service_name = '$service' ORDER BY _PARTITIONTIME DESC LIMIT 1"
+            response=$(curl -s -X POST "https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/queries" \
+              --header "Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}" \
+              --header "Content-Type: application/json" \
+              --data "{\"query\": \"$query\", \"useLegacySql\": false}")
+            stored_hash=$(echo "$response" | jq -r '.rows[0].f[0].v')
+            echo "Stored hash: $stored_hash"
+          
+            # Compare computed hash with the stored hash.
+            if [ "$computed_hash" != "$stored_hash" ]; then
+              echo "Spec $spec has changed."
+              changed_specs+=("$spec")
+            else
+              echo "Spec $spec is unchanged."
+            fi
+          done
+          
+          # If no spec file has changed, exit the workflow.
+          if [ ${#changed_specs[@]} -eq 0 ]; then
+            echo "No spec changes detected. Exiting workflow."
+            exit 1
+          fi
+          
+          # Convert the array of changed spec files into a space-separated string.
+          changed_specs_list=$(printf "%s " "${changed_specs[@]}")
+          echo "Changed specs: $changed_specs_list"
+          # Set an output variable so later steps know which specs to lint.
+          echo "::set-output name=changed_specs::$changed_specs_list"
+
+      - name: Run Spectral Linting on Changed Specs
         id: lint
-        run: spectral lint ./specs/* -o lint-result.json -f json --quiet || true
+        run: |
+          # Retrieve the list of changed specs from the previous step.
+          specs=$(echo "${{ steps.check-hashes.outputs.changed_specs }}")
+          echo "Linting changed specs: $specs"
+          spectral lint $specs -o lint-result.json -f json --quiet || true
 
       - name: Transform lint results into grouped JSON
         run: |
           # Get the spec source file paths from lint-result.json
           sources=$(jq -r '.[].source' lint-result.json | sort -u)
           
-          # Initialize an empty array to hold our row objects
+          # Initialize an empty array for JSON rows.
           rows_array=()
           
           # Iterate over each unique source
@@ -45,13 +103,21 @@ jobs:
             else
               # Otherwise, assume it's YAML and use yq.
               service=$(yq e '.info.title' "$src")
-            fi          
+            fi
+            
+            # Re-compute the SHA256 hash for the spec file
+            computed_hash=$(sha256sum "$src" | awk '{print $1}')
+            echo "Computed hash: $computed_hash"                      
           
             # Get rule violations from lint-result.json for entries with this source and map each to {rule, severity}
             results=$(jq --arg src "$src" '[.[] | select(.source == $src) | {rule: .code, severity: .severity}]' lint-result.json)
           
             # Build a row JSON object with the extracted service name and the result array
-            row=$(jq -n --arg service "$service" --argjson results "$results" '{json: {service_name: $service, lint_result: $results, spec_hash: "TODO", rules_hash: "TODO"}}')
+            row=$(jq -n \
+                --arg service "$service" \
+                --argjson results "$results" \
+                --arg spec_hash "$computed_hash" \
+                '{json: {service_name: $service, lint_result: $results, spec_hash: $spec_hash, rules_hash: "TODO"}}')
           
             # Append the row to our rows_array
             rows_array+=("$row")
@@ -60,24 +126,17 @@ jobs:
           # Combine all rows into the final JSON structure
           combined=$(printf '%s\n' "${rows_array[@]}" | jq -s '{rows: .}')
           
-          # Write the output to a file (or you could use it further in your workflow)
+          # Write the output to a file
           echo "$combined" > transformed.json
-      - id: login-gcp
-        name: Authenticate with Google Cloud
-        uses: google-github-actions/auth@v2.1.2
-        with:
-          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.SERVICE_ACCOUNT }}
-          token_format: 'access_token'
 
-      - id: write-to-bigquery
-        name: Write to BigQuery
+      - name: Write to BigQuery
+        id: write-to-bigquery
         shell: bash
         run: |
           curl --request POST \
-          'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/api/tables/rest_api_lint/insertAll' \
-          --header 'Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}' \
-          --header 'Accept: application/json' \
-          --header 'Content-Type: application/json' \
-          --data @transformed.json \
+            'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/api/tables/rest_api_lint/insertAll' \
+            --header "Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}" \
+            --header "Accept: application/json" \
+            --header "Content-Type: application/json" \
+            --data @transformed.json \
             --compressed
