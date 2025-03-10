@@ -51,7 +51,7 @@ jobs:
             results=$(jq --arg src "$src" '[.[] | select(.source == $src) | {rule: .code, severity: .severity}]' lint-result.json)
           
             # Build a row JSON object with the extracted service name and the result array
-            row=$(jq -n --arg service "$service" --argjson results "$results" '{json: {service: $service, result: $results}}')
+            row=$(jq -n --arg service "$service" --argjson results "$results" '{json: {service_name: $service, lint_result: $results, spec_hash: "TODO", rules_hash: "TODO"}}')
           
             # Append the row to our rows_array
             rows_array+=("$row")
@@ -79,7 +79,7 @@ jobs:
         shell: bash
         run: |
           curl --request POST \
-          'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/api_lint/tables/lint_result/insertAll' \
+          'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/api/tables/rest_api_lint/insertAll' \
           --header 'Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}' \
           --header 'Accept: application/json' \
           --header 'Content-Type: application/json' \
