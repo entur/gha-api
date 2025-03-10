@@ -27,10 +27,6 @@ jobs:
         id: lint
         run: spectral lint ./specs/* -o lint-result.json -f json --quiet || true
 
-      - id: dump-result
-        shell: bash
-        run: cat lint-result.json
-
       - name: Transform lint results into grouped JSON
         run: |
           # Get the spec source file paths from lint-result.json
@@ -66,7 +62,7 @@ jobs:
           
           # Write the output to a file (or you could use it further in your workflow)
           echo "$combined" > transformed.json
-          cat transformed.json
+          #cat transformed.json
 
       - id: login-gcp
         if: false #disabled for now
