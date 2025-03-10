@@ -27,7 +27,7 @@ jobs:
           path: rulesets
           sparse-checkout: |
             .spectral.yml
-      - uses: stoplightio/spectral-action@v0.8.9
-        with:
-          file_glob: ${{ env.GHA_API_LINT_FILE_GLOB }}
-          spectral_ruleset: rulesets/.spectral.yml
+      - name: Install Spectral
+        run: npm install -g @stoplight/spectral
+      - name: Lint OpenAPI
+        run: spectral lint $GHA_API_LINT_FILE_GLOB --ruleset rulesets/.spectral.yml
