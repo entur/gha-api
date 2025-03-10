@@ -30,4 +30,4 @@ jobs:
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
-        run: spectral lint $GHA_API_LINT_FILE_GLOB --ruleset rulesets/.spectral.yml
+        run: spectral lint $GHA_API_LINT_FILE_GLOB --ruleset rulesets/.spectral.yml -v
