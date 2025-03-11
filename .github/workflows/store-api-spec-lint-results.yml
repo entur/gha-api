@@ -61,17 +61,20 @@ jobs:
             else
               service=$(yq e '.info.title' "$spec")
             fi
-
-            # Query BigQuery for the latest stored hash for this service.
+          
+            # Query BigQuery for the latest stored hashes for this service.
             query="SELECT spec_hash, rules_hash FROM \`ent-apidata-dev.api.rest_api_lint\` WHERE service_name = '$service' ORDER BY created DESC LIMIT 1"
-            response=$(curl -s -X POST "https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/queries" \
-              --header "Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}" \
-              --header "Content-Type: application/json" \
-              --data "{\"query\": \"$query\", \"useLegacySql\": false}")
-
-            stored_spec_hash=$(echo "$response" | jq -r '.rows[0].f[0].v')
-            stored_rules_hash=$(echo "$response" | jq -r '.rows[0].f[1].v')
-
+              
+            # Run the query using the bq CLI, outputting results in JSON format.
+            response=$(bq query --project_id=ent-apidata-dev --format=json --nouse_legacy_sql "$query")          
+            echo $response
+              
+            # Extract the spec_hash and rules_hash from the first row.
+            stored_spec_hash=$(echo "$response" | jq -r '.[0].spec_hash')
+            stored_rules_hash=$(echo "$response" | jq -r '.[0].rules_hash')          
+            echo "stored_rules_hash = $stored_spec_hash"
+            echo "stored_rules_hash = $stored_rules_hash"
+                                                
             # Compare computed hash with the stored hash.
             if [ "$computed_spec_hash" != "$stored_spec_hash" ]; then
               echo "Spec $spec has changed."
