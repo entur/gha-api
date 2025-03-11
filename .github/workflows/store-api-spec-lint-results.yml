@@ -48,12 +48,17 @@ jobs:
             fi
             echo "Service: $service"
           
+          echo "SELECT spec_hash FROM \`ent-apidata-dev.api.rest_api_lint\` WHERE service_name = '$service' ORDER BY _PARTITIONTIME DESC LIMIT 1"
+          
             # Query BigQuery for the latest stored hash for this service.
             query="SELECT spec_hash FROM \`ent-apidata-dev.api.rest_api_lint\` WHERE service_name = '$service' ORDER BY _PARTITIONTIME DESC LIMIT 1"
             response=$(curl -s -X POST "https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/queries" \
               --header "Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}" \
               --header "Content-Type: application/json" \
               --data "{\"query\": \"$query\", \"useLegacySql\": false}")
+          
+            echo "BigQuery response: $response"
+          
             stored_hash=$(echo "$response" | jq -r '.rows[0].f[0].v')
             echo "Stored hash: $stored_hash"
           
