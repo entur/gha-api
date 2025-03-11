@@ -41,7 +41,6 @@ jobs:
 
             # Compute a SHA256 hash for the spec file.
             computed_spec_hash=$(sha256sum "$spec" | awk '{print $1}')
-            echo "Computed hash: $computed_spec_hash"
           
             # Extract the service name from the spec.
             if [[ "$spec" == *.json ]]; then
@@ -79,8 +78,7 @@ jobs:
           fi
           
           # Convert the array of changed spec files into a space-separated string.
-          changed_specs_list=$(printf "%s " "${changed_specs[@]}")
-          echo "Changed specs: $changed_specs_list"
+          changed_specs_list=$(printf "%s " "${changed_specs[@]}")          
           # Set an output variable so later steps know which specs to lint.
           echo "::set-output name=changed_specs::$changed_specs_list"
       - name: Setup Node.js
@@ -106,9 +104,7 @@ jobs:
           rows_array=()
           
           # Iterate over each unique source
-          while IFS= read -r src; do
-            echo "Processing spec file: $src"
-          
+          while IFS= read -r src; do          
             if [[ "$src" == *.json ]]; then
               # If the file is JSON, use jq to extract the service name.
               service=$(jq -r '.info.title' "$src")
