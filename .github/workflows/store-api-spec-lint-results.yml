@@ -162,6 +162,7 @@ jobs:
         shell: bash
         run: |
           bq load \
+            --project_id=ent-apidata-dev 
             --source_format=NEWLINE_DELIMITED_JSON \
             --autodetect \
             ent-apidata-dev:api.rest_api_lint \
