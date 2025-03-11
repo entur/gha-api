@@ -37,8 +37,8 @@ jobs:
             echo "Processing spec file: $spec"
 
             # Compute a SHA256 hash for the spec file.
-            computed_hash=$(sha256sum "$spec" | awk '{print $1}')
-            echo "Computed hash: $computed_hash"
+            computed_spec_hash=$(sha256sum "$spec" | awk '{print $1}')
+            echo "Computed hash: $computed_spec_hash"
           
             # Extract the service name from the spec.
             if [[ "$spec" == *.json ]]; then
@@ -46,9 +46,6 @@ jobs:
             else
               service=$(yq e '.info.title' "$spec")
             fi
-            echo "Service: $service"
-          
-          echo "SELECT spec_hash FROM \`ent-apidata-dev.api.rest_api_lint\` WHERE service_name = '$service' ORDER BY created DESC LIMIT 1"
           
             # Query BigQuery for the latest stored hash for this service.
             query="SELECT spec_hash FROM \`ent-apidata-dev.api.rest_api_lint\` WHERE service_name = '$service' ORDER BY created DESC LIMIT 1"
@@ -56,14 +53,11 @@ jobs:
               --header "Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}" \
               --header "Content-Type: application/json" \
               --data "{\"query\": \"$query\", \"useLegacySql\": false}")
-          
-            echo "BigQuery response: $response"
-          
-            stored_hash=$(echo "$response" | jq -r '.rows[0].f[0].v')
-            echo "Stored hash: $stored_hash"
+
+            stored_spec_hash=$(echo "$response" | jq -r '.rows[0].f[0].v')
           
             # Compare computed hash with the stored hash.
-            if [ "$computed_hash" != "$stored_hash" ]; then
+            if [ "$computed_spec_hash" != "$stored_spec_hash" ]; then
               echo "Spec $spec has changed."
               changed_specs+=("$spec")
             else
@@ -117,8 +111,8 @@ jobs:
             fi
             
             # Re-compute the SHA256 hash for the spec file
-            computed_hash=$(sha256sum "$src" | awk '{print $1}')
-            echo "Computed hash: $computed_hash"                      
+            computed_spec_hash=$(sha256sum "$src" | awk '{print $1}')
+            echo "Computed hash: $computed_spec_hash"                      
           
             # Get rule violations from lint-result.json for entries with this source and map each to {rule, severity}
             results=$(jq --arg src "$src" '[.[] | select(.source == $src) | {rule: .code, severity: .severity}]' lint-result.json)
@@ -127,7 +121,7 @@ jobs:
             row=$(jq -n \
                 --arg service "$service" \
                 --argjson results "$results" \
-                --arg spec_hash "$computed_hash" \
+                --arg spec_hash "$computed_spec_hash" \
                 '{json: {service_name: $service, lint_result: $results, spec_hash: $spec_hash, rules_hash: "TODO"}}')
           
             # Append the row to our rows_array
