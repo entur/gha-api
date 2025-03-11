@@ -129,7 +129,8 @@ jobs:
                 --arg service "$service" \
                 --argjson results "$results" \
                 --arg spec_hash "$computed_spec_hash" \
-                '{json: {service_name: $service, lint_result: $results, spec_hash: $spec_hash, rules_hash: "TODO"}}')
+                --arg rules_hash "$computed_rules_hash" \
+                '{json: {service_name: $service, lint_result: $results, spec_hash: $spec_hash, rules_hash: $rules_hash}}')
           
             # Append the row to our rows_array
             rows_array+=("$row")
