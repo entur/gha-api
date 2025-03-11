@@ -73,21 +73,26 @@ jobs:
           
           # If no spec file has changed, exit the workflow.
           if [ ${#changed_specs[@]} -eq 0 ]; then
-            echo "No spec changes detected. Exiting workflow. (This is not an error.)"
-            exit 1 #TODO: Do this with conditional steps instead
+            echo "No spec changes detected. Nothing further to do. Ignoring rest of workflow." #Variable "changes" is not set to true, so steps below will be ignored.           
+            exit 0
           fi
+          
+          echo "changes=true" >> $GITHUB_OUTPUT
           
           # Convert the array of changed spec files into a space-separated string.
           changed_specs_list=$(printf "%s " "${changed_specs[@]}")          
           # Set an output variable so later steps know which specs to lint.
           echo "::set-output name=changed_specs::$changed_specs_list"
       - name: Setup Node.js
+        if: steps.check-hashes.outputs.changes == 'true'
         uses: actions/setup-node@v3
         with:
           node-version: '16'
       - name: Install Spectral CLI
+        if: steps.check-hashes.outputs.changes == 'true'
         run: npm install -g @stoplight/spectral-cli
       - name: Run Spectral Linting on Changed Specs
+        if: steps.check-hashes.outputs.changes == 'true'
         id: lint
         run: |
           # Retrieve the list of changed specs from the previous step.
@@ -96,6 +101,7 @@ jobs:
           spectral lint $specs -o lint-result.json -f json --quiet || true
 
       - name: Transform lint results into grouped JSON
+        if: steps.check-hashes.outputs.changes == 'true'
         run: |
           # Get the spec source file paths from lint-result.json
           sources=$(jq -r '.[].source' lint-result.json | sort -u)
@@ -141,6 +147,7 @@ jobs:
           echo "$combined" > transformed.json
 
       - name: Write to BigQuery
+        if: steps.check-hashes.outputs.changes == 'true'
         id: write-to-bigquery
         shell: bash
         run: |
