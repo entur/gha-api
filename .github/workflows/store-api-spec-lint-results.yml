@@ -77,7 +77,12 @@ jobs:
           echo "Changed specs: $changed_specs_list"
           # Set an output variable so later steps know which specs to lint.
           echo "::set-output name=changed_specs::$changed_specs_list"
-
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - name: Install Spectral CLI
+        run: npm install -g @stoplight/spectral-cli
       - name: Run Spectral Linting on Changed Specs
         id: lint
         run: |
