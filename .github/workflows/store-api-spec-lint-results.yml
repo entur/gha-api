@@ -42,6 +42,12 @@ jobs:
           #Calulate hash of the linting rules. If the rules change, all specs should be linted.
           computed_rules_hash=$(sha256sum "rulesets/.spectral.yml" | awk '{print $1}')                    
 
+          # Check if the /specs directory is empty
+          if [ -z "$(ls -A ./specs)" ]; then
+            echo "No spec files found in ./specs. Aborting job."
+            exit 0 #Variable "changes" is not set to true, so steps below will be ignored.
+          fi
+
           # Loop over each file in the /specs directory.
           for spec in ./specs/*; do
             echo "Processing spec file: $spec"
@@ -78,10 +84,10 @@ jobs:
             fi
           done
 
-          # If no spec file has changed, exit the workflow.
+          # If no spec file has changed, exit the job.
           if [ ${#changed_specs[@]} -eq 0 ]; then
-            echo "No spec changes detected. Nothing further to do. Ignoring rest of workflow." #Variable "changes" is not set to true, so steps below will be ignored.           
-            exit 0
+            echo "No spec changes detected. Aborting job."            
+            exit 0 #Variable "changes" is not set to true, so steps below will be ignored.
           fi
 
           echo "changes=true" >> $GITHUB_OUTPUT
