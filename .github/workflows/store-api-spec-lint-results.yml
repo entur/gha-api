@@ -30,7 +30,6 @@ jobs:
         with:
           workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.SERVICE_ACCOUNT }}
-          token_format: "access_token"
 
       - name: Check Spec Hashes and Identify Changed Specs
         id: check-hashes
@@ -67,13 +66,10 @@ jobs:
               
             # Run the query using the bq CLI, outputting results in JSON format.
             response=$(bq query --project_id=ent-apidata-dev --format=json --nouse_legacy_sql "$query")          
-            echo $response
               
             # Extract the spec_hash and rules_hash from the first row.
             stored_spec_hash=$(echo "$response" | jq -r '.[0].spec_hash')
             stored_rules_hash=$(echo "$response" | jq -r '.[0].rules_hash')          
-            echo "stored_rules_hash = $stored_spec_hash"
-            echo "stored_rules_hash = $stored_rules_hash"
                                                 
             # Compare computed hash with the stored hash.
             if [ "$computed_spec_hash" != "$stored_spec_hash" ]; then
@@ -156,21 +152,17 @@ jobs:
             rows_array+=("$row")
           done <<< "$sources"
 
-          # Combine all rows into the final JSON structure
-          combined=$(printf '%s\n' "${rows_array[@]}" | jq -s '{rows: .}')
-
-          # Write the output to a file
-          echo "$combined" > transformed.json
+          printf '%s\n' "${rows_array[@]}" > transformed.ndjson
+          
+          echo "transformed.ndjson: $(cat transformed.ndjson)"
 
       - name: Write to BigQuery
         if: steps.check-hashes.outputs.changes == 'true'
         id: write-to-bigquery
         shell: bash
         run: |
-          curl --request POST \
-            'https://bigquery.googleapis.com/bigquery/v2/projects/ent-apidata-dev/datasets/api/tables/rest_api_lint/insertAll' \
-            --header "Authorization: Bearer ${{ steps.login-gcp.outputs.access_token }}" \
-            --header "Accept: application/json" \
-            --header "Content-Type: application/json" \
-            --data @transformed.json \
-            --compressed
+          bq load \
+            --source_format=NEWLINE_DELIMITED_JSON \
+            --autodetect \
+            ent-apidata-dev:api.rest_api_lint \
+            transformed.ndjson
