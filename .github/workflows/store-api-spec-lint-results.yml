@@ -152,9 +152,7 @@ jobs:
             rows_array+=("$row")
           done <<< "$sources"
 
-          printf '%s\n' "${rows_array[@]}" > transformed.ndjson
-          
-          echo "transformed.ndjson: $(cat transformed.ndjson)"
+          printf '%s\n' "${rows_array[@]}" > transformed.json                    
 
       - name: Write to BigQuery
         if: steps.check-hashes.outputs.changes == 'true'
@@ -162,8 +160,7 @@ jobs:
         shell: bash
         run: |
           bq load \
-            --project_id=ent-apidata-dev 
             --source_format=NEWLINE_DELIMITED_JSON \
             --autodetect \
             ent-apidata-dev:api.rest_api_lint \
-            transformed.ndjson
+            transformed.json
