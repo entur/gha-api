@@ -32,7 +32,7 @@ jobs:
           # Initialize an empty array to hold changed spec file paths.
           changed_specs=()
           
-          #First, check hash of the linting rules
+          #Calulate hash of the linting rules. If the rules change, all specs should be linted.
           computed_rules_hash=$(sha256sum ".spectral.yml" | awk '{print $1}')                    
           
           # Loop over each file in the /specs directory.
@@ -119,8 +119,10 @@ jobs:
             
             # Re-compute the SHA256 hash for the spec file
             computed_spec_hash=$(sha256sum "$src" | awk '{print $1}')
-            echo "Computed hash: $computed_spec_hash"                      
-          
+            
+            # Re-compute the SHA256 hash for the rules file
+            computed_rules_hash=$(sha256sum ".spectral.yml" | awk '{print $1}')                  
+                    
             # Get rule violations from lint-result.json for entries with this source and map each to {rule, severity}
             results=$(jq --arg src "$src" '[.[] | select(.source == $src) | {rule: .code, severity: .severity}]' lint-result.json)
           
