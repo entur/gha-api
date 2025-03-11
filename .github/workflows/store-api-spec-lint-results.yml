@@ -1,8 +1,9 @@
 name: Entur/Api/Lint
 
 on:
+  push: #Remove later. Schedule only runs on default branch
   schedule:
-    - cron: "*/1 * * * *"
+    - cron: '*/1 * * * *'
 
 jobs:
   lint-and-store-result:
