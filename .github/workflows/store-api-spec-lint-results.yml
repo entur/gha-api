@@ -56,13 +56,8 @@ jobs:
               --header "Content-Type: application/json" \
               --data "{\"query\": \"$query\", \"useLegacySql\": false}")
           
-            echo "BigQuery response: $response"
-
             stored_spec_hash=$(echo "$response" | jq -r '.rows[0].f[0].v')
             stored_rules_hash=$(echo "$response" | jq -r '.rows[0].f[1].v')
-          
-            echo "Stored spec hash: $stored_spec_hash"
-            echo "Stored rules hash: stored_rules_hash"
           
             # Compare computed hash with the stored hash.
             if [ "$computed_spec_hash" != "$stored_spec_hash" ]; then
