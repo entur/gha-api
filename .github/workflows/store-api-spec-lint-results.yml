@@ -162,6 +162,6 @@ jobs:
           bq load \
             --source_format=NEWLINE_DELIMITED_JSON \
             --autodetect \
-            --project_id=ent-apidata-dev 
+            --project_id=ent-apidata-dev \
             ent-apidata-dev:api.rest_api_lint \
             transformed.json
