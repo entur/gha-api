@@ -9,18 +9,7 @@ on:
         default: "build/resources/main/static/*.json"
 
 jobs:
-  pre-check:
-    name: Check Repository Owner
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Verify Entur Organization
-        if: github.repository_owner != 'entur'
-        run: |
-          echo "Error: This workflow can only be run in repositories owned by the Entur organization"
-          exit 1
-
   lint:
-    needs: pre-check
     name: OpenAPI Lint
     runs-on: ubuntu-24.04
     permissions:
@@ -39,17 +28,7 @@ jobs:
             .spectral.yml
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
-      - name: echo spec content
-        run: cat specs/organisations-v2.json
       - name: echo ruleset content
         run: cat rulesets/.spectral.yml
-      - name: save spec files
-        run: |
-          mkdir -p specs
-          GITHUB_REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d"/" -f2)
-          for file in $GHA_API_LINT_FILE_GLOB; do
-              FILENAME=$(basename "$file")
-              cp "$file" "specs/${GITHUB_REPO_NAME}-${FILENAME}"
-          done
       - name: Lint OpenAPI
         run: spectral lint $GHA_API_LINT_FILE_GLOB --ruleset rulesets/.spectral.yml -v
