@@ -73,8 +73,8 @@ jobs:
           
           # If no spec file has changed, exit the workflow.
           if [ ${#changed_specs[@]} -eq 0 ]; then
-            echo "No spec changes detected. Exiting workflow."
-            exit 0
+            echo "No spec changes detected. Exiting workflow. (This is not an error.)"
+            exit 1
           fi
           
           # Convert the array of changed spec files into a space-separated string.
