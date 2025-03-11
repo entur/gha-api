@@ -141,7 +141,7 @@ jobs:
             results=$(jq --arg src "$src" '[.[] | select(.source == $src) | {rule: .code, severity: .severity}]' lint-result.json)
 
             # Build a row JSON object with the extracted service name and the result array
-            row=$(jq -n \
+            row=$(jq -nc \
                 --arg service "$service" \
                 --argjson results "$results" \
                 --arg spec_hash "$computed_spec_hash" \
@@ -152,9 +152,9 @@ jobs:
             rows_array+=("$row")
           done <<< "$sources"
 
-          printf '%s\n' "${rows_array[@]}" > transformed.json          
+          printf '%s\n' "${rows_array[@]}" > transformed.ndjson          
           
-          cat transformed.json
+          cat transformed.ndjson
 
       - name: Write to BigQuery
         if: steps.check-hashes.outputs.changes == 'true'
@@ -166,4 +166,4 @@ jobs:
             --autodetect \
             --project_id=ent-apidata-dev \
             ent-apidata-dev:api.rest_api_lint \
-            transformed.json
+            transformed.ndjson
