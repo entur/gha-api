@@ -68,7 +68,7 @@ jobs:
               echo "Linting rules have changed. Linting $spec."
               changed_specs+=("$spec")
             else
-              echo "Spec $spec is unchanged."
+              echo "Spec $spec is unchanged and linting rules have not changed. Not linting spec."
             fi
           done
           
