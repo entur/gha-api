@@ -152,7 +152,9 @@ jobs:
             rows_array+=("$row")
           done <<< "$sources"
 
-          printf '%s\n' "${rows_array[@]}" > transformed.json                    
+          printf '%s\n' "${rows_array[@]}" > transformed.json          
+          
+          cat transformed.json
 
       - name: Write to BigQuery
         if: steps.check-hashes.outputs.changes == 'true'
