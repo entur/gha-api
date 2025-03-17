@@ -1,7 +1,7 @@
 name: Entur/Api/Lint
 
 on:
-  push: #Remove later. Schedule only runs on default branch
+  workflow_dispatch:
 
 jobs:
   lint-and-store-result:
