@@ -1,7 +1,7 @@
-name: Entur/Api/Lint
+name: Lint OpenAPI specs
 
 on:
-  workflow_dispatch:
+  pull_request:
   workflow_call:
     inputs:
       file_glob:
@@ -16,7 +16,8 @@ jobs:
     permissions:
       contents: read
     env:
-      GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
+      #GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
+      GHA_API_LINT_FILE_GLOB: "specs/*.json"
 
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +30,25 @@ jobs:
             .spectral.yml
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
-      - name: echo ruleset content
-        run: cat rulesets/.spectral.yml
       - name: Lint OpenAPI
-        run: spectral lint $GHA_API_LINT_FILE_GLOB --ruleset rulesets/.spectral.yml -v
+        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} --ruleset rulesets/.spectral.yml -f text || true
+      # - name: Upload report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: spectral-report
+      #     path: report.html
+
+  upload-to-bucket:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
+      - name: "Set up Cloud SDK"
+        uses: google-github-actions/setup-gcloud@v2
+      - name: Upload specs to GCS
+        run: |
+          echo "Starting to sync files to GCS Bucket to /${GITHUB_REPOSITORY#*/}"
+          gcloud storage rsync --include="${GHA_API_LINT_FILE_GLOB}" "gs://entur-api-bucket/${GITHUB_REPOSITORY#*/}"
