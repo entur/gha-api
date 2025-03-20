@@ -1,0 +1,55 @@
+name: Lint OpenAPI specs
+
+on:
+  pull_request:
+  workflow_call:
+    inputs:
+      file_glob:
+        description: "which openAPI 3.x file(s) to lint"
+        type: string
+        default: "specs/*.json"
+
+jobs:
+  lint:
+    name: OpenAPI Lint
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      #GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
+      GHA_API_LINT_FILE_GLOB: "specs/*.json"
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout guidelines
+        uses: actions/checkout@v4
+        with:
+          repository: entur/api-guidelines
+          path: rulesets
+          sparse-checkout: |
+            .spectral.yml
+      - name: Install Spectral
+        run: npm install -g @stoplight/spectral-cli
+      - name: Lint OpenAPI
+        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} --ruleset rulesets/.spectral.yml -f pretty || true
+
+  upload-to-bucket:
+    name: Upload to GCS
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
+      - name: "Set up Cloud SDK"
+        uses: google-github-actions/setup-gcloud@v2
+      - name: Upload specs to GCS
+        run: |
+          echo "Starting to sync files to GCS Bucket to /${GITHUB_REPOSITORY#*/}"
+          gcloud storage rsync --include="${GHA_API_LINT_FILE_GLOB}" "gs://entur-api-bucket/${GITHUB_REPOSITORY#*/}"
