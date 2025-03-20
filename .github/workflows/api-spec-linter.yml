@@ -36,6 +36,10 @@ jobs:
         run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} --ruleset rulesets/.spectral.yml -f pretty || true
 
   upload-to-bucket:
+    name: Upload to bucket
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
