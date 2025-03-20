@@ -31,7 +31,7 @@ jobs:
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
-        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} --ruleset rulesets/.spectral.yml -f text || true
+        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} --ruleset rulesets/.spectral.yml -f pretty || true
       # - name: Upload report
       #   uses: actions/upload-artifact@v4
       #   with:
