@@ -1,7 +1,6 @@
 name: Lint OpenAPI specs
 
 on:
-  pull_request:
   workflow_call:
     inputs:
       file_glob:
@@ -20,10 +19,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
-
     env:
-      #GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
-      GHA_API_LINT_FILE_GLOB: "specs/*.json"
+      GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
 
     steps:
       - uses: actions/checkout@v4
@@ -37,10 +34,11 @@ jobs:
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
-        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} --ruleset rulesets/.spectral.yml -f pretty || true
+        run: spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} --ruleset rulesets/.spectral.yml -f pretty || true # for now, we want to see the errors in the PR, but not fail the job
 
   upload-to-bucket:
     name: Upload to bucket
+    continue-on-error: true # This is to ensure that the upload step does not fail the checks of the PR if the upload fails.
     permissions:
       contents: read
       id-token: write
@@ -56,7 +54,7 @@ jobs:
       - name: "copy specs to temporary directory"
         run: |
           mkdir -p /tmp/specs
-          cp -r ${{ inputs.file_glob }} /tmp/specs/
+          cp ${{ inputs.file_glob }} /tmp/specs/
       - name: Upload specs to GCS
         run: |
           echo "Starting to sync files to GCS Bucket to /${GITHUB_REPOSITORY#*/}"
