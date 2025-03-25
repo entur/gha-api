@@ -53,7 +53,11 @@ jobs:
           credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
       - name: "Set up Cloud SDK"
         uses: google-github-actions/setup-gcloud@v2
+      - name: "copy specs to temporary directory"
+        run: |
+          mkdir -p /tmp/specs
+          cp -r ${{ inputs.file_glob }} /tmp/specs/
       - name: Upload specs to GCS
         run: |
           echo "Starting to sync files to GCS Bucket to /${GITHUB_REPOSITORY#*/}"
-          gcloud storage rsync --include="${GHA_API_LINT_FILE_GLOB}" "gs://entur-api-bucket/${GITHUB_REPOSITORY#*/}"
+          gcloud storage rsync /tmp/specs/ "gs://entur-api-bucket/${GITHUB_REPOSITORY#*/}"
