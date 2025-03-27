@@ -1,0 +1,24 @@
+name: Entur/API/CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify-pr:
+    name: Verify PR
+    if: ${{ github.event_name == 'pull_request' }}
+    uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1
+
+  test-lint-ok:
+    uses: ./.github/workflows/lint.yml
+    with:
+      file_glob: fixture/openapi-good.yaml
+      skip_upload: true
+      fail_on_lint_error: true
+
+  update-lint-doc:
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    with:
+      workflow_file: .github/workflows/lint.yml
+      readme_file: README-lint.md
