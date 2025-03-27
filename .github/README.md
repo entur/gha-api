@@ -1,6 +1,8 @@
 <h1 align="center">entur/gha-api</h1>
 
+[![Entur/API/CI](https://github.com/entur/gha-api/actions/workflows/ci.yml/badge.svg)](https://github.com/entur/gha-api/actions/workflows/ci.yml)
 [![Lint OpenAPI specs](https://github.com/entur/gha-api/actions/workflows/api-spec-linter.yml/badge.svg)](https://github.com/entur/gha-api/actions/workflows/api-spec-linter.yml)
+[![License](https://img.shields.io/github/license/entur/gha-api)](https://github.com/entur/gha-api)
 
 ## Golden path
 
