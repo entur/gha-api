@@ -13,7 +13,9 @@ jobs:
   test-lint-ok:
     uses: ./.github/workflows/lint.yml
     with:
-      file_glob: fixture/*.yaml
+      file_glob: fixture/openapi-good.yaml
+      skip_upload: true
+      fail_on_lint_error: true
 
   update-lint-doc:
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
