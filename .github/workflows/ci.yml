@@ -1,0 +1,16 @@
+name: Entur/API/CI
+
+on:
+  pull_request:
+
+jobs:
+  verify-pr:
+    name: Verify PR
+    if: ${{ github.event_name == 'pull_request' }}
+    uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1
+
+  update-lint-doc:
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    with:
+      workflow_file: .github/workflows/lint.yml
+      readme_file: README-lint.md

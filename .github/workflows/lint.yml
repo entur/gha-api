@@ -42,6 +42,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    env:
+      GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -54,7 +56,7 @@ jobs:
       - name: "copy specs to temporary directory"
         run: |
           mkdir -p /tmp/specs
-          cp ${{ inputs.file_glob }} /tmp/specs/
+          cp ${{ env.GHA_API_LINT_FILE_GLOB }} /tmp/specs/
       - name: Upload specs to GCS
         run: |
           echo "Starting to sync files to GCS Bucket to /${GITHUB_REPOSITORY#*/}"
