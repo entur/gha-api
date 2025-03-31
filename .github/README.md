@@ -29,6 +29,6 @@ on:
   pull_request:
 
 jobs:
-  docker-lint:
+  api-lint:
     uses: entur/gha-api/.github/workflows/lint.yml@v1
 ```
