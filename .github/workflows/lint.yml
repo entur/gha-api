@@ -7,10 +7,10 @@ on:
         description: "which openAPI 3.x file(s) to lint"
         type: string
         default: "specs/*.json specs/*.yml specs/*.yaml"
-      skip_upload:
+      upload_to_bucket:
         description: "If true, skip upload-to-bucket job"
         type: boolean
-        default: false
+        default: true
       fail_on_lint_error:
         description: "If true, a lint error will fail the workflow."
         type: boolean
@@ -52,7 +52,7 @@ jobs:
 
   upload-to-bucket:
     name: Upload to bucket
-    if: ${{ inputs.skip_upload == false }}
+    if: ${{ inputs.upload_to_bucket == true }}
     continue-on-error: true
     permissions:
       contents: read
@@ -75,4 +75,4 @@ jobs:
       - name: Upload specs to GCS
         run: |
           echo "Starting to sync files to GCS Bucket to /${GITHUB_REPOSITORY#*/}"
-          gcloud storage rsync /tmp/specs/ "gs://entur-api-bucket/${GITHUB_REPOSITORY#*/}"
+          gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-001/${GITHUB_REPOSITORY#*/}"
