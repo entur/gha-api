@@ -14,7 +14,7 @@ jobs:
     uses: ./.github/workflows/lint.yml
     with:
       file_glob: fixture/openapi-good.yaml
-      skip_upload: true
+      upload_to_bucket: false
       fail_on_lint_error: true
 
   update-lint-doc:
