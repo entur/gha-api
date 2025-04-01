@@ -29,6 +29,7 @@ on:
   pull_request:
 
 jobs:
-  api-lint:
+  Openapi-lint:
     uses: entur/gha-api/.github/workflows/lint.yml@v1
+    secrets: inherit
 ```
