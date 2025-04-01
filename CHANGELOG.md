@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/entur/gha-api/compare/v1.0.1...v1.0.2) (2025-04-01)
+
+
+### Bug Fixes
+
+* removed fileglobs for yaml ([#29](https://github.com/entur/gha-api/issues/29)) ([2dc6afa](https://github.com/entur/gha-api/commit/2dc6afa017788b4a1f6e554a7f8041b13b1d6c56))
+
 ## [1.0.1](https://github.com/entur/gha-api/compare/v1.0.0...v1.0.1) (2025-04-01)
 
 
