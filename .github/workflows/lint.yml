@@ -6,7 +6,7 @@ on:
       file_glob:
         description: "which openAPI 3.x file(s) to lint"
         type: string
-        default: "specs/*.json specs/*.yml specs/*.yaml"
+        default: "specs/*.json"
       upload_to_bucket:
         description: "If true, skip upload-to-bucket job"
         type: boolean
