@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/entur/gha-api/compare/v1.0.0...v1.0.1) (2025-04-01)
+
+
+### Bug Fixes
+
+* updating input name in ci.yml ([#27](https://github.com/entur/gha-api/issues/27)) ([c99e200](https://github.com/entur/gha-api/commit/c99e2003bab3f1d1e35c8908f66f4e81931a4b9c))
+
 ## 1.0.0 (2025-03-31)
 
 
