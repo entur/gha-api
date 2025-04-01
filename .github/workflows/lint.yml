@@ -8,7 +8,7 @@ on:
         type: string
         default: "specs/*.json"
       upload_to_bucket:
-        description: "If true, skip upload-to-bucket job"
+        description: "If true, will upload the spec(s) to a GCS bucket for analytics"
         type: boolean
         default: true
       fail_on_lint_error:
