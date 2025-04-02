@@ -6,7 +6,7 @@ on:
       file_glob:
         description: "which openAPI 3.x file(s) to lint"
         type: string
-        default: "specs/*.json"
+        default: "specs/*.{yml,yaml,json}"
       upload_to_bucket:
         description: "If true, will upload the spec(s) to a GCS bucket for analytics"
         type: boolean
