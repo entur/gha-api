@@ -76,6 +76,7 @@ jobs:
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
         run: |
+          echo "linting ${{ needs.get-spec.outputs.spec_path }}"
           if [ "${{ inputs.fail_on_lint_error }}" = "true" ]; then
             spectral lint ${{ needs.get-spec.outputs.spec_path }} --ruleset rulesets/.spectral.yml -f pretty
           else
