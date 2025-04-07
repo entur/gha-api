@@ -49,7 +49,12 @@ jobs:
 
       - name: Set spec path output
         id: set_spec
-        run: echo "spec_path=${{ inputs.artifact_glob != '' ? inputs.artifact_glob : inputs.file_glob }}" >> $GITHUB_OUTPUT
+        run: |
+          if [ -n "${{ inputs.artifact_glob }}" ]; then
+            echo "spec_path=${{ inputs.artifact_glob }}" >> $GITHUB_OUTPUT
+          else
+            echo "spec_path=${{ inputs.file_glob }}" >> $GITHUB_OUTPUT
+          fi
 
   lint:
     name: OpenAPI Lint
