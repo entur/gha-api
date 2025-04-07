@@ -45,13 +45,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: ${{ inputs.artifact_glob }}
+          path: /tmp
           #merge-multiple: ?
 
       - name: Set spec path output
         id: set_spec
         run: |
           if [ -n "${{ inputs.artifact_glob }}" ]; then
-            echo "spec_path=${{ inputs.artifact_glob }}" >> $GITHUB_OUTPUT
+            echo "spec_path=/tmp/${{ inputs.artifact_glob }}" >> $GITHUB_OUTPUT
           else
             echo "spec_path=${{ inputs.file_glob }}" >> $GITHUB_OUTPUT
           fi
