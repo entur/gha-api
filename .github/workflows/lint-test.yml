@@ -1,0 +1,15 @@
+name: Test lint
+on:
+  push:
+jobs:
+  upload-artifact:
+    steps:
+      - uses: actions/checkout@v4
+      - name: Save spec to the artifact storage
+        uses: actions/upload-artifact@v4
+        with:
+          name: order.json
+          path: order.json
+          retention-days: 1
+    runs-on: linux
+  
