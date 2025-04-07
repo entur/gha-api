@@ -5,7 +5,7 @@
     "description": "This is a short description of the Order API",
     "version": "1"
   },
-  "servers": [{ "url": "https://order-production.entur.io/" }],
+  "servers": [{ "url": "http://order-production.entur.io/" }],
   "tags": [
     { "name": "Order Public API", "description": "Order Public API" },
     { "name": "Order Internal API", "description": "Order Internal API" }
