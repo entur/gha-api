@@ -11,5 +11,12 @@ jobs:
           name: order.json
           path: order.json
           retention-days: 1
-    runs-on: linux
+    runs-on: ubuntu-24.04
   
+  lint:
+    needs: upload-artifact
+    uses: .github/workflows/lint.yml
+    with:
+      file_glob: fixture/openapi-good.yaml
+      upload_to_bucket: false
+      fail_on_lint_error: true
