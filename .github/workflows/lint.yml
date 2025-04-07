@@ -4,9 +4,12 @@ on:
   workflow_call:
     inputs:
       file_glob:
-        description: "which openAPI 3.x file(s) to lint"
+        description: "OpenAPI specs to lint, as a glob pattern."
         type: string
-        default: "specs/*.json"
+        required: false
+      artifact_glob:
+        description: "OpenAPI specs to lint, as a Github artifact."
+        type: string
       upload_to_bucket:
         description: "If true, will upload the spec(s) to a GCS bucket for analytics"
         type: boolean
@@ -21,17 +24,41 @@ permissions:
   id-token: write
 
 jobs:
+  get-spec:
+    name: Get spec
+    runs-on: ubuntu-24.04
+    outputs:
+      spec_path: ${{ steps.set_spec.outputs.spec_path }}
+    steps:
+      - name: Validate inputs - only one allowed
+        if: ${{ inputs.file_glob != '' && inputs.artifact_glob != '' }}
+        run: |
+          echo "Error: Both file_glob and artifact_glob were provided. Please provide only one."
+          exit 1        
+        
+      - name: Checkout repository (if file_glob provided)
+        if: ${{ inputs.file_glob != '' }}
+        uses: actions/checkout@v4
+
+      - name: Download artifact (if artifact_glob provided)
+        if: ${{ inputs.artifact_glob != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.artifact_glob }}
+          #merge-multiple: ?
+
+      - name: Set spec path output
+          id: set_spec
+          run: echo "spec_path=${{ inputs.artifact_glob != '' ? inputs.artifact_glob : inputs.file_glob }}" >> $GITHUB_OUTPUT
+
   lint:
     name: OpenAPI Lint
     runs-on: ubuntu-24.04
+    needs: get-spec
     permissions:
       contents: read
       id-token: write
-    env:
-      GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
-
     steps:
-      - uses: actions/checkout@v4
       - name: Checkout guidelines
         uses: actions/checkout@v4
         with:
@@ -45,23 +72,21 @@ jobs:
       - name: Lint OpenAPI
         run: |
           if [ "${{ inputs.fail_on_lint_error }}" = "true" ]; then
-            spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} --ruleset rulesets/.spectral.yml -f pretty
+            spectral lint ${{ needs.get-spec.outputs.spec_path }} --ruleset rulesets/.spectral.yml -f pretty
           else
-            spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} --ruleset rulesets/.spectral.yml -f pretty || true
+            spectral lint ${{ needs.get-spec.outputs.spec_path }}--ruleset rulesets/.spectral.yml -f pretty || true
           fi
 
   upload-to-bucket:
     name: Upload to bucket
     if: ${{ inputs.upload_to_bucket == true }}
     continue-on-error: true
+    needs: get-spec
     permissions:
       contents: read
       id-token: write
-    env:
-      GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
       - id: auth
         uses: google-github-actions/auth@v2
         with:
@@ -71,7 +96,7 @@ jobs:
       - name: "copy specs to temporary directory"
         run: |
           mkdir -p /tmp/specs
-          cp ${{ env.GHA_API_LINT_FILE_GLOB }} /tmp/specs/
+          cp ${{ needs.get-spec.outputs.spec_path }} /tmp/specs/
       - name: Upload specs to GCS
         run: |
           echo "Starting to sync files to GCS Bucket to /${GITHUB_REPOSITORY#*/}"

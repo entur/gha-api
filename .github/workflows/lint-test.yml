@@ -13,3 +13,10 @@ jobs:
           retention-days: 1
     runs-on: ubuntu-24.04
   
+  lint:
+    needs: upload-artifact
+    uses: ./.github/workflows/lint.yml
+    with:
+      artifact_glob: order.json
+      upload_to_bucket: false
+      fail_on_lint_error: true
