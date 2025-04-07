@@ -75,13 +75,15 @@ jobs:
             .spectral.yml
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
+      - name: List /tmp contents
+        run: ls -la /tmp
       - name: Lint OpenAPI
         run: |
           echo "linting ${{ needs.get-spec.outputs.spec_path }}"
           if [ "${{ inputs.fail_on_lint_error }}" = "true" ]; then
             spectral lint ${{ needs.get-spec.outputs.spec_path }} --ruleset rulesets/.spectral.yml -f pretty
           else
-            spectral lint ${{ needs.get-spec.outputs.spec_path }}--ruleset rulesets/.spectral.yml -f pretty || true
+            spectral lint ${{ needs.get-spec.outputs.spec_path }} --ruleset rulesets/.spectral.yml -f pretty || true
           fi
 
   upload-to-bucket:
