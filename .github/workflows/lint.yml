@@ -57,6 +57,9 @@ jobs:
             echo "spec_path=${{ inputs.file_glob }}" >> $GITHUB_OUTPUT
           fi
 
+      - name: List /tmp contents
+        run: ls -la /tmp
+
   lint:
     name: OpenAPI Lint
     runs-on: ubuntu-24.04
