@@ -76,7 +76,7 @@ jobs:
             spec_glob="${{ inputs.file_glob }}"
           fi
           
-          ls -la $spec_glob
+          ls -la
           
           echo "linting $spec_glob"                         
           spectral lint order.json --ruleset rulesets/.spectral.yml -f pretty || test "${{ inputs.fail_on_lint_error }}" = "false"

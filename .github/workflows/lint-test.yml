@@ -17,6 +17,7 @@ jobs:
     needs: upload-artifact
     uses: ./.github/workflows/lint.yml
     with:
-      artifact_glob: order.json
+      #artifact_glob: order.json
+      file_glob: order.json
       upload_to_bucket: false
       fail_on_lint_error: true
