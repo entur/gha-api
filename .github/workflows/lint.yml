@@ -6,9 +6,8 @@ on:
       file_glob:
         description: "OpenAPI specs to lint, as a glob pattern."
         type: string
-        required: false
       artifact_glob:
-        description: "OpenAPI specs to lint, as a Github artifact."
+        description: "OpenAPI specs to lint, as a Github artifact glob pattern."
         type: string
       upload_to_bucket:
         description: "If true, will upload the spec(s) to a GCS bucket for analytics"
