@@ -28,7 +28,7 @@ jobs:
           path: fixture/openapi-good.yaml
           retention-days: 1
 
-  lint:
+  test-lint-ok-with-artifact:
     needs: upload-artifact
     uses: ./.github/workflows/lint.yml
     with:
