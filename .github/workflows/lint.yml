@@ -24,8 +24,8 @@ permissions:
   id-token: write
 
 jobs:
-  validate-inputs:
-    name: Get spec
+  validate-input:
+    name: Validate input
     runs-on: ubuntu-24.04
     steps:
       - name: Validate inputs - only one allowed
@@ -37,7 +37,7 @@ jobs:
   lint:
     name: OpenAPI Lint
     runs-on: ubuntu-24.04
-    needs: validate-inputs
+    needs: validate-input
     permissions:
       contents: read
       id-token: write
@@ -61,15 +61,15 @@ jobs:
             .spectral.yml
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
-      - name: List /tmp contents
-        run: ls -la /tmp
       - name: Lint OpenAPI
         run: |          
           if [ -n "${{ inputs.artifact_glob }}" ]; then
             spec_glob="${{ inputs.artifact_glob }}"
           else
             spec_glob="${{ inputs.file_glob }}"
-          fi  
+          fi
+          
+          ls -la
           
           echo "linting $spec_glob"                         
           spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f pretty || test "${{ inputs.fail_on_lint_error }}" = "false"
@@ -78,7 +78,7 @@ jobs:
     name: Upload to bucket
     if: ${{ inputs.upload_to_bucket == true }}
     continue-on-error: true
-    needs: validate-inputs
+    needs: validate-input
     permissions:
       contents: read
       id-token: write
