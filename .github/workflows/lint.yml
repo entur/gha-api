@@ -56,7 +56,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: ${{ inputs.artifact_glob }}
-          #merge-multiple: ?
+          path: specs
+          merge-multiple: true
       - name: Checkout guidelines
         uses: actions/checkout@v4
         with:
@@ -70,13 +71,12 @@ jobs:
       - name: Lint OpenAPI
         run: |          
           if [ -n "${{ inputs.artifact_glob }}" ]; then
-            spec_glob="${{ inputs.artifact_glob }}"
+            spec_glob="specs/*"
           else
             spec_glob="${{ inputs.file_glob }}"
           fi
           
-          ls -la
-          cat $spec_glob          
+          ls -la $spec_glob                    
           echo linting $spec_glob ...                        
           spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f pretty || test "${{ inputs.fail_on_lint_error }}" = "false"
 
