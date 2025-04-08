@@ -26,17 +26,24 @@ permissions:
 jobs:
   validate-input:
     name: Validate input
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
-      - name: Validate inputs - only one allowed
-        if: ${{ inputs.file_glob != '' && inputs.artifact_glob != '' }}
+      - name: Validate inputs
         run: |
-          echo "Error: Both file_glob and artifact_glob were provided. Please provide only one."
-          exit 1        
-
+          # Ensure at least one input is provided.
+          if [ -z "${{ inputs.artifact_glob }}" ] && [ -z "${{ inputs.file_glob }}" ]; then
+            echo "Error: Neither artifact_glob nor file_glob is provided."
+            exit 1
+          fi           
+          
+          # Ensure not both inputs are provided.
+          if [ -n "${{ inputs.artifact_glob }}" ] && [ -n "${{ inputs.file_glob }}" ]; then            
+            echo "Error: Both file_glob and artifact_glob were provided. Please provide only one."
+            exit 1
+          fi
   lint:
     name: OpenAPI Lint
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: validate-input
     permissions:
       contents: read
@@ -69,7 +76,7 @@ jobs:
             spec_glob="${{ inputs.file_glob }}"
           fi
           
-          ls -la
+          ls -la $spec_glob
           
           echo "linting $spec_glob"                         
           spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f pretty || test "${{ inputs.fail_on_lint_error }}" = "false"
@@ -82,7 +89,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository (if file_glob provided)
         if: ${{ inputs.file_glob != '' }}
