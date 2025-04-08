@@ -76,7 +76,7 @@ jobs:
           fi
           
           ls -la
-          more $spec_glob          
+          cat $spec_glob          
           echo linting $spec_glob ...                        
           spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f pretty || test "${{ inputs.fail_on_lint_error }}" = "false"
 
