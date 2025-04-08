@@ -74,10 +74,7 @@ jobs:
             spec_glob="specs/*"
           else
             spec_glob="${{ inputs.file_glob }}"
-          fi
-          
-          ls -la $spec_glob                    
-          echo linting $spec_glob ...                        
+          fi          
           spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f pretty || test "${{ inputs.fail_on_lint_error }}" = "false"
 
   upload-to-bucket:
@@ -98,6 +95,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: ${{ inputs.artifact_glob }}
+          path: specs
+          merge-multiple: true
       - id: auth
         uses: google-github-actions/auth@v2
         with:
@@ -106,14 +105,11 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
       - name: "copy specs to temporary directory"
         run: |
-          if [ -n "${{ inputs.artifact_glob }}" ]; then
-            spec_glob="${{ inputs.artifact_glob }}"
-          else
-            spec_glob="${{ inputs.file_glob }}"
-          fi            
-          mkdir -p /tmp/specs
-          cp $spec_glob /tmp/specs/
+          if [ -n "${{ inputs.file_glob }}" ]; then
+            mkdir specs
+            cp ${{ inputs.artifact_glob }} specs
+          fi
       - name: Upload specs to GCS
         run: |
           echo "Starting to sync files to GCS Bucket to /${GITHUB_REPOSITORY#*/}"
-          gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-001/${GITHUB_REPOSITORY#*/}"
+          gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-test/${GITHUB_REPOSITORY#*/}"

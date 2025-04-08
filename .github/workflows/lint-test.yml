@@ -19,5 +19,5 @@ jobs:
     with:
       artifact_glob: order.json
       #file_glob: order.json
-      upload_to_bucket: false
+      upload_to_bucket: true
       fail_on_lint_error: true
