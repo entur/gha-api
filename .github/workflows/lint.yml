@@ -79,7 +79,7 @@ jobs:
           ls -la $spec_glob
           
           echo "linting $spec_glob"                         
-          spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f pretty || test "${{ inputs.fail_on_lint_error }}" = "false"
+          spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f pretty
 
   upload-to-bucket:
     name: Upload to bucket
