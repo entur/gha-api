@@ -100,7 +100,9 @@ jobs:
       - id: auth
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
+          #credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
+          workload_identity_provider: "${{ env.WORKLOAD_IDENTITY_PROVIDER }}"
+          service_account: "${{ env.SERVICE_ACCOUNT }}"
       - name: "Set up Cloud SDK"
         uses: google-github-actions/setup-gcloud@v2
       - name: "copy specs to temporary directory"
@@ -112,4 +114,4 @@ jobs:
       - name: Upload specs to GCS
         run: |
           echo "Starting to sync files to GCS Bucket to /${GITHUB_REPOSITORY#*/}"
-          gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-test/${GITHUB_REPOSITORY#*/}"
+          gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-001/${GITHUB_REPOSITORY#*/}"
