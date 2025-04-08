@@ -19,6 +19,6 @@ jobs:
     needs: upload-artifact
     uses: ./.github/workflows/lint.yml
     with:
-      #artifact_glob: organisation-register-backend_organisations-v3.json
-      file_glob: organisation-register-backend_organisations-v3.json
+      artifact_glob: organisation-register-backend_organisations-v3.json
+      #file_glob: organisation-register-backend_organisations-v3.json
       upload_to_bucket: false
