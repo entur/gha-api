@@ -99,21 +99,18 @@ jobs:
           merge-multiple: true
       - id: auth
         uses: google-github-actions/auth@v2
-        if: false
         with:
           credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
       - name: "Set up Cloud SDK"
         uses: google-github-actions/setup-gcloud@v2
-        if: false
       - name: "copy specs to temporary directory"
         run: |
           if [ -n "${{ inputs.file_glob }}" ]; then
             mkdir -p /tmp/specs
             cp ${{ inputs.artifact_glob }} /tmp/specs
           fi
-      # Uploaded and processed? with artifact and file glob
-      # gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-001/${GITHUB_REPOSITORY#*/}"
       - name: Upload specs to GCS
         run: |
-          echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GITHUB_REPOSITORY#*/}" 
+          echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GITHUB_REPOSITORY#*/}"
+          gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-001/${GITHUB_REPOSITORY#*/}"
           
