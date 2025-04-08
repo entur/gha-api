@@ -86,6 +86,7 @@ jobs:
       contents: read
       id-token: write
     runs-on: ubuntu-latest
+    environment: prd
     steps:
       - name: Checkout repository (if file_glob provided)
         if: ${{ inputs.file_glob != '' }}
