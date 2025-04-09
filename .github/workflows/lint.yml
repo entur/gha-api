@@ -31,7 +31,7 @@ jobs:
       - name: Validate inputs
         run: |
           # Ensure not both inputs are empty.
-          if [ -z "${{ inputs.artifact_glob }}" ] && [ -n "${{ inputs.file_glob }}" ]; then            
+          if [ -z "${{ inputs.artifact_glob }}" ] && [ -z "${{ inputs.file_glob }}" ]; then            
             echo "Error: Exactly one of file_glob OR artifact_glob is required."
             exit 1
           fi          
