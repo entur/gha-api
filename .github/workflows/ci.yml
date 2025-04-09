@@ -10,7 +10,7 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1
 
-  test-lint-ok:
+  test-lint-file-glob-ok:
     uses: ./.github/workflows/lint.yml
     with:
       file_glob: fixture/openapi-good.yaml
@@ -28,13 +28,33 @@ jobs:
           path: fixture/openapi-good.yaml
           retention-days: 1
 
-  test-lint-ok-with-artifact:
+  # Lints the artifact uploaded in upload-artifact
+  test-lint-artifact-ok:
     needs: upload-artifact
     uses: ./.github/workflows/lint.yml
     with:
-      artifact_glob: openapi-good.yaml
+      artifact_glob: "*.json"
       upload_to_bucket: false
       fail_on_lint_error: true
+
+  test-lint-artifact-error:
+    needs: upload-artifact
+    uses: ./.github/workflows/lint.yml
+    continue-on-error: true
+    with:
+      artifact_glob: "*.json"
+      file_glob: "*.json"
+      upload_to_bucket: false
+      fail_on_lint_error: true
+  check-expected-error:
+    needs: test-lint-artifact-error
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if reusable workflow succeeded
+        if: ${{ needs.test-lint-artifact-error.outcome == 'success' }}
+        run: |
+          echo "The reusable workflow succeeded, so failing the overall workflow."
+          exit 1
 
   update-lint-doc:
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
