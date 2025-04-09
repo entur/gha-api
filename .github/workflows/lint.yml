@@ -4,10 +4,11 @@ on:
   workflow_call:
     inputs:
       file_glob:
-        description: "OpenAPI specs to lint, as a glob pattern."
+        description: "OpenAPI specs to lint, as a glob pattern. Either send in this OR artifact_glob."
         type: string
+        default: "specs/*.json"
       artifact_glob:
-        description: "OpenAPI specs to lint, as a Github artifact glob pattern."
+        description: "OpenAPI specs to lint, as a Github artifact glob pattern. Either send in this OR file_glob."
         type: string
       upload_to_bucket:
         description: "If true, will upload the spec(s) to a GCS bucket for analytics"
@@ -29,14 +30,8 @@ jobs:
     steps:
       - name: Validate inputs
         run: |
-          # Ensure at least one input is provided.
-          if [ -z "${{ inputs.artifact_glob }}" ] && [ -z "${{ inputs.file_glob }}" ]; then
-            echo "Error: Neither artifact_glob nor file_glob is provided."
-            exit 1
-          fi           
-          
           # Ensure not both inputs are provided.
-          if [ -n "${{ inputs.artifact_glob }}" ] && [ -n "${{ inputs.file_glob }}" ]; then            
+          if [ -n "${{ inputs.artifact_glob }}" ] && [ -n "${{ inputs.file_glob }}" ] && [ "${{ inputs.file_glob }}" != "specs/*.json" ]; then            
             echo "Error: Both file_glob and artifact_glob were provided. Please provide only one."
             exit 1
           fi
@@ -49,7 +44,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout repository (if file_glob provided)
-        if: ${{ inputs.file_glob != '' }}
+        if: ${{ inputs.artifact_glob == '' }}
         uses: actions/checkout@v4
       - name: Download artifact (if artifact_glob provided)
         if: ${{ inputs.artifact_glob != '' }}
@@ -88,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository (if file_glob provided)
-        if: ${{ inputs.file_glob != '' }}
+        if: ${{ inputs.artifact_glob == '' }}
         uses: actions/checkout@v4
       - name: Download artifact (if artifact_glob provided)
         if: ${{ inputs.artifact_glob != '' }}
@@ -105,9 +100,9 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
       - name: Copy specs to temporary directory
         run: |
-          if [ -n "${{ inputs.file_glob }}" ]; then
+          if [ -z "${{ inputs.artifact_glob }}" ]; then
             mkdir -p /tmp/specs
-            cp ${{ inputs.artifact_glob }} /tmp/specs
+            cp ${{ inputs.file_glob }} /tmp/specs
           fi
       - name: Upload specs to GCS
         run: |
