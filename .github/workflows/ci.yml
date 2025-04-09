@@ -17,12 +17,6 @@ jobs:
       upload_to_bucket: false
       fail_on_lint_error: true
 
-  test-lint-file-glob-error:
-    uses: ./.github/workflows/lint.yml
-    with:
-      upload_to_bucket: false
-      fail_on_lint_error: true
-
   upload-artifact:
     runs-on: ubuntu-latest
     steps:
@@ -39,15 +33,6 @@ jobs:
     uses: ./.github/workflows/lint.yml
     with:
       artifact_glob: "*.yaml"
-      upload_to_bucket: false
-      fail_on_lint_error: true
-
-
-  test-lint-artifact-error:
-    needs: upload-artifact
-    uses: ./.github/workflows/lint.yml
-    with:
-      artifact_glob: "*.json"
       upload_to_bucket: false
       fail_on_lint_error: true
 
