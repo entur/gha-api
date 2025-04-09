@@ -27,13 +27,21 @@ jobs:
           name: openapi-good.yaml
           path: fixture/openapi-good.yaml
           retention-days: 1
-
   # Lints the artifact uploaded in upload-artifact
   test-lint-artifact-ok:
     needs: upload-artifact
     uses: ./.github/workflows/lint.yml
     with:
       artifact_glob: "*.yaml"
+      upload_to_bucket: false
+      fail_on_lint_error: true
+
+
+  test-lint-artifact-fail:
+    needs: upload-artifact
+    uses: ./.github/workflows/lint.yml
+    with:
+      artifact_glob: "*.json"
       upload_to_bucket: false
       fail_on_lint_error: true
 
