@@ -20,6 +20,7 @@ jobs:
   test-lint-file-glob-error-no-input:
     uses: ./.github/workflows/lint.yml
     with:
+      file_glob: ''
       upload_to_bucket: false
       fail_on_lint_error: true
 
