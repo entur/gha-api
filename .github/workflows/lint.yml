@@ -76,6 +76,13 @@ jobs:
           else
             spec_glob="${{ inputs.file_glob }}"
           fi          
+          
+          #This is needed, because calling spectral with a glob that does not match any files will succeed, which is not what we want.
+          if ! compgen -G $spec_glob > /dev/null; then
+            echo "No file matches '$spec_glob'"
+            exit 1
+          fi            
+          
           spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f pretty || test "${{ inputs.fail_on_lint_error }}" = "false"
 
   upload-to-bucket:
