@@ -7,7 +7,7 @@ info:
     name: "Support"
     email: "support@example.com"
 servers:
-  - url: "https://example.com"
+  - url: "http://example.com"
 tags:
   - name: example
     description: "Tag for example operations"
