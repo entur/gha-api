@@ -30,6 +30,12 @@ jobs:
     steps:
       - name: Validate inputs
         run: |
+          # Ensure not both inputs are empty.
+          if [ -z "${{ inputs.artifact_glob }}" ] && [ -n "${{ inputs.file_glob }}" ]; then            
+            echo "Error: Exactly one of file_glob OR artifact_glob is required."
+            exit 1
+          fi          
+          
           # Ensure not both inputs are provided.
           if [ -n "${{ inputs.artifact_glob }}" ] && [ -n "${{ inputs.file_glob }}" ] && [ "${{ inputs.file_glob }}" != "specs/*.json" ]; then            
             echo "Error: Both file_glob and artifact_glob were provided. Please provide only one."
