@@ -4,9 +4,12 @@ on:
   workflow_call:
     inputs:
       file_glob:
-        description: "which openAPI 3.x file(s) to lint"
+        description: "OpenAPI specs to lint, as a glob pattern. Either send in this OR artifact_glob."
         type: string
         default: "specs/*.json"
+      artifact_glob:
+        description: "OpenAPI specs to lint, as a Github artifact glob pattern. Either send in this OR file_glob."
+        type: string
       upload_to_bucket:
         description: "If true, will upload the spec(s) to a GCS bucket for analytics"
         type: boolean
@@ -21,17 +24,41 @@ permissions:
   id-token: write
 
 jobs:
+  validate-input:
+    name: Validate input
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate inputs
+        run: |
+          # Ensure not both inputs are empty.
+          if [ -z "${{ inputs.artifact_glob }}" ] && [ -z "${{ inputs.file_glob }}" ]; then            
+            echo "Error: Exactly one of file_glob OR artifact_glob is required."
+            exit 1
+          fi          
+          
+          # Ensure not both inputs are provided.
+          if [ -n "${{ inputs.artifact_glob }}" ] && [ -n "${{ inputs.file_glob }}" ] && [ "${{ inputs.file_glob }}" != "specs/*.json" ]; then            
+            echo "Error: Both file_glob and artifact_glob were provided. Please provide only one."
+            exit 1
+          fi
   lint:
     name: OpenAPI Lint
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    needs: validate-input
     permissions:
       contents: read
       id-token: write
-    env:
-      GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository (if file_glob provided)
+        if: ${{ inputs.artifact_glob == '' }}
+        uses: actions/checkout@v4
+      - name: Download artifact (if artifact_glob provided)
+        if: ${{ inputs.artifact_glob != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.artifact_glob }}
+          path: /tmp/specs
+          merge-multiple: true #Downloads everything into /tmp/specs, without subdirectories
       - name: Checkout guidelines
         uses: actions/checkout@v4
         with:
@@ -43,36 +70,55 @@ jobs:
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
-        run: |
-          if [ "${{ inputs.fail_on_lint_error }}" = "true" ]; then
-            spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} --ruleset rulesets/.spectral.yml -f pretty
+        run: |          
+          if [ -n "${{ inputs.artifact_glob }}" ]; then
+            spec_glob="/tmp/specs/*"
           else
-            spectral lint ${{ env.GHA_API_LINT_FILE_GLOB }} --ruleset rulesets/.spectral.yml -f pretty || true
-          fi
+            spec_glob="${{ inputs.file_glob }}"
+          fi          
+          
+          #This is needed, because calling spectral with a glob that does not match any files will succeed, which is not what we want.
+          if ! compgen -G $spec_glob > /dev/null; then
+            echo "No file matches '$spec_glob'"
+            exit 1
+          fi            
+          
+          spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f pretty || test "${{ inputs.fail_on_lint_error }}" = "false"
 
   upload-to-bucket:
     name: Upload to bucket
     if: ${{ inputs.upload_to_bucket == true }}
     continue-on-error: true
+    needs: validate-input
     permissions:
       contents: read
       id-token: write
-    env:
-      GHA_API_LINT_FILE_GLOB: ${{ inputs.file_glob }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - id: auth
+      - name: Checkout repository (if file_glob provided)
+        if: ${{ inputs.artifact_glob == '' }}
+        uses: actions/checkout@v4
+      - name: Download artifact (if artifact_glob provided)
+        if: ${{ inputs.artifact_glob != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.artifact_glob }}
+          path: /tmp/specs
+          merge-multiple: true
+      - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
-      - name: "Set up Cloud SDK"
+      - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
-      - name: "copy specs to temporary directory"
+      - name: Copy specs to temporary directory
         run: |
-          mkdir -p /tmp/specs
-          cp ${{ env.GHA_API_LINT_FILE_GLOB }} /tmp/specs/
+          if [ -z "${{ inputs.artifact_glob }}" ]; then
+            mkdir -p /tmp/specs
+            cp ${{ inputs.file_glob }} /tmp/specs
+          fi
       - name: Upload specs to GCS
         run: |
-          echo "Starting to sync files to GCS Bucket to /${GITHUB_REPOSITORY#*/}"
+          echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GITHUB_REPOSITORY#*/}"
           gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-001/${GITHUB_REPOSITORY#*/}"
+          
