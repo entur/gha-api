@@ -119,8 +119,9 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
       - name: Copy specs to temporary directory
         run: |
-          if [ -z "${{ inputs.artifact_glob }}" ]; then
-            mkdir -p /tmp/specs
+          mkdir -p /tmp/specs
+          
+          if [ -z "${{ inputs.artifact_glob }}" ]; then            
             cp ${{ inputs.file_glob }} /tmp/specs
           else
             #Since gcloud storage rsync does not support GLOB, copy files matching artifact_contents_glob to /tmp/specs for upload 
