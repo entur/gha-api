@@ -115,6 +115,7 @@ jobs:
         with:
           credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
       - name: Set up Cloud SDK
+        if: ${{ inputs.upload_to_bucket == true }}
         uses: google-github-actions/setup-gcloud@v2
       - name: Copy specs to temporary directory
         run: |
