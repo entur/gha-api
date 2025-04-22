@@ -12,6 +12,7 @@ on:
         type: string
       artifact_contents_glob:
         description: "Glob pattern inside artifacts to include in linting."
+        type: string
         default: "*"
       upload_to_bucket:
         description: "If true, will upload the spec(s) to a GCS bucket for analytics"
