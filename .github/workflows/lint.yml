@@ -10,6 +10,10 @@ on:
       artifact_glob:
         description: "OpenAPI specs to lint, as a Github artifact glob pattern. Either send in this OR file_glob."
         type: string
+      artifact_contents_glob:
+        description: "Glob pattern inside artifacts to include in linting."
+        type: string
+        default: "*"
       upload_to_bucket:
         description: "If true, will upload the spec(s) to a GCS bucket for analytics"
         type: boolean
@@ -57,8 +61,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: ${{ inputs.artifact_glob }}
-          path: /tmp/specs
-          merge-multiple: true #Downloads everything into /tmp/specs, without subdirectories
+          path: /tmp/artifacts
+          merge-multiple: true #Downloads all artifacts into /tmp/artifacts, without subdirectories
       - name: Checkout guidelines
         uses: actions/checkout@v4
         with:
@@ -72,7 +76,7 @@ jobs:
       - name: Lint OpenAPI
         run: |          
           if [ -n "${{ inputs.artifact_glob }}" ]; then
-            spec_glob="/tmp/specs/*"
+            spec_glob="/tmp/artifacts/${{ inputs.artifact_contents_glob }}"
           else
             spec_glob="${{ inputs.file_glob }}"
           fi          
@@ -103,7 +107,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: ${{ inputs.artifact_glob }}
-          path: /tmp/specs
+          path: /tmp/artifacts
           merge-multiple: true
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
@@ -113,12 +117,15 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
       - name: Copy specs to temporary directory
         run: |
-          if [ -z "${{ inputs.artifact_glob }}" ]; then
-            mkdir -p /tmp/specs
+          mkdir -p /tmp/specs
+          
+          if [ -z "${{ inputs.artifact_glob }}" ]; then            
             cp ${{ inputs.file_glob }} /tmp/specs
+          else
+            #Since gcloud storage rsync does not support GLOB, copy files matching artifact_contents_glob to /tmp/specs for upload 
+            cp /tmp/artifacts/${{ inputs.artifact_contents_glob }} /tmp/specs
           fi
       - name: Upload specs to GCS
         run: |
           echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GITHUB_REPOSITORY#*/}"
           gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-001/${GITHUB_REPOSITORY#*/}"
-          
