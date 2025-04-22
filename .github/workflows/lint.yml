@@ -91,7 +91,7 @@ jobs:
 
   upload-to-bucket:
     name: Upload to bucket
-
+    if: ${{ inputs.upload_to_bucket == true }}
     continue-on-error: true
     needs: validate-input
     permissions:
@@ -110,12 +110,10 @@ jobs:
           path: /tmp/artifacts
           merge-multiple: true
       - name: Authenticate with Google Cloud
-        if: ${{ inputs.upload_to_bucket == true }}
         uses: google-github-actions/auth@v2
         with:
           credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
       - name: Set up Cloud SDK
-        if: ${{ inputs.upload_to_bucket == true }}
         uses: google-github-actions/setup-gcloud@v2
       - name: Copy specs to temporary directory
         run: |
@@ -127,10 +125,7 @@ jobs:
             #Since gcloud storage rsync does not support GLOB, copy files matching artifact_contents_glob to /tmp/specs for upload 
             cp /tmp/artifacts/${{ inputs.artifact_contents_glob }} /tmp/specs
           fi
-          
-          ls -la /tmp/specs
       - name: Upload specs to GCS
-        if: ${{ inputs.upload_to_bucket == true }}
         run: |
           echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GITHUB_REPOSITORY#*/}"
           gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-001/${GITHUB_REPOSITORY#*/}"
