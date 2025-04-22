@@ -36,6 +36,26 @@ jobs:
       upload_to_bucket: false
       fail_on_lint_error: true
 
+
+  upload-artifact-all:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Save all specs to the artifact storage
+        uses: actions/upload-artifact@v4
+        with:
+          name: specs
+          path: fixture/*.yaml
+          retention-days: 1
+  # Lints the artifact uploaded in upload-artifact
+  test-lint-artifact-with-file-glob-ok:
+    needs: upload-artifact-all
+    uses: ./.github/workflows/lint.yml
+    with:
+      artifact_glob: "specs"
+      upload_to_bucket: false
+      fail_on_lint_error: true
+
   update-lint-doc:
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
