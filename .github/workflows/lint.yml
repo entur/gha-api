@@ -134,4 +134,3 @@ jobs:
         run: |
           echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GITHUB_REPOSITORY#*/}"
           gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-001/${GITHUB_REPOSITORY#*/}"
-          
