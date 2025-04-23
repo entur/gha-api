@@ -3,19 +3,19 @@ name: Lint OpenAPI specs
 on:
   workflow_call:
     inputs:
-      file_glob:
-        description: "OpenAPI specs to lint, as a glob pattern. Either send in this OR artifact_glob."
+      spec:
+        description: "OpenAPI specs to lint, as a glob pattern."
         type: string
         default: "specs/*.json"
-      artifact_glob:
-        description: "OpenAPI specs to lint, as a Github artifact glob pattern. Either send in this OR file_glob."
+      artifact:
+        description: "OpenAPI specs to lint, as a Github artifact glob pattern."
         type: string
-      artifact_contents_glob:
-        description: "Glob pattern inside artifacts to include in linting."
+      artifact_contents:
+        description: "Glob pattern inside artifacts to include in linting, only used if artifact is provided."
         type: string
         default: "*"
       upload_to_bucket:
-        description: "If true, will upload the spec(s) to a GCS bucket for analytics"
+        description: "If true, will upload the spec(s) to a GCS bucket for analytics."
         type: boolean
         default: true
       fail_on_lint_error:
@@ -35,14 +35,14 @@ jobs:
       - name: Validate inputs
         run: |
           # Ensure not both inputs are empty.
-          if [ -z "${{ inputs.artifact_glob }}" ] && [ -z "${{ inputs.file_glob }}" ]; then            
-            echo "Error: Exactly one of file_glob OR artifact_glob is required."
+          if [ -z "${{ inputs.artifact }}" ] && [ -z "${{ inputs.spec }}" ]; then            
+            echo "Error: Exactly one of spec OR artifact is required."
             exit 1
           fi          
-          
+
           # Ensure not both inputs are provided.
-          if [ -n "${{ inputs.artifact_glob }}" ] && [ -n "${{ inputs.file_glob }}" ] && [ "${{ inputs.file_glob }}" != "specs/*.json" ]; then            
-            echo "Error: Both file_glob and artifact_glob were provided. Please provide only one."
+          if [ -n "${{ inputs.artifact }}" ] && [ -n "${{ inputs.spec }}" ] && [ "${{ inputs.spec }}" != "specs/*.json" ]; then            
+            echo "Error: Both spec and artifact were provided. Please provide only one."
             exit 1
           fi
   lint:
@@ -53,14 +53,14 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Checkout repository (if file_glob provided)
-        if: ${{ inputs.artifact_glob == '' }}
+      - name: Checkout repository (if spec provided)
+        if: ${{ inputs.artifact == '' }}
         uses: actions/checkout@v4
-      - name: Download artifact (if artifact_glob provided)
-        if: ${{ inputs.artifact_glob != '' }}
+      - name: Download artifact (if artifact provided)
+        if: ${{ inputs.artifact != '' }}
         uses: actions/download-artifact@v4
         with:
-          pattern: ${{ inputs.artifact_glob }}
+          pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
           merge-multiple: true #Downloads all artifacts into /tmp/artifacts, without subdirectories
       - name: Checkout guidelines
@@ -74,19 +74,19 @@ jobs:
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
-        run: |          
-          if [ -n "${{ inputs.artifact_glob }}" ]; then
-            spec_glob="/tmp/artifacts/${{ inputs.artifact_contents_glob }}"
+        run: |
+          if [ -n "${{ inputs.artifact }}" ]; then
+            spec_glob="/tmp/artifacts/${{ inputs.artifact_contents }}"
           else
-            spec_glob="${{ inputs.file_glob }}"
+            spec_glob="${{ inputs.spec }}"
           fi          
-          
+
           #This is needed, because calling spectral with a glob that does not match any files will succeed, which is not what we want.
           if ! compgen -G $spec_glob > /dev/null; then
             echo "No file matches '$spec_glob'"
             exit 1
           fi            
-          
+
           spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f pretty || test "${{ inputs.fail_on_lint_error }}" = "false"
 
   upload-to-bucket:
@@ -99,14 +99,14 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository (if file_glob provided)
-        if: ${{ inputs.artifact_glob == '' }}
+      - name: Checkout repository (if spec provided)
+        if: ${{ inputs.artifact == '' }}
         uses: actions/checkout@v4
-      - name: Download artifact (if artifact_glob provided)
-        if: ${{ inputs.artifact_glob != '' }}
+      - name: Download artifact (if artifact provided)
+        if: ${{ inputs.artifact != '' }}
         uses: actions/download-artifact@v4
         with:
-          pattern: ${{ inputs.artifact_glob }}
+          pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
           merge-multiple: true
       - name: Authenticate with Google Cloud
@@ -118,12 +118,12 @@ jobs:
       - name: Copy specs to temporary directory
         run: |
           mkdir -p /tmp/specs
-          
-          if [ -z "${{ inputs.artifact_glob }}" ]; then            
-            cp ${{ inputs.file_glob }} /tmp/specs
+
+          if [ -z "${{ inputs.artifact }}" ]; then            
+            cp ${{ inputs.spec }} /tmp/specs
           else
-            #Since gcloud storage rsync does not support GLOB, copy files matching artifact_contents_glob to /tmp/specs for upload 
-            cp /tmp/artifacts/${{ inputs.artifact_contents_glob }} /tmp/specs
+            #Since gcloud storage rsync does not support GLOB, copy files matching artifact_contents to /tmp/specs for upload 
+            cp /tmp/artifacts/${{ inputs.artifact_contents }} /tmp/specs
           fi
       - name: Upload specs to GCS
         run: |
