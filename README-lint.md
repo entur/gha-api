@@ -15,13 +15,13 @@ jobs:
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-|                                               INPUT                                                |  TYPE   | REQUIRED |     DEFAULT      |                                               DESCRIPTION                                                |
-|----------------------------------------------------------------------------------------------------|---------|----------|------------------|----------------------------------------------------------------------------------------------------------|
-| <a name="input_artifact_contents_glob"></a>[artifact_contents_glob](#input_artifact_contents_glob) | string  |  false   |      `"*"`       |                        Glob pattern inside artifacts to <br>include in linting.                          |
-|              <a name="input_artifact_glob"></a>[artifact_glob](#input_artifact_glob)               | string  |  false   |                  | OpenAPI specs to lint, as <br>a Github artifact glob pattern. <br>Either send in this OR <br>file_glob.  |
-|       <a name="input_fail_on_lint_error"></a>[fail_on_lint_error](#input_fail_on_lint_error)       | boolean |  false   |     `false`      |                            If true, a lint error <br>will fail the workflow.                             |
-|                    <a name="input_file_glob"></a>[file_glob](#input_file_glob)                     | string  |  false   | `"specs/*.json"` |         OpenAPI specs to lint, as <br>a glob pattern. Either send <br>in this OR artifact_glob.          |
-|          <a name="input_upload_to_bucket"></a>[upload_to_bucket](#input_upload_to_bucket)          | boolean |  false   |      `true`      |                 If true, will upload the <br>spec(s) to a GCS bucket <br>for analytics                   |
+|                                         INPUT                                          |  TYPE   | REQUIRED |     DEFAULT      |                                           DESCRIPTION                                            |
+|----------------------------------------------------------------------------------------|---------|----------|------------------|--------------------------------------------------------------------------------------------------|
+|                <a name="input_artifact"></a>[artifact](#input_artifact)                | string  |  false   |                  |                  OpenAPI specs to lint, as <br>a Github artifact glob pattern.                   |
+|  <a name="input_artifact_contents"></a>[artifact_contents](#input_artifact_contents)   | string  |  false   |      `"*"`       | Glob pattern inside artifacts to <br>include in linting, only used <br>if artifact is provided.  |
+| <a name="input_fail_on_lint_error"></a>[fail_on_lint_error](#input_fail_on_lint_error) | boolean |  false   |     `false`      |                        If true, a lint error <br>will fail the workflow.                         |
+|                      <a name="input_spec"></a>[spec](#input_spec)                      | string  |  false   | `"specs/*.json"` |                          OpenAPI specs to lint, as <br>a glob pattern.                           |
+|    <a name="input_upload_to_bucket"></a>[upload_to_bucket](#input_upload_to_bucket)    | boolean |  false   |      `true`      |             If true, will upload the <br>spec(s) to a GCS bucket <br>for analytics.              |
 
 <!-- AUTO-DOC-INPUT:END -->
 
