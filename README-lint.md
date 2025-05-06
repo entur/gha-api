@@ -6,7 +6,7 @@ Add the following step to your workflow configuration:
 
 ```yml
 jobs:
-  docker-lint:
+  Openapi-lint:
     name: API Lint
     uses: entur/gha-api/.github/workflows/lint.yml@v1
 ```
