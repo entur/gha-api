@@ -5,8 +5,8 @@
 [![License](https://img.shields.io/github/license/entur/gha-api)](https://github.com/entur/gha-api)
 
 ## About this Action
-This is a github action to help teams in Entur adhere to our [API guidelines](https://github.com/entur/api-guidelines) using spectral to lint the OpenAPI specs of the service
 
+This is a github action to help teams in Entur adhere to our [API guidelines](https://github.com/entur/api-guidelines) using spectral to lint the OpenAPI specs of the service
 
 [How to use](https://github.com/entur/gha-api/blob/main/README-lint.md)
 
@@ -36,6 +36,6 @@ on:
 
 jobs:
   Openapi-lint:
-    uses: entur/gha-api/.github/workflows/lint.yml@v1
+    uses: entur/gha-api/.github/workflows/lint.yml@v2
     secrets: inherit
 ```
