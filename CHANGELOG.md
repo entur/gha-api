@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/entur/gha-api/compare/v2.0.0...v3.0.0) (2025-05-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* API-383: Using new spectral rules (v 1.0.1) with breaking changes.
+
+### Features
+
+* API-383: Using new spectral rules (v 1.0.1) with breaking changes. ([3c5b263](https://github.com/entur/gha-api/commit/3c5b263508d37defced90184a1f091e08677c9c6))
+
 ## [2.0.0](https://github.com/entur/gha-api/compare/v1.0.2...v2.0.0) (2025-04-23)
 
 
