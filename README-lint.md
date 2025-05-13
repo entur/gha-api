@@ -8,7 +8,7 @@ Add the following step to your workflow configuration:
 jobs:
   Openapi-lint:
     name: API Lint
-    uses: entur/gha-api/.github/workflows/lint.yml@v2
+    uses: entur/gha-api/.github/workflows/lint.yml@v3
 ```
 
 ## Inputs
