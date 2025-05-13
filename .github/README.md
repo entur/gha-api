@@ -36,6 +36,6 @@ on:
 
 jobs:
   Openapi-lint:
-    uses: entur/gha-api/.github/workflows/lint.yml@v2
+    uses: entur/gha-api/.github/workflows/lint.yml@v3
     secrets: inherit
 ```
