@@ -17,6 +17,14 @@ jobs:
       upload_to_bucket: false
       fail_on_lint_error: true
 
+  test-lint-file-glob-ok-offers:
+    uses: ./.github/workflows/lint.yml
+    with:
+      spec: fixture/offers-v2.json
+      upload_to_bucket: false
+      fail_on_lint_error: true
+
+
   upload-artifact:
     runs-on: ubuntu-latest
     steps:
