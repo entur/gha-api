@@ -122,6 +122,12 @@ jobs:
               head_sha: context.payload.pull_request.head.sha,
               status: 'in_progress'
             });
+            
+            //Create title of lint check. We want one check per spec source
+            const artifact         = core.getInput('artifact');
+            const artifactContents = core.getInput('artifact_contents');                        
+            const titleSuffix = artifact ? `${artifact}/${artifactContents}` : core.getInput('spec');
+            const resultTitle = `Spectral Lint Results - ${titleSuffix}`;            
 
             // 2) Batch annotations (max 50 per request)
             for (let i = 0; i < annotations.length; i += 50) {
@@ -130,7 +136,7 @@ jobs:
                 repo:  context.repo.repo,
                 check_run_id: check.id,
                 output: {
-                  title:   'Spectral Lint Results',
+                  title:   resultTitle,
                   summary: `Found ${annotations.length} issue(s)`,
                   annotations: annotations.slice(i, i + 50)
                 }
