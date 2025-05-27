@@ -95,6 +95,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
+            const core = require('@actions/core');
+
             const results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
 
             // Helper to map Spectral severity to GitHub annotation levels
@@ -104,22 +106,18 @@ jobs:
               return 'notice';
             }
 
-            const annotations = results.map(item => {
-              const start = item.range.start.line + 1;
-              const end   = item.range.end.line + 1;
-              return {
-                path: item.source,
-                start_line: start,
-                end_line:   end,
-                annotation_level: mapSeverity(item.severity),
-                message: `[${item.code}] ${item.message}`
-              };
-            });
+            const annotations = results.map(item => ({
+              path:             item.source,
+              start_line:       item.range.start.line + 1,
+              end_line:         item.range.end.line + 1,
+              annotation_level: mapSeverity(item.severity),
+              message: `[${item.code}] ${item.message}`
+              }));
 
             // 1) Create the check run in progress
             //Create title of lint check. We want one check per spec source
-            const artifact         = core.getInput('artifact');
-            const artifactContents = core.getInput('artifact_contents');                        
+            const artifact = core.getInput('artifact');
+            const artifactContents = core.getInput('artifact_contents');            
             const titleSuffix = artifact ? `${artifact}/${artifactContents}` : core.getInput('spec');
             const resultTitle = `Spectral Lint Results - ${titleSuffix}`;                        
             const { data: check } = await github.rest.checks.create({
@@ -133,12 +131,12 @@ jobs:
             // 2) Batch annotations (max 50 per request)
             for (let i = 0; i < annotations.length; i += 50) {
               await github.rest.checks.update({
-                owner: context.repo.owner,
-                repo:  context.repo.repo,
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
                 check_run_id: check.id,
                 output: {
-                  title:   'Spectral Lint Results',
-                  summary: `Found ${annotations.length} issue(s)`,
+                  title:       resultTitle,
+                  summary:     `Found ${annotations.length} issue(s)`,
                   annotations: annotations.slice(i, i + 50)
                 }
               });
