@@ -20,9 +20,9 @@ jobs:
   test-lint-file-glob-warn:
     uses: ./.github/workflows/lint.yml
     with:
-      spec: fixture/openapi-warn.yaml
+      spec: fixture/openapi-bad.yaml
       upload_to_bucket: false
-      fail_on_lint_error: true
+      fail_on_lint_error: false
 
   upload-artifact:
     runs-on: ubuntu-latest
