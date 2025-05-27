@@ -106,7 +106,7 @@ jobs:
               const start = item.range.start.line + 1;
               const end   = item.range.end.line + 1;
               return {
-                path: item.path,
+                path: item.source,
                 start_line: start,
                 end_line:   end,
                 annotation_level: mapSeverity(item.severity),
