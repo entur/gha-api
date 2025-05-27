@@ -95,7 +95,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const core = require('@actions/core');
 
             const results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
 
