@@ -87,7 +87,13 @@ jobs:
             exit 1
           fi            
 
-          spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f pretty || test "${{ inputs.fail_on_lint_error }}" = "false"
+          spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f html -o lint-report.html || test "${{ inputs.fail_on_lint_error }}" = "false"
+      - name: Save lint report to artifact storage
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report.html
+          path: lint-report.html
+          retention-days: 30
 
   upload-to-bucket:
     name: Upload to bucket
