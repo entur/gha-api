@@ -26,6 +26,7 @@ on:
 permissions:
   contents: read
   id-token: write
+  checks: write
 
 jobs:
   validate-input:
@@ -49,9 +50,6 @@ jobs:
     name: OpenAPI Lint
     runs-on: ubuntu-latest
     needs: validate-input
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - name: Checkout repository (if spec provided)
         if: ${{ inputs.artifact == '' }}
@@ -87,22 +85,74 @@ jobs:
             exit 1
           fi            
 
-          spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f html -o lint-report.html || test "${{ inputs.fail_on_lint_error }}" = "false"
-      - name: Save lint report to artifact storage
-        uses: actions/upload-artifact@v4
+          spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f json -o results.json || test "${{ inputs.fail_on_lint_error }}" = "false"
+
+      - name: Annotate Spectral findings via Checks API
+        uses: actions/github-script@v6
         with:
-          name: lint-report.html
-          path: lint-report.html
-          retention-days: 30
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
+
+            // Helper to map Spectral severity to GitHub annotation levels
+            function mapSeverity(sev) {
+              if (sev === 0) return 'failure';
+              if (sev === 1) return 'warning';
+              return 'notice';
+            }
+
+            const annotations = results.map(item => {
+              const start = item.range.start.line + 1;
+              const end   = item.range.end.line + 1;
+              return {
+                path: item.path,
+                start_line: start,
+                end_line:   end,
+                annotation_level: mapSeverity(item.severity),
+                message: `[${item.code}] ${item.message}`
+              };
+            });
+
+            // 1) Create the check run in progress
+            const { data: check } = await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              name:  'Spectral Lint',
+              head_sha: context.payload.pull_request.head.sha,
+              status: 'in_progress'
+            });
+
+            // 2) Batch annotations (max 50 per request)
+            for (let i = 0; i < annotations.length; i += 50) {
+              await github.rest.checks.update({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                check_run_id: check.id,
+                output: {
+                  title:   'Spectral Lint Results',
+                  summary: `Found ${annotations.length} issue(s)`,
+                  annotations: annotations.slice(i, i + 50)
+                }
+              });
+            }
+
+            // 3) Complete the check run
+            await github.rest.checks.update({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              check_run_id: check.id,
+              completed_at: new Date().toISOString(),
+              conclusion: annotations.some(a => a.annotation_level === 'failure')
+                ? 'failure'
+                : 'success'
+            });
 
   upload-to-bucket:
     name: Upload to bucket
     if: ${{ inputs.upload_to_bucket == true }}
     continue-on-error: true
     needs: validate-input
-    permissions:
-      contents: read
-      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository (if spec provided)
