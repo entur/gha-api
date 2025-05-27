@@ -73,6 +73,8 @@ jobs:
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
         run: |
+          shopt -s globstar
+
           if [ -n "${{ inputs.artifact }}" ]; then
             spec_glob="/tmp/artifacts/${{ inputs.artifact_contents }}"
           else
@@ -179,6 +181,8 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
       - name: Copy specs to temporary directory
         run: |
+          shopt -s globstar
+
           mkdir -p /tmp/specs
 
           if [ -z "${{ inputs.artifact }}" ]; then            
