@@ -115,9 +115,9 @@ jobs:
 
             // 1) Create the check run in progress
             //Create title of lint check. We want one check per spec source
-            const artifact = core.getInput('artifact');
-            const artifactContents = core.getInput('artifact_contents');            
-            const titleSuffix = artifact ? `${artifact}/${artifactContents}` : core.getInput('spec');
+            const artifact = '${{ inputs.artifact }}';
+            const artifactContents = '${{ inputs.artifact_contents }}';            
+            const titleSuffix = artifact ? `${artifact}/${artifactContents}` : '${{ inputs.spec }}';
             const resultTitle = `Spectral Lint Results - ${titleSuffix}`;                        
             const { data: check } = await github.rest.checks.create({
               owner: context.repo.owner,
@@ -128,6 +128,7 @@ jobs:
             });
 
             // 2) Batch annotations (max 50 per request)
+            const summary = `Found ${annotations.length} issue(s)`
             for (let i = 0; i < annotations.length; i += 50) {
               await github.rest.checks.update({
                 owner:        context.repo.owner,
@@ -135,7 +136,7 @@ jobs:
                 check_run_id: check.id,
                 output: {
                   title:       resultTitle,
-                  summary:     `Found ${annotations.length} issue(s)`,
+                  summary:     summary,
                   annotations: annotations.slice(i, i + 50)
                 }
               });
