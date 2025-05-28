@@ -110,7 +110,7 @@ jobs:
               start_line:       item.range.start.line + 1,
               end_line:         item.range.end.line + 1,
               annotation_level: mapSeverity(item.severity),
-              message: `[${item.code}] ${item.message}`
+              message: `[${item.code}] ${item.message} https://github.com/entur/gha-api/blob/59b23433a403cd21dde23b76810672d088b2888a/fixture/openapi-bad-2.yaml#L3`
               }));
 
             // 1) Create the check run in progress
