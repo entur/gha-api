@@ -95,6 +95,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
+            const path = require('path');
 
             const results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
 
@@ -105,12 +106,14 @@ jobs:
               return 'notice';
             }
 
+            const repoRoot = process.cwd();
+
             const annotations = results.map(item => ({
-              path:             item.source,
+              path:             path.relative(repoRoot, item.source),
               start_line:       item.range.start.line + 1,
               end_line:         item.range.end.line + 1,
               annotation_level: mapSeverity(item.severity),
-              message: `[${item.code}] ${item.message} https://github.com/entur/gha-api/blob/59b23433a403cd21dde23b76810672d088b2888a/fixture/openapi-bad-2.yaml#L3`
+              message: `[${item.code}] ${item.message}`
               }));
 
             // 1) Create the check run in progress
