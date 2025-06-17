@@ -91,7 +91,7 @@ jobs:
       - name: Convert Spectral result JSON to SARIF format
         run: |
           npm install -g spectral-sarif
-          spectral-sarif -r "${GITHUB_WORKSPACE}" results.json
+          spectral-sarif -r "${GITHUB_WORKSPACE}" -o results.sarif results.json
 
       - name: Upload SARIF to Code Scanning
         uses: github/codeql-action/upload-sarif@v3
