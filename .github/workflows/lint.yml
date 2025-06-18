@@ -97,6 +97,9 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
+          category:  ${{ inputs.artifact && format('{0}/{1}', inputs.artifact, inputs.artifact_contents) || inputs.spec }}
+
+
 
   upload-to-bucket:
     name: Upload to bucket
