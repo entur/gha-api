@@ -30,7 +30,7 @@ jobs:
     with:
       spec: fixture/openapi-bad-2.yaml
       upload_to_bucket: false
-      fail_on_lint_error: false
+      fail_on_lint_error: true
 
   upload-artifact:
     runs-on: ubuntu-latest

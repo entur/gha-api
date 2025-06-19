@@ -130,9 +130,6 @@ jobs:
                 echo "❌ Found error(s); failing workflow." >&2
                 exit 1
             fi
-                  
-          
-          
 
   upload-to-bucket:
     name: Upload to bucket
