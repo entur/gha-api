@@ -1,19 +1,19 @@
 openapi: "3.1.0"
 info:
-  title: ""
+  title: "Demo API"
   description: "This is a demo API specification."
-  version: ""
+  version: "1.0.0"
   contact:
     name: "Support"
     email: "support@example.com"
 servers:
-  - url: "http://example.com"
+  - url: "https://example.com"
 tags:
   - name: example
     description: "Tag for example operations"
 paths:
-  /example-api:
-    trace:
+  /example-api: #Warning for -api
+    get:
       description: "a good description"
       tags:
         - example
