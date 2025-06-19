@@ -98,37 +98,37 @@ jobs:
           ws="${GITHUB_WORKSPACE%/}"          
           
           if [ "$total_count" -gt 0 ]; then
-          {
-            # ─── HEADER ────────────────────────────────────────────────────────
-            echo '| Code | Path | Message | Severity | Start | End  | Source |'
-            echo '| ---- | ---- | ------- | -------- | ----- | ---- | ------ |'
-        
-            # ─── ROWS ──────────────────────────────────────────────────────────
-            jq -r --arg ws "$ws/" '
-              .[] |
-              (if .severity == 0 then "Error"
-               elif .severity == 1 then "Warn"
-               elif .severity == 2 then "Info"
-               elif .severity == 3 then "Hint"
-               else (.severity|tostring) end) as $sev |
-              # collapse JSON-path array into dot-path
-              (.path | join(".")) as $jsonPath |
-              # build start/end as “line:char”
-              "\(.range.start.line):\(.range.start.character)" as $start |
-              "\(.range.end.line):\(.range.end.character)"   as $end |
-              # strip the workspace prefix from source
-              (.source | sub("^"+$ws; "")) as $src |
-              # emit the table row
-              "| \(.code) | \($jsonPath) | \(.message) | \($sev) | \($start) | \($end) | \($src) |"
-            ' "$tmp"
-            } >> "$GITHUB_STEP_SUMMARY"
+            {
+              # ─── HEADER ────────────────────────────────────────────────────────
+              echo '| Code | Path | Message | Severity | Start | End  | Source |'
+              echo '| ---- | ---- | ------- | -------- | ----- | ---- | ------ |'
+          
+              # ─── ROWS ──────────────────────────────────────────────────────────
+              jq -r --arg ws "$ws/" '
+                .[] |
+                (if .severity == 0 then "Error"
+                 elif .severity == 1 then "Warn"
+                 elif .severity == 2 then "Info"
+                 elif .severity == 3 then "Hint"
+                 else (.severity|tostring) end) as $sev |
+                # collapse JSON-path array into dot-path
+                (.path | join(".")) as $jsonPath |
+                # build start/end as “line:char”
+                "\(.range.start.line):\(.range.start.character)" as $start |
+                "\(.range.end.line):\(.range.end.character)"   as $end |
+                # strip the workspace prefix from source
+                (.source | sub("^"+$ws; "")) as $src |
+                # emit the table row
+                "| \(.code) | \($jsonPath) | \(.message) | \($sev) | \($start) | \($end) | \($src) |"
+              ' "$tmp"
+              } >> "$GITHUB_STEP_SUMMARY"
             else
-            echo "No issues found." >> "$GITHUB_STEP_SUMMARY"
+              echo "No issues found." >> "$GITHUB_STEP_SUMMARY"
             fi
                         
             if [ "$error_count" -gt 0 ] && [ "${{ inputs.fail_on_lint_error }}" != "false" ]; then
-                echo "❌ Found error(s); failing workflow." >&2
-                exit 1
+              echo "❌ Found linting errors. Failing workflow." >&2
+              exit 1
             fi
 
   upload-to-bucket:
