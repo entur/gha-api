@@ -94,6 +94,9 @@ jobs:
           #Error issues
           error_count=$(jq '[.[] | select(.severity == 0)] | length' "$tmp")
           
+          #) Get workspace root so we can strip it
+          ws="${GITHUB_WORKSPACE%/}"          
+          
           if [ "$total_count" -gt 0 ]; then
           {
             # ─── HEADER ────────────────────────────────────────────────────────
@@ -101,7 +104,7 @@ jobs:
             echo '| ---------------------- | ---------------- | ------------------------------------------------------------ | -------- | ----- | ---- | -------------------------------------------------------------------------- |'
         
             # ─── ROWS ──────────────────────────────────────────────────────────
-            jq -r '
+            jq -r --arg ws "$ws/" '
               .[] |
               (if .severity == 0 then "Error"
                elif .severity == 1 then "Warn"
