@@ -87,7 +87,7 @@ jobs:
 
           tmp=$(mktemp)
           #Instead of using -f markdown, we use json. This is because the markdown format results in warnings being omitted. 
-          spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f json -o "$tmp" 2>&1 || true
+          spectral lint "$spec_glob" --ruleset rulesets/.spectral.yml -f json -o "$tmp" || true
           
           #All issues          
           total_count=$(jq 'length // 0' "$tmp")
@@ -100,8 +100,8 @@ jobs:
           if [ "$total_count" -gt 0 ]; then
           {
             # ─── HEADER ────────────────────────────────────────────────────────
-            echo '| Code                   | Path             | Message                                                      | Severity | Start | End  | Source                                                                     |'
-            echo '| ---------------------- | ---------------- | ------------------------------------------------------------ | -------- | ----- | ---- | -------------------------------------------------------------------------- |'
+            echo '| Code | Path | Message | Severity | Start | End  | Source |'
+            echo '| ---- | ---- | ------- | -------- | ----- | ---- | ------ |'
         
             # ─── ROWS ──────────────────────────────────────────────────────────
             jq -r --arg ws "$ws/" '
