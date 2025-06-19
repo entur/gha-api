@@ -86,7 +86,8 @@ jobs:
           fi            
 
           tmp=$(mktemp)
-          spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f json >"$tmp" 2>&1 || true
+          #Instead of using -f markdown, we use json. This is because the markdown format results in warnings being omitted. 
+          spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f json -o "$tmp" 2>&1 || true
           
           #All issues          
           total_count=$(jq 'length // 0' "$tmp")
