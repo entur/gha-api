@@ -69,6 +69,7 @@ jobs:
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
+        shell: bash
         run: |
           shopt -s globstar
 
@@ -84,7 +85,45 @@ jobs:
             exit 1
           fi            
 
-          (spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f markdown >> $GITHUB_STEP_SUMMARY) || test "${{ inputs.fail_on_lint_error }}" = "false"
+          tmp=$(mktemp)
+          spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f json >"$tmp" 2>&1 || true
+          
+          #All issues          
+          total_count=$(jq 'length // 0' "$tmp")
+          #Error issues
+          error_count=$(jq '[.[] | select(.severity == 0)] | length' "$tmp")
+          
+          if [ "$total_count" -gt 0 ]; then
+          {
+            # ─── HEADER ────────────────────────────────────────────────────────
+            echo '| Code                   | Path             | Message                                                      | Severity | Start | End  | Source                                                                     |'
+            echo '| ---------------------- | ---------------- | ------------------------------------------------------------ | -------- | ----- | ---- | -------------------------------------------------------------------------- |'
+        
+            # ─── ROWS ──────────────────────────────────────────────────────────
+            jq -r '
+            .[] |
+            (if .severity == 0 then "Error"
+             elif .severity == 1 then "Warn"
+             elif .severity == 2 then "Info"
+             elif .severity == 3 then "Hint"
+             else (.severity|tostring) end) as $sev |
+            (.path | join(".")) as $jsonPath |
+            "\(.range.start.line):\(.range.start.character)" as $start |
+            "\(.range.end.line):\(.range.end.character)"   as $end |
+            "| \(.code) | \($jsonPath) | \(.message) | \($sev) | \($start) | \($end) | \(.source) |"
+            ' "$tmp"
+            } >> "$GITHUB_STEP_SUMMARY"
+            else
+            echo "No issues found." >> "$GITHUB_STEP_SUMMARY"
+            fi
+                        
+            if [ "$error_count" -gt 0 ] && [ "${{ inputs.fail_on_lint_error }}" != "false" ]; then
+                echo "❌ Found error(s); failing workflow." >&2
+                exit 1
+            fi
+                  
+          
+          
 
   upload-to-bucket:
     name: Upload to bucket
