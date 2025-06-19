@@ -102,16 +102,21 @@ jobs:
         
             # ─── ROWS ──────────────────────────────────────────────────────────
             jq -r '
-            .[] |
-            (if .severity == 0 then "Error"
-             elif .severity == 1 then "Warn"
-             elif .severity == 2 then "Info"
-             elif .severity == 3 then "Hint"
-             else (.severity|tostring) end) as $sev |
-            (.path | join(".")) as $jsonPath |
-            "\(.range.start.line):\(.range.start.character)" as $start |
-            "\(.range.end.line):\(.range.end.character)"   as $end |
-            "| \(.code) | \($jsonPath) | \(.message) | \($sev) | \($start) | \($end) | \(.source) |"
+              .[] |
+              (if .severity == 0 then "Error"
+               elif .severity == 1 then "Warn"
+               elif .severity == 2 then "Info"
+               elif .severity == 3 then "Hint"
+               else (.severity|tostring) end) as $sev |
+              # collapse JSON-path array into dot-path
+              (.path | join(".")) as $jsonPath |
+              # build start/end as “line:char”
+              "\(.range.start.line):\(.range.start.character)" as $start |
+              "\(.range.end.line):\(.range.end.character)"   as $end |
+              # strip the workspace prefix from source
+              (.source | sub("^"+$ws; "")) as $src |
+              # emit the table row
+              "| \(.code) | \($jsonPath) | \(.message) | \($sev) | \($start) | \($end) | \($src) |"
             ' "$tmp"
             } >> "$GITHUB_STEP_SUMMARY"
             else
