@@ -23,10 +23,6 @@ on:
         type: boolean
         default: false
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   validate-input:
     name: Validate input
@@ -51,7 +47,6 @@ jobs:
     needs: validate-input
     permissions:
       contents: read
-      id-token: write
     steps:
       - name: Checkout repository (if spec provided)
         if: ${{ inputs.artifact == '' }}
@@ -74,6 +69,7 @@ jobs:
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
+        shell: bash
         run: |
           shopt -s globstar
 
@@ -89,7 +85,51 @@ jobs:
             exit 1
           fi            
 
-          spectral lint $spec_glob --ruleset rulesets/.spectral.yml -f pretty || test "${{ inputs.fail_on_lint_error }}" = "false"
+          tmp=$(mktemp)
+          #Instead of using -f markdown, we use json. This is because the markdown format results in warnings being omitted. 
+          spectral lint "$spec_glob" --ruleset rulesets/.spectral.yml -f json -o "$tmp" || true
+          
+          #All issues          
+          total_count=$(jq 'length // 0' "$tmp")
+          #Error issues
+          error_count=$(jq '[.[] | select(.severity == 0)] | length' "$tmp")
+          
+          #) Get workspace root so we can strip it
+          ws="${GITHUB_WORKSPACE%/}"          
+          
+          if [ "$total_count" -gt 0 ]; then
+            {
+              # ─── HEADER ────────────────────────────────────────────────────────
+              echo '| Code | Path | Message | Severity | Start | End  | Source |'
+              echo '| ---- | ---- | ------- | -------- | ----- | ---- | ------ |'
+          
+              # ─── ROWS ──────────────────────────────────────────────────────────
+              jq -r --arg ws "$ws/" '
+                .[] |
+                (if .severity == 0 then "Error"
+                 elif .severity == 1 then "Warn"
+                 elif .severity == 2 then "Info"
+                 elif .severity == 3 then "Hint"
+                 else (.severity|tostring) end) as $sev |
+                # collapse JSON-path array into dot-path
+                (.path | join(".")) as $jsonPath |
+                # build start/end as “line:char”
+                "\(.range.start.line):\(.range.start.character)" as $start |
+                "\(.range.end.line):\(.range.end.character)"   as $end |
+                # strip the workspace prefix from source
+                (.source | sub("^"+$ws; "")) as $src |
+                # emit the table row
+                "| \(.code) | \($jsonPath) | \(.message) | \($sev) | \($start) | \($end) | \($src) |"
+              ' "$tmp"
+              } >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "No issues found." >> "$GITHUB_STEP_SUMMARY"
+            fi
+                        
+            if [ "$error_count" -gt 0 ] && [ "${{ inputs.fail_on_lint_error }}" != "false" ]; then
+              echo "❌ Found linting errors. Failing workflow." >&2
+              exit 1
+            fi
 
   upload-to-bucket:
     name: Upload to bucket
