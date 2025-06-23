@@ -22,6 +22,10 @@ on:
         description: "If true, a lint error will fail the workflow."
         type: boolean
         default: false
+      fail_on_lint_warning:
+        description: "If true, a lint warning (or error) will fail the workflow."
+        type: boolean
+        default: false
 
 jobs:
   validate-input:
@@ -93,6 +97,7 @@ jobs:
           total_count=$(jq 'length // 0' "$tmp")
           #Error issues
           error_count=$(jq '[.[] | select(.severity == 0)] | length' "$tmp")
+          warning_count=$(jq '[.[] | select(.severity == 1)] | length' "$tmp")
           
           #) Get workspace root so we can strip it
           ws="${GITHUB_WORKSPACE%/}"          
@@ -126,8 +131,13 @@ jobs:
               echo "No issues found." >> "$GITHUB_STEP_SUMMARY"
             fi
                         
-            if [ "$error_count" -gt 0 ] && [ "${{ inputs.fail_on_lint_error }}" != "false" ]; then
+            if [ "$error_count" -gt 0 ] && ([ "${{ inputs.fail_on_lint_error }}" != "false" ] || [ "${{ inputs.fail_on_lint_warning }}" != "false" ]); then
               echo "❌ Found linting errors. Failing workflow." >&2
+              exit 1
+            fi                       
+          
+            if [ "$warning_count" -gt 0 ] && [ "${{ inputs.fail_on_lint_warning }}" != "false" ]; then
+              echo "❌ Found linting warnings. Failing workflow." >&2
               exit 1
             fi
 
