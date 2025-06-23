@@ -20,12 +20,8 @@ on:
         default: true
       fail_threshold:
         description: "The threshold to fail the build."
-        type: choice
+        type: string
         default: 'none'
-        options:
-          - none
-          - warn
-          - error
 
 jobs:
   validate-input:
@@ -45,6 +41,16 @@ jobs:
             echo "Error: Both spec and artifact were provided. Please provide only one."
             exit 1
           fi
+          
+          # Validate fail_threshold
+          case "${{ inputs.fail_threshold }}" in
+            none|warn|error) 
+              ;;  # OK
+            *) 
+              echo "Error: fail_threshold must be one of: none, warn, error"
+              exit 1
+              ;;
+          esac
   lint:
     name: OpenAPI Lint
     runs-on: ubuntu-latest
