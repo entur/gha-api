@@ -10,54 +10,33 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1
 
-  test-lint-file-glob-good-warn-ok:
+  test-lint-file-glob-fail-on-warn-ok:
     uses: ./.github/workflows/lint.yml
     with:
       spec: fixture/openapi-good.yaml
       upload_to_bucket: false
       fail_on_lint_warning: true
 
-  test-lint-file-glob-good-error-ok:
+  test-lint-file-glob-fail-on-error-ok:
     uses: ./.github/workflows/lint.yml
     with:
       spec: fixture/openapi-good.yaml
       upload_to_bucket: false
       fail_on_lint_error: true
 
-  test-lint-file-globstar-good-warn-ok:
+  test-lint-file-globstar-ok:
     uses: ./.github/workflows/lint.yml
     with:
       spec: fixture/**/openapi-good-*.yaml
       upload_to_bucket: false
       fail_on_lint_warning: true
 
-  test-lint-file-glob-warn-warn-fails:
-    uses: ./.github/workflows/lint.yml
-    with:
-      spec: fixture/openapi-warn.yaml
-      upload_to_bucket: false
-      fail_on_lint_warning: true
-
-  test-lint-file-glob-warn-error-ok:
+  test-lint-file-glob-warn:
     uses: ./.github/workflows/lint.yml
     with:
       spec: fixture/openapi-warn.yaml
       upload_to_bucket: false
       fail_on_lint_error: true
-
-  test-lint-file-glob-bad-error-fails:
-    uses: ./.github/workflows/lint.yml
-    with:
-      spec: fixture/openapi-bad.yaml
-      upload_to_bucket: false
-      fail_on_lint_error: true
-
-  test-lint-file-glob-bad-warn-fails:
-    uses: ./.github/workflows/lint.yml
-    with:
-      spec: fixture/openapi-bad.yaml
-      upload_to_bucket: false
-      fail_on_lint_warning: true
 
   upload-artifact:
     runs-on: ubuntu-latest
@@ -70,7 +49,7 @@ jobs:
           path: fixture/openapi-good.yaml
           retention-days: 1
   # Lints the artifact uploaded in upload-artifact
-  test-lint-artifact-good-warn-ok:
+  test-lint-artifact-ok:
     needs: upload-artifact
     uses: ./.github/workflows/lint.yml
     with:
@@ -89,7 +68,7 @@ jobs:
           path: fixture/*.yaml
           retention-days: 1
   # Lints the artifact uploaded in upload-artifact
-  test-lint-artifact-with-artifact_contents_glob-good-warn-ok:
+  test-lint-artifact-with-artifact_contents_glob-ok:
     needs: upload-artifact-all
     uses: ./.github/workflows/lint.yml
     with:
