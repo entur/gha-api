@@ -10,33 +10,61 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1
 
-  test-lint-file-glob-fail-on-warn-ok:
+  test-lint-file-glob-good-warn-ok:
     uses: ./.github/workflows/lint.yml
     with:
       spec: fixture/openapi-good.yaml
       upload_to_bucket: false
-      fail_on_lint_warning: true
+      fail_threshold: warn
 
-  test-lint-file-glob-fail-on-error-ok:
+  test-lint-file-glob-good-error-ok:
     uses: ./.github/workflows/lint.yml
     with:
       spec: fixture/openapi-good.yaml
       upload_to_bucket: false
-      fail_on_lint_error: true
+      fail_threshold: error
 
-  test-lint-file-globstar-ok:
+  test-lint-file-globstar-good-warn-ok:
     uses: ./.github/workflows/lint.yml
     with:
       spec: fixture/**/openapi-good-*.yaml
       upload_to_bucket: false
-      fail_on_lint_warning: true
+      fail_threshold: warn
 
-  test-lint-file-glob-warn:
+  test-lint-file-glob-warn-warn-fails:
     uses: ./.github/workflows/lint.yml
     with:
       spec: fixture/openapi-warn.yaml
       upload_to_bucket: false
-      fail_on_lint_error: true
+      fail_threshold: warn
+
+  test-lint-file-glob-warn-error-ok:
+    uses: ./.github/workflows/lint.yml
+    with:
+      spec: fixture/openapi-warn.yaml
+      upload_to_bucket: false
+      fail_threshold: error
+
+  test-lint-file-glob-bad-error-fails:
+    uses: ./.github/workflows/lint.yml
+    with:
+      spec: fixture/openapi-bad.yaml
+      upload_to_bucket: false
+      fail_threshold: error
+
+  test-lint-file-glob-bad-warn-fails:
+    uses: ./.github/workflows/lint.yml
+    with:
+      spec: fixture/openapi-bad.yaml
+      upload_to_bucket: false
+      fail_threshold: warn
+
+  test-lint-file-glob-bad-none-ok:
+    uses: ./.github/workflows/lint.yml
+    with:
+      spec: fixture/openapi-bad.yaml
+      upload_to_bucket: false
+      fail_threshold: none
 
   upload-artifact:
     runs-on: ubuntu-latest
@@ -49,13 +77,13 @@ jobs:
           path: fixture/openapi-good.yaml
           retention-days: 1
   # Lints the artifact uploaded in upload-artifact
-  test-lint-artifact-ok:
+  test-lint-artifact-good-warn-ok:
     needs: upload-artifact
     uses: ./.github/workflows/lint.yml
     with:
       artifact: "*.yaml"
       upload_to_bucket: false
-      fail_on_lint_warning: true
+      fail_threshold: warn
 
   upload-artifact-all:
     runs-on: ubuntu-latest
@@ -68,14 +96,14 @@ jobs:
           path: fixture/*.yaml
           retention-days: 1
   # Lints the artifact uploaded in upload-artifact
-  test-lint-artifact-with-artifact_contents_glob-ok:
+  test-lint-artifact-with-artifact_contents_glob-good-warn-ok:
     needs: upload-artifact-all
     uses: ./.github/workflows/lint.yml
     with:
       artifact: "specs"
       artifact_contents: "openapi-good.yaml"
       upload_to_bucket: false
-      fail_on_lint_warning: true
+      fail_threshold: warn
 
   update-lint-doc:
     if: ${{ github.event.pull_request.head.repo.full_name == 'entur/gha-api' }}

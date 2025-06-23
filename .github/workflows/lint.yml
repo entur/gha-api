@@ -18,14 +18,14 @@ on:
         description: "If true, will upload the spec(s) to a GCS bucket for analytics."
         type: boolean
         default: true
-      fail_on_lint_error:
-        description: "If true, a lint error will fail the workflow."
-        type: boolean
-        default: false
-      fail_on_lint_warning:
-        description: "If true, a lint warning (or error) will fail the workflow."
-        type: boolean
-        default: false
+      fail_threshold:
+        description: "The threshold to fail the build."
+        type: choice
+        default: 'none'
+        options:
+          - none
+          - warn
+          - error
 
 jobs:
   validate-input:
@@ -131,12 +131,12 @@ jobs:
               echo "No issues found." >> "$GITHUB_STEP_SUMMARY"
             fi
                         
-            if [ "$error_count" -gt 0 ] && ([ "${{ inputs.fail_on_lint_error }}" != "false" ] || [ "${{ inputs.fail_on_lint_warning }}" != "false" ]); then
+            if [ "$error_count" -gt 0 ] && [ "${{ inputs.fail_threshold }}" != "none" ]; then
               echo "❌ Found linting errors. Failing workflow." >&2
               exit 1
             fi                       
           
-            if [ "$warning_count" -gt 0 ] && [ "${{ inputs.fail_on_lint_warning }}" != "false" ]; then
+            if [ "$warning_count" -gt 0 ] && [ "${{ inputs.fail_threshold }}" = "warn" ]; then
               echo "❌ Found linting warnings. Failing workflow." >&2
               exit 1
             fi
