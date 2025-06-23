@@ -38,12 +38,12 @@ jobs:
       upload_to_bucket: false
       fail_threshold: error
 
-  test-lint-file-glob-bad-fail-threshold-none-ok:
+  test-lint-file-glob-bad-fail-threshold-never-ok:
     uses: ./.github/workflows/lint.yml
     with:
       spec: fixture/openapi-bad.yaml
       upload_to_bucket: false
-      fail_threshold: none
+      fail_threshold: never
 
   upload-artifact:
     runs-on: ubuntu-latest
