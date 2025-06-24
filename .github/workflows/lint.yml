@@ -97,7 +97,7 @@ jobs:
           set -o errexit
           set -o nounset
           set -o pipefail
-          
+        
           shopt -s globstar
 
           if [ -n "$GHA_API_LINT_ARTIFACT" ]; then
@@ -155,12 +155,12 @@ jobs:
             fi
                         
             if [ "$error_count" -gt 0 ] && [ "$GHA_API_LINT_FAIL_THRESHOLD" != "never" ]; then
-              echo "::error::Found linting errors. Failing workflow."
+              echo "::error:: Found linting errors. Failing workflow."
               exit 1
             fi                       
-
+          
             if [ "$warning_count" -gt 0 ] && [ "$GHA_API_LINT_FAIL_THRESHOLD" = "warn" ]; then
-              echo "::warning::Found linting warnings. Failing workflow."
+              echo "::error::Found linting warnings. Failing workflow."
               exit 1
             fi
 
