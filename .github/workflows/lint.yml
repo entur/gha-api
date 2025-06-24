@@ -29,21 +29,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Validate inputs
+        env:
+          GHA_API_LINT_SPEC: ${{ inputs.spec }}
+          GHA_API_LINT_ARTIFACT: ${{ inputs.artifact }}
+          GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
         run: |
           # Ensure not both inputs are empty.
-          if [ -z "${{ inputs.artifact }}" ] && [ -z "${{ inputs.spec }}" ]; then            
+          if [ -z "$GHA_API_LINT_ARTIFACT" ] && [ -z "$GHA_API_LINT_SPEC" ]; then            
             echo "Error: Exactly one of spec OR artifact is required."
             exit 1
           fi          
 
           # Ensure not both inputs are provided.
-          if [ -n "${{ inputs.artifact }}" ] && [ -n "${{ inputs.spec }}" ] && [ "${{ inputs.spec }}" != "specs/*.json" ]; then            
+          if [ -n "$GHA_API_LINT_ARTIFACT" ] && [ -n "$GHA_API_LINT_SPEC" ] && [ "$GHA_API_LINT_SPEC" != "specs/*.json" ]; then            
             echo "Error: Both spec and artifact were provided. Please provide only one."
             exit 1
           fi
           
           # Validate fail_threshold
-          case "${{ inputs.fail_threshold }}" in
+          case "$GHA_API_LINT_FAIL_THRESHOLD" in
             warn|error|never) 
               ;;  # OK
             *) 
@@ -80,13 +84,18 @@ jobs:
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
         shell: bash
+        env:
+          GHA_API_LINT_ARTIFACT:       ${{ inputs.artifact }}
+          GHA_API_LINT_SPEC:           ${{ inputs.spec }}
+          GHA_API_LINT_CONTENTS:       ${{ inputs.artifact_contents }}
+          GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
         run: |
           shopt -s globstar
 
-          if [ -n "${{ inputs.artifact }}" ]; then
-            spec_glob="/tmp/artifacts/${{ inputs.artifact_contents }}"
+          if [ -n "$GHA_API_LINT_ARTIFACT" ]; then
+            spec_glob="/tmp/artifacts/$GHA_API_LINT_CONTENTS"
           else
-            spec_glob="${{ inputs.spec }}"
+            spec_glob="$GHA_API_LINT_SPEC"
           fi          
 
           #This is needed, because calling spectral with a glob that does not match any files will succeed, which is not what we want.
@@ -137,12 +146,12 @@ jobs:
               echo "No issues found." >> "$GITHUB_STEP_SUMMARY"
             fi
                         
-            if [ "$error_count" -gt 0 ] && [ "${{ inputs.fail_threshold }}" != "never" ]; then
+            if [ "$error_count" -gt 0 ] && [ "$GHA_API_LINT_FAIL_THRESHOLD" != "never" ]; then
               echo "❌ Found linting errors. Failing workflow." >&2
               exit 1
             fi                       
           
-            if [ "$warning_count" -gt 0 ] && [ "${{ inputs.fail_threshold }}" = "warn" ]; then
+            if [ "$warning_count" -gt 0 ] && [ "$GHA_API_LINT_FAIL_THRESHOLD" = "warn" ]; then
               echo "❌ Found linting warnings. Failing workflow." >&2
               exit 1
             fi
@@ -174,16 +183,20 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
       - name: Copy specs to temporary directory
+        env:
+          GHA_API_LINT_ARTIFACT: ${{ inputs.artifact }}
+          GHA_API_LINT_SPEC:     ${{ inputs.spec }}
+          GHA_API_LINT_CONTENTS: ${{ inputs.artifact_contents }}
         run: |
           shopt -s globstar
 
           mkdir -p /tmp/specs
 
-          if [ -z "${{ inputs.artifact }}" ]; then            
-            cp ${{ inputs.spec }} /tmp/specs
+          if [ -z "$GHA_API_LINT_ARTIFACT" ]; then            
+            cp "$GHA_API_LINT_SPEC" /tmp/specs
           else
             #Since gcloud storage rsync does not support GLOB, copy files matching artifact_contents to /tmp/specs for upload 
-            cp /tmp/artifacts/${{ inputs.artifact_contents }} /tmp/specs
+            cp /tmp/artifacts/$GHA_API_LINT_CONTENTS /tmp/specs
           fi
       - name: Upload specs to GCS
         run: |
