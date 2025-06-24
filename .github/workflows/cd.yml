@@ -6,6 +6,7 @@ on:
 permissions:
   pull-requests: write
   contents: write
+  issues: write
 jobs:
   release:
     uses: entur/gha-meta/.github/workflows/release.yml@v1
