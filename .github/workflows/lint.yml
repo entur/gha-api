@@ -21,7 +21,7 @@ on:
       fail_threshold:
         description: "The threshold to fail the build. Accepted values: warn, error, never"
         type: string
-        default: 'never'
+        default: "never"
 
 jobs:
   validate-input:
@@ -41,7 +41,7 @@ jobs:
             echo "Error: Both spec and artifact were provided. Please provide only one."
             exit 1
           fi
-          
+
           # Validate fail_threshold
           case "${{ inputs.fail_threshold }}" in
             warn|error|never) 
@@ -98,22 +98,22 @@ jobs:
           tmp=$(mktemp)
           #Instead of using -f markdown, we use json. This is because the markdown format results in warnings being omitted. 
           spectral lint "$spec_glob" --ruleset rulesets/.spectral.yml -f json -o "$tmp" || true
-          
+
           #All issues          
           total_count=$(jq 'length // 0' "$tmp")
           #Error issues
           error_count=$(jq '[.[] | select(.severity == 0)] | length' "$tmp")
           warning_count=$(jq '[.[] | select(.severity == 1)] | length' "$tmp")
-          
+
           #) Get workspace root so we can strip it
           ws="${GITHUB_WORKSPACE%/}"          
-          
+
           if [ "$total_count" -gt 0 ]; then
             {
               # ─── HEADER ────────────────────────────────────────────────────────
               echo '| Code | Path | Message | Severity | Start | End  | Source |'
               echo '| ---- | ---- | ------- | -------- | ----- | ---- | ------ |'
-          
+
               # ─── ROWS ──────────────────────────────────────────────────────────
               jq -r --arg ws "$ws/" '
                 .[] |
@@ -141,7 +141,7 @@ jobs:
               echo "❌ Found linting errors. Failing workflow." >&2
               exit 1
             fi                       
-          
+
             if [ "$warning_count" -gt 0 ] && [ "${{ inputs.fail_threshold }}" = "warn" ]; then
               echo "❌ Found linting warnings. Failing workflow." >&2
               exit 1
@@ -149,7 +149,14 @@ jobs:
 
   upload-to-bucket:
     name: Upload to bucket
-    if: ${{ inputs.upload_to_bucket == true }}
+    if: |
+      inputs.upload_to_bucket == true && (
+        (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) ||
+        (github.event_name == 'pull_request' && 
+         github.event.action == 'closed' && 
+         github.event.pull_request.merged == true && 
+         github.event.pull_request.base.ref == github.event.repository.default_branch)
+      )
     continue-on-error: true
     needs: validate-input
     permissions:
