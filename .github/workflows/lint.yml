@@ -26,6 +26,7 @@ on:
 jobs:
   validate-input:
     name: Validate input
+    if: ${{ github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     steps:
       - name: Validate inputs
@@ -55,7 +56,6 @@ jobs:
     name: OpenAPI Lint
     runs-on: ubuntu-latest
     needs: validate-input
-    if: ${{ github.actor != 'dependabot[bot]' }}
     permissions:
       contents: read
     steps:
@@ -147,7 +147,6 @@ jobs:
               echo "❌ Found linting warnings. Failing workflow." >&2
               exit 1
             fi
-
   upload-to-bucket:
     name: Upload to bucket
     if: |
@@ -158,7 +157,6 @@ jobs:
          github.event.pull_request.merged == true && 
          github.event.pull_request.base.ref == github.event.repository.default_branch)
       )
-    continue-on-error: true
     needs: validate-input
     permissions:
       contents: read
