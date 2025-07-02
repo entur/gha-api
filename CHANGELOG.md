@@ -1,5 +1,28 @@
 # Changelog
 
+
+## [4.0.0](https://github.com/entur/gha-api/compare/v3.0.0...v4.0.0) (2025-07-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* API-406: Replaced input fail_on_lint_error with new fail_threshold  ([#48](https://github.com/entur/gha-api/issues/48))
+
+### Features
+
+* Allows use of ** in spec patterns to match recursive directories ([6f95da7](https://github.com/entur/gha-api/commit/6f95da7ad7917373752cbaef811e6a662dfe3954))
+* API-372: Display lint issues in step summary ([a71d023](https://github.com/entur/gha-api/commit/a71d0237de03fde4479c53c2c92862617b7e23e4))
+* skips linting for dependabot PR's ([e3246fb](https://github.com/entur/gha-api/commit/e3246fb1e502ff814d403236d636a7f9b98e4473))
+
+
+### Bug Fixes
+
+* added missing permission for release please ([23de049](https://github.com/entur/gha-api/commit/23de049b6613b6c3320257688585752a4771439e))
+* Do not use context vars in run steps. ([952b5ef](https://github.com/entur/gha-api/commit/952b5ef0e141bbed6f6dabcf2570545ad2102e25))
+* Makes globstar fixture meaningfully different from normal star ([7cb7207](https://github.com/entur/gha-api/commit/7cb72075aac6317af445ba6d722123a3c89b5ca1))
+* only uploads spec to bucket when pushing to default branch ([ff1cc6e](https://github.com/entur/gha-api/commit/ff1cc6e2efcc14ae134eaad6c08564e6478802e2))
+
+
 ## [3.0.0](https://github.com/entur/gha-api/compare/v2.0.0...v3.0.0) (2025-05-12)
 
 
