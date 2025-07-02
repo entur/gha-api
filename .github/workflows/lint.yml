@@ -34,15 +34,19 @@ jobs:
           GHA_API_LINT_ARTIFACT: ${{ inputs.artifact }}
           GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
         run: |
+          set -o errexit  #Exits immediately if any command fails (returns non-zero)
+          set -o nounset  #Treats unset variables as errors          
+          set -o pipefail #Makes a pipeline fail if any command in it fails (not just the last)
+          
           # Ensure not both inputs are empty.
           if [ -z "$GHA_API_LINT_ARTIFACT" ] && [ -z "$GHA_API_LINT_SPEC" ]; then            
-            echo "Error: Exactly one of spec OR artifact is required."
+            echo "::error::Exactly one of spec OR artifact is required."
             exit 1
           fi          
 
           # Ensure not both inputs are provided.
           if [ -n "$GHA_API_LINT_ARTIFACT" ] && [ -n "$GHA_API_LINT_SPEC" ] && [ "$GHA_API_LINT_SPEC" != "specs/*.json" ]; then            
-            echo "Error: Both spec and artifact were provided. Please provide only one."
+            echo "::error::Both spec and artifact were provided. Please provide only one."
             exit 1
           fi
 
@@ -51,7 +55,7 @@ jobs:
             warn|error|never) 
               ;;  # OK
             *) 
-              echo "Error: fail_threshold must be one of: warn, error, never"
+              echo "::error::fail_threshold must be one of: warn, error, never"
               exit 1
               ;;
           esac
@@ -90,6 +94,10 @@ jobs:
           GHA_API_LINT_CONTENTS:       ${{ inputs.artifact_contents }}
           GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
         run: |
+          set -o errexit
+          set -o nounset
+          set -o pipefail
+          
           shopt -s globstar
 
           if [ -n "$GHA_API_LINT_ARTIFACT" ]; then
@@ -99,8 +107,8 @@ jobs:
           fi          
 
           #This is needed, because calling spectral with a glob that does not match any files will succeed, which is not what we want.
-          if ! compgen -G $spec_glob > /dev/null; then
-            echo "No file matches '$spec_glob'"
+          if ! compgen -G "$spec_glob" > /dev/null; then
+            echo "::error::No file matches '$spec_glob'"
             exit 1
           fi            
 
@@ -133,7 +141,7 @@ jobs:
                  else (.severity|tostring) end) as $sev |
                 # collapse JSON-path array into dot-path
                 (.path | join(".")) as $jsonPath |
-                # build start/end as “line:char”
+                # build start/end as "line:char"
                 "\(.range.start.line):\(.range.start.character)" as $start |
                 "\(.range.end.line):\(.range.end.character)"   as $end |
                 # strip the workspace prefix from source
@@ -147,12 +155,12 @@ jobs:
             fi
                         
             if [ "$error_count" -gt 0 ] && [ "$GHA_API_LINT_FAIL_THRESHOLD" != "never" ]; then
-              echo "❌ Found linting errors. Failing workflow." >&2
+              echo "::error::Found linting errors. Failing workflow."
               exit 1
             fi                       
-          
+
             if [ "$warning_count" -gt 0 ] && [ "$GHA_API_LINT_FAIL_THRESHOLD" = "warn" ]; then
-              echo "❌ Found linting warnings. Failing workflow." >&2
+              echo "::warning::Found linting warnings. Failing workflow."
               exit 1
             fi
 
@@ -195,6 +203,9 @@ jobs:
           GHA_API_LINT_SPEC:     ${{ inputs.spec }}
           GHA_API_LINT_CONTENTS: ${{ inputs.artifact_contents }}
         run: |
+          set -o errexit
+          set -o nounset
+          set -o pipefail
           shopt -s globstar
 
           mkdir -p /tmp/specs
@@ -207,5 +218,8 @@ jobs:
           fi
       - name: Upload specs to GCS
         run: |
+          set -o errexit
+          set -o nounset
+          set -o pipefail
           echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GITHUB_REPOSITORY#*/}"
           gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-001/${GITHUB_REPOSITORY#*/}"
