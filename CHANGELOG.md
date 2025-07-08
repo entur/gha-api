@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [4.0.1](https://github.com/entur/gha-api/compare/v4.0.0...v4.0.1) (2025-07-08)
+
+
+### Bug Fixes
+
+* globs spec path to cp in artifact upload ([#56](https://github.com/entur/gha-api/issues/56)) ([bfeaea0](https://github.com/entur/gha-api/commit/bfeaea0f712363621c7913441289e29e76e469d0))
+
 ## [4.0.0](https://github.com/entur/gha-api/compare/v3.0.0...v4.0.0) (2025-07-02)
 
 
