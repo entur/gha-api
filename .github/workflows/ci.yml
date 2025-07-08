@@ -13,7 +13,7 @@ jobs:
   test-lint-file-glob-fail-threshold-warn-ok:
     uses: ./.github/workflows/lint.yml
     with:
-      spec: fixture/openapi-good.yaml
+      spec: fixture/openapi-goody-goody*.yaml
       upload_to_bucket: false
       fail_threshold: warn
 
