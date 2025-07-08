@@ -28,7 +28,7 @@ jobs:
     uses: ./.github/workflows/lint.yml
     with:
       spec: fixture/**/openapi-good-*.yaml
-      upload_to_bucket: false
+      upload_to_bucket: true
       fail_threshold: warn
 
   test-lint-file-glob-warn:
