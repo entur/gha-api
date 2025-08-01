@@ -102,3 +102,16 @@ jobs:
     with:
       upload_to_bucket: false
 ```
+
+## Linting asyncapi specs (Beta)
+
+By default, linting assumes an openapi spec. You can also lint asyncapi specs by setting the `spec_type` input to `asyncapi`.
+Linting of asyncapi specs has limited support. Linting rules are not complete, and lint result is not uploaded to GCS bucket.
+
+```yml
+jobs:
+  Openapi-lint:
+    #[...]
+    with:
+      spec_type: asyncapi
+```

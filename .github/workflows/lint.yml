@@ -22,6 +22,10 @@ on:
         description: "The threshold to fail the build. Accepted values: warn, error, never"
         type: string
         default: "never"
+      spec_type:
+        description: "The type of spec. Accepted values: openapi, asyncapi"
+        type: string
+        default: "openapi"
 
 jobs:
   validate-input:
@@ -34,6 +38,7 @@ jobs:
           GHA_API_LINT_SPEC: ${{ inputs.spec }}
           GHA_API_LINT_ARTIFACT: ${{ inputs.artifact }}
           GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
+          GHA_API_LINT_SPEC_TYPE: ${{ inputs.spec_type }}
         run: |
           set -o errexit  #Exits immediately if any command fails (returns non-zero)
           set -o nounset  #Treats unset variables as errors          
@@ -60,6 +65,16 @@ jobs:
               exit 1
               ;;
           esac
+          
+          # Validate spec_type
+          case "$GHA_API_LINT_SPEC_TYPE" in
+            openapi|asyncapi) 
+              ;;  # OK
+            *) 
+              echo "::error::spec_type must be one of: openapi, asyncapi"
+              exit 1
+              ;;
+          esac
   lint:
     name: OpenAPI Lint
     runs-on: ubuntu-latest
@@ -77,14 +92,14 @@ jobs:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
           merge-multiple: true #Downloads all artifacts into /tmp/artifacts, without subdirectories
-      - name: Checkout guidelines
+      - name: Checkout linting rulesets
         uses: actions/checkout@v4
         with:
           repository: entur/api-guidelines
           ref: v1.0.1
           path: rulesets
           sparse-checkout: |
-            .spectral.yml
+            .spectral*.yml
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
@@ -94,6 +109,7 @@ jobs:
           GHA_API_LINT_SPEC:           ${{ inputs.spec }}
           GHA_API_LINT_CONTENTS:       ${{ inputs.artifact_contents }}
           GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
+          GHA_API_LINT_SPEC_TYPE:      ${{ inputs.spec_type }}
         run: |
           set -o errexit
           set -o nounset
@@ -112,10 +128,16 @@ jobs:
             echo "::error::No file matches '$spec_glob'"
             exit 1
           fi            
+          
+          if [[ "$GHA_API_LINT_SPEC_TYPE" == "asyncapi" ]]; then
+            ruleset="rulesets/.spectral-asyncapi.yml"
+          else
+            ruleset="rulesets/.spectral.yml"
+          fi          
 
           tmp=$(mktemp)
           #Instead of using -f markdown, we use json. This is because the markdown format results in warnings being omitted. 
-          spectral lint "$spec_glob" --ruleset rulesets/.spectral.yml -f json -o "$tmp" || true
+          spectral lint "$spec_glob" --ruleset "$ruleset" -f json -o "$tmp" || true
 
           #All issues          
           total_count=$(jq 'length // 0' "$tmp")
@@ -167,7 +189,9 @@ jobs:
   upload-to-bucket:
     name: Upload to bucket
     if: |
-      inputs.upload_to_bucket == true && (
+      inputs.upload_to_bucket == true 
+      && inputs.spec_type != 'asyncapi'
+      && (
         (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) ||
         (github.event_name == 'pull_request' && 
          github.event.action == 'closed' && 

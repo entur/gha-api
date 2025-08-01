@@ -90,3 +90,11 @@ jobs:
     with:
       workflow_file: .github/workflows/lint.yml
       readme_file: README-lint.md
+
+  test-lint-async-file-glob-fail-threshold-warn-ok:
+    uses: ./.github/workflows/lint.yml
+    with:
+      spec: fixture/async-good.json
+      upload_to_bucket: false
+      fail_threshold: warn
+      spec_type: "async"
