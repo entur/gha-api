@@ -98,6 +98,7 @@ jobs:
           repository: entur/api-guidelines
           ref: v1.0.1
           path: rulesets
+          sparse-checkout-cone-mode: false
           sparse-checkout: |
             .spectral*.yml
       - name: Install Spectral
