@@ -97,4 +97,4 @@ jobs:
       spec: fixture/async-good.json
       upload_to_bucket: false
       fail_threshold: warn
-      spec_type: "async"
+      spec_type: "asyncapi"
