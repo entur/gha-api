@@ -96,7 +96,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: entur/api-guidelines
-          ref: v1.1.0
+          ref: v1.0.1
           path: rulesets
           sparse-checkout-cone-mode: false
           sparse-checkout: |
@@ -137,9 +137,17 @@ jobs:
           fi          
 
           tmp=$(mktemp)
-          #Instead of using -f markdown, we use json. This is because the markdown format results in warnings being omitted. 
-          spectral lint "$spec_glob" --ruleset "$ruleset" -f json -o "$tmp" || true
-
+          
+          #Instead of using -f markdown, we use json. This is because the markdown format results in warnings being omitted.
+          #Capture return code in $rc, and do not fail workflow.
+          spectral lint "$spec_glob" --ruleset "$ruleset" -f json -o "$tmp" && rc=$? || rc=$?
+          
+          #Return code 2 means that spectral command failed to run (not linting errors), so fail workflow.
+          if [ "$rc" -eq 2 ]; then
+            echo "::error::Spectral execution error (exit code $rc)."
+            exit $rc
+          fi          
+          
           #All issues          
           total_count=$(jq 'length // 0' "$tmp")
           #Error issues
