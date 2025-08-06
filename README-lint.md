@@ -10,6 +10,7 @@
 | <a name="input_artifact_contents"></a>[artifact_contents](#input_artifact_contents) | string  |  false   |      `"*"`       | Glob pattern inside artifacts to <br>include in linting, only used <br>if artifact is provided.  |
 |     <a name="input_fail_threshold"></a>[fail_threshold](#input_fail_threshold)      | string  |  false   |    `"never"`     |          The threshold to fail the <br>build. Accepted values: warn, error, <br>never            |
 |                    <a name="input_spec"></a>[spec](#input_spec)                     | string  |  false   | `"specs/*.json"` |                          OpenAPI specs to lint, as <br>a glob pattern.                           |
+|             <a name="input_spec_type"></a>[spec_type](#input_spec_type)             | string  |  false   |   `"openapi"`    |                    The type of spec. Accepted <br>values: openapi, asyncapi                      |
 |  <a name="input_upload_to_bucket"></a>[upload_to_bucket](#input_upload_to_bucket)   | boolean |  false   |      `true`      |             If true, will upload the <br>spec(s) to a GCS bucket <br>for analytics.              |
 
 <!-- AUTO-DOC-INPUT:END -->
@@ -106,3 +107,16 @@ jobs:
 ### For public repositories
 Upload to bucket will not work out of the box for public repositories, due to the secret `ENTUR_API_DATA_SA` not being available. 
 For these repositories, you must ask team plattform to manually add `ENTUR_API_DATA_SA` as a repository secret.
+
+## Linting asyncapi specs (Beta)
+
+By default, linting assumes an openapi spec. You can also lint asyncapi specs by setting the `spec_type` input to `asyncapi`.
+Linting of asyncapi specs has limited support. Linting rules are not complete, and lint result is not uploaded to GCS bucket.
+
+```yml
+jobs:
+  Openapi-lint:
+    #[...]
+    with:
+      spec_type: asyncapi
+```
