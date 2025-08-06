@@ -1,0 +1,73 @@
+name: Upload OpenAPI Spec to Dev Portal
+
+on:
+  workflow_call:
+    inputs:
+      spec:
+        description: "OpenAPI specs to lint, as a glob pattern."
+        type: string
+        default: "specs/*.json"
+      artifact:
+        description: "OpenAPI specs to lint, as a Github artifact glob pattern."
+        type: string
+      artifact_contents:
+        description: "Glob pattern inside artifacts to include in linting, only used if artifact is provided."
+        type: string
+        default: "*"
+
+jobs:
+  upload-to-bucket:
+    name: Upload to bucket
+    if: |
+      (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) ||
+      (github.event_name == 'pull_request' && 
+       github.event.action == 'closed' && 
+       github.event.pull_request.merged == true && 
+       github.event.pull_request.base.ref == github.event.repository.default_branch)
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (if spec provided)
+        if: ${{ inputs.artifact == '' }}
+        uses: actions/checkout@v4
+      - name: Download artifact (if artifact provided)
+        if: ${{ inputs.artifact != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.artifact }}
+          path: /tmp/artifacts
+          merge-multiple: true
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      - name: Copy specs to temporary directory
+        env:
+          GHA_API_LINT_ARTIFACT: ${{ inputs.artifact }}
+          GHA_API_LINT_SPEC: ${{ inputs.spec }}
+          GHA_API_LINT_CONTENTS: ${{ inputs.artifact_contents }}
+        run: |
+          set -o errexit
+          set -o nounset
+          set -o pipefail
+          shopt -s globstar
+
+          mkdir -p /tmp/specs
+
+          if [ -z "$GHA_API_LINT_ARTIFACT" ]; then            
+            cp $GHA_API_LINT_SPEC /tmp/specs
+          else
+            #Since gcloud storage rsync does not support GLOB, copy files matching artifact_contents to /tmp/specs for upload 
+            cp /tmp/artifacts/$GHA_API_LINT_CONTENTS /tmp/specs
+          fi
+      - name: Upload specs to GCS
+        run: |
+          set -o errexit
+          set -o nounset
+          set -o pipefail
+          echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GITHUB_REPOSITORY#*/}"
+          gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-developer-portal-prd-001/${GITHUB_REPOSITORY#*/}"
