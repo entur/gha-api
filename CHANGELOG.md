@@ -1,6 +1,20 @@
 # Changelog
 
 
+## [4.1.0](https://github.com/entur/gha-api/compare/v4.0.1...v4.1.0) (2025-08-11)
+
+
+### Features
+
+* added workflow for uploading spec to dev portal ([#64](https://github.com/entur/gha-api/issues/64)) ([78c39f2](https://github.com/entur/gha-api/commit/78c39f2119f030ce862087f64ac6513766f4e7f5))
+* API-411: Added support for linting asyncapi specs.  ([#60](https://github.com/entur/gha-api/issues/60)) ([14435b5](https://github.com/entur/gha-api/commit/14435b546188acad8e5b3b97ea86fb5932b7a22c))
+
+
+### Bug Fixes
+
+* API-433: If spectral fails to run, workflow now fails.  ([#63](https://github.com/entur/gha-api/issues/63)) ([d99a9b2](https://github.com/entur/gha-api/commit/d99a9b2346dc310ce2372231c41e6bb102422856))
+* Using latest linting ruleset. ([#67](https://github.com/entur/gha-api/issues/67)) ([506d8b0](https://github.com/entur/gha-api/commit/506d8b0c30e683a4bf5628fd80aa50026f53c36e))
+
 ## [4.0.1](https://github.com/entur/gha-api/compare/v4.0.0...v4.0.1) (2025-07-08)
 
 
