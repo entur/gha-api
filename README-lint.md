@@ -1,31 +1,35 @@
 # `gha-api/lint`
 
+Note: OpenAPI specs are linted with Vacuum; AsyncAPI specs use Spectral.
+
 ## Inputs
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-|                                        INPUT                                        |  TYPE   | REQUIRED |     DEFAULT      |                                           DESCRIPTION                                            |
-|-------------------------------------------------------------------------------------|---------|----------|------------------|--------------------------------------------------------------------------------------------------|
-|              <a name="input_artifact"></a>[artifact](#input_artifact)               | string  |  false   |                  |                  OpenAPI specs to lint, as <br>a Github artifact glob pattern.                   |
-| <a name="input_artifact_contents"></a>[artifact_contents](#input_artifact_contents) | string  |  false   |      `"*"`       | Glob pattern inside artifacts to <br>include in linting, only used <br>if artifact is provided.  |
-|     <a name="input_fail_threshold"></a>[fail_threshold](#input_fail_threshold)      | string  |  false   |    `"never"`     |          The threshold to fail the <br>build. Accepted values: warn, error, <br>never            |
-|                    <a name="input_spec"></a>[spec](#input_spec)                     | string  |  false   | `"specs/*.json"` |                          OpenAPI specs to lint, as <br>a glob pattern.                           |
-|             <a name="input_spec_type"></a>[spec_type](#input_spec_type)             | string  |  false   |   `"openapi"`    |                    The type of spec. Accepted <br>values: openapi, asyncapi                      |
-|  <a name="input_upload_to_bucket"></a>[upload_to_bucket](#input_upload_to_bucket)   | boolean |  false   |      `true`      |             If true, will upload the <br>spec(s) to a GCS bucket <br>for analytics.              |
+| INPUT                                                                               | TYPE    | REQUIRED | DEFAULT          | DESCRIPTION                                                                                     |
+| ----------------------------------------------------------------------------------- | ------- | -------- | ---------------- | ----------------------------------------------------------------------------------------------- |
+| <a name="input_artifact"></a>[artifact](#input_artifact)                            | string  | false    |                  | OpenAPI specs to lint, as <br>a Github artifact glob pattern.                                   |
+| <a name="input_artifact_contents"></a>[artifact_contents](#input_artifact_contents) | string  | false    | `"*"`            | Glob pattern inside artifacts to <br>include in linting, only used <br>if artifact is provided. |
+| <a name="input_fail_threshold"></a>[fail_threshold](#input_fail_threshold)          | string  | false    | `"never"`        | The threshold to fail the <br>build. Accepted values: warn, error, <br>never                    |
+| <a name="input_spec"></a>[spec](#input_spec)                                        | string  | false    | `"specs/*.json"` | OpenAPI specs to lint, as <br>a glob pattern.                                                   |
+| <a name="input_spec_type"></a>[spec_type](#input_spec_type)                         | string  | false    | `"openapi"`      | The type of spec. Accepted <br>values: openapi, asyncapi                                        |
+| <a name="input_upload_to_bucket"></a>[upload_to_bucket](#input_upload_to_bucket)    | boolean | false    | `true`           | If true, will upload the <br>spec(s) to a GCS bucket <br>for analytics.                         |
 
 <!-- AUTO-DOC-INPUT:END -->
 
 ## Outputs
 
 <!-- AUTO-DOC-OUTPUT:START - Do not remove or modify this section -->
+
 No outputs.
+
 <!-- AUTO-DOC-OUTPUT:END -->
 
 # Usage
 
 ## Golden path
 
-Place your openAPI specs in the `specs` folder in project root. 
+Place your openAPI specs in the `specs` folder in project root.
 
 ```sh
 λ amazing-app ❯ tree
@@ -37,6 +41,7 @@ Place your openAPI specs in the `specs` folder in project root.
     └── workflows
         └── ci.yml
 ```
+
 Add the following step to your workflow configuration. By default, the action looks for specs to lint in the `specs` folder.
 
 ```yml
@@ -51,7 +56,7 @@ jobs:
 
 ## Customizing the specs location in the repository
 
-If your specs are located in a different folder in your repository, you can specify the path to the specs using the `spec` input. 
+If your specs are located in a different folder in your repository, you can specify the path to the specs using the `spec` input.
 [Globstar patterns](https://www.linuxjournal.com/content/globstar-new-bash-globbing-option) are supported.
 
 ```yml
@@ -66,7 +71,7 @@ jobs:
 
 If your specs are not in your repository, but in a GitHub artifact, you can specify the artifact name using the `artifact` input.
 
-Optionally, you can also specify a file pattern inside the artifact using `artifact_contents`. [Globstar patterns](https://www.linuxjournal.com/content/globstar-new-bash-globbing-option) are supported. 
+Optionally, you can also specify a file pattern inside the artifact using `artifact_contents`. [Globstar patterns](https://www.linuxjournal.com/content/globstar-new-bash-globbing-option) are supported.
 
 ```yml
 jobs:
@@ -76,7 +81,6 @@ jobs:
       artifact: myArtifactName
       artifact_contents: "*.yaml"
 ```
-
 
 ## Failing workflow based on linting results
 
@@ -105,7 +109,8 @@ jobs:
 ```
 
 ### For public repositories
-Upload to bucket will not work out of the box for public repositories, due to the secret `ENTUR_API_DATA_SA` not being available. 
+
+Upload to bucket will not work out of the box for public repositories, due to the secret `ENTUR_API_DATA_SA` not being available.
 For these repositories, you must ask team plattform to manually add `ENTUR_API_DATA_SA` as a repository secret.
 
 ## Linting asyncapi specs (Beta)

@@ -6,7 +6,6 @@
 
 ## About this Action
 
-This is a github action to help teams in Entur adhere to our [API guidelines](https://github.com/entur/api-guidelines) using spectral to lint the OpenAPI specs of the service
+This is a GitHub Action to help teams in Entur adhere to our [API guidelines](https://github.com/entur/api-guidelines), using Vacuum to lint OpenAPI specs (and Spectral for AsyncAPI).
 
 ### [How to use](https://github.com/entur/gha-api/blob/main/README-lint.md)
-
