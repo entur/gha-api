@@ -43,7 +43,7 @@ jobs:
           set -o errexit  #Exits immediately if any command fails (returns non-zero)
           set -o nounset  #Treats unset variables as errors          
           set -o pipefail #Makes a pipeline fail if any command in it fails (not just the last)
-          
+
           # Ensure not both inputs are empty.
           if [ -z "$GHA_API_LINT_ARTIFACT" ] && [ -z "$GHA_API_LINT_SPEC" ]; then            
             echo "::error::Exactly one of spec OR artifact is required."
@@ -65,7 +65,7 @@ jobs:
               exit 1
               ;;
           esac
-          
+
           # Validate spec_type
           case "$GHA_API_LINT_SPEC_TYPE" in
             openapi|asyncapi) 
@@ -101,21 +101,24 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             .spectral*.yml
-      - name: Install Spectral
+      - name: Install Vacuum (OpenAPI)
+        run: npm install -g @quobix/vacuum@0.17.8
+      - name: Install Spectral (AsyncAPI only)
+        if: ${{ inputs.spec_type == 'asyncapi' }}
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
         shell: bash
         env:
-          GHA_API_LINT_ARTIFACT:       ${{ inputs.artifact }}
-          GHA_API_LINT_SPEC:           ${{ inputs.spec }}
-          GHA_API_LINT_CONTENTS:       ${{ inputs.artifact_contents }}
+          GHA_API_LINT_ARTIFACT: ${{ inputs.artifact }}
+          GHA_API_LINT_SPEC: ${{ inputs.spec }}
+          GHA_API_LINT_CONTENTS: ${{ inputs.artifact_contents }}
           GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
-          GHA_API_LINT_SPEC_TYPE:      ${{ inputs.spec_type }}
+          GHA_API_LINT_SPEC_TYPE: ${{ inputs.spec_type }}
         run: |
           set -o errexit
           set -o nounset
           set -o pipefail
-        
+
           shopt -s globstar
 
           if [ -n "$GHA_API_LINT_ARTIFACT" ]; then
@@ -129,7 +132,7 @@ jobs:
             echo "::error::No file matches '$spec_glob'"
             exit 1
           fi            
-          
+
           if [[ "$GHA_API_LINT_SPEC_TYPE" == "asyncapi" ]]; then
             ruleset="rulesets/.spectral-asyncapi.yml"
           else
@@ -137,17 +140,35 @@ jobs:
           fi          
 
           tmp=$(mktemp)
-          
-          #Instead of using -f markdown, we use json. This is because the markdown format results in warnings being omitted.
-          #Capture return code in $rc, and do not fail workflow.
-          spectral lint "$spec_glob" --ruleset "$ruleset" -f json -o "$tmp" && rc=$? || rc=$?
-          
-          #Return code 2 means that spectral command failed to run (not linting errors), so fail workflow.
-          if [ "$rc" -eq 2 ]; then
-            echo "::error::Spectral execution error (exit code $rc)."
-            exit $rc
+
+          if [[ "$GHA_API_LINT_SPEC_TYPE" == "asyncapi" ]]; then
+            # Use Spectral for AsyncAPI as Vacuum focuses on OpenAPI
+            spectral lint "$spec_glob" --ruleset "$ruleset" -f json -o "$tmp" && rc=$? || rc=$?
+            # Return code 2 means spectral command failed to run (not linting errors), so fail workflow.
+            if [ "$rc" -eq 2 ]; then
+              echo "::error::Spectral execution error (exit code $rc)."
+              exit $rc
+            fi
+          else
+            # Use Vacuum for OpenAPI: produce Spectral-compatible JSON via spectral-report
+            # Handle multiple files by generating per-file reports and merging them into a single array
+            reports_dir=$(mktemp -d)
+            count=0
+            rc=0
+            for f in $spec_glob; do
+              out="$reports_dir/report_$count.json"
+              # Generate Spectral-compatible report for each file
+              vacuum spectral-report -r "$ruleset" "$f" "$out" || rc=$?
+              if [ "$rc" -ne 0 ]; then
+                echo "::error::Vacuum execution error on $f (exit code $rc)."
+                exit $rc
+              fi
+              count=$((count+1))
+            done
+            # Merge all per-file arrays into a single array
+            jq -s 'add' "$reports_dir"/*.json > "$tmp"
           fi          
-          
+
           #All issues          
           total_count=$(jq 'length // 0' "$tmp")
           #Error issues
@@ -232,7 +253,7 @@ jobs:
       - name: Copy specs to temporary directory
         env:
           GHA_API_LINT_ARTIFACT: ${{ inputs.artifact }}
-          GHA_API_LINT_SPEC:     ${{ inputs.spec }}
+          GHA_API_LINT_SPEC: ${{ inputs.spec }}
           GHA_API_LINT_CONTENTS: ${{ inputs.artifact_contents }}
         run: |
           set -o errexit
