@@ -23,7 +23,7 @@ No outputs.
 
 ## Golden path
 
-Place your openAPI specs in the `specs` folder in project root.
+Place your OpenAPI specs in the `specs` folder in project root.
 
 ```sh
 λ amazing-app ❯ tree
