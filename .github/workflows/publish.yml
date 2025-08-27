@@ -1,0 +1,114 @@
+name: Publish OpenAPI specs to developer portal
+
+on:
+  workflow_call:
+    inputs:
+      spec:
+        description: "OpenAPI specs to publish, as a glob pattern."
+        type: string
+        default: "specs/*.json"
+      artifact:
+        description: "OpenAPI specs to publish, as a Github artifact glob pattern."
+        type: string
+      artifact_contents:
+        description: "Glob pattern inside artifacts to include in publishing, only used if artifact is provided."
+        type: string
+        default: "*"
+      visibility:
+        description: "Visibility of the published specs. Can be 'public', 'partner' or 'internal'."
+        type: string
+        default: "public"
+        required: false
+
+jobs:
+  validate-input:
+    name: Validate input
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate inputs
+        env:
+          GHA_API_SPEC: ${{ inputs.spec }}
+          GHA_API_ARTIFACT: ${{ inputs.artifact }}
+          GHA_API_VISIBILITY: ${{ inputs.visibility }}
+        run: |
+          set -o errexit  #Exits immediately if any command fails (returns non-zero)
+          set -o nounset  #Treats unset variables as errors          
+          set -o pipefail #Makes a pipeline fail if any command in it fails (not just the last)
+
+          # Ensure not both inputs are empty.
+          if [ -z "$GHA_API_ARTIFACT" ] && [ -z "$GHA_API_SPEC" ]; then            
+            echo "::error::Exactly one of spec OR artifact is required."
+            exit 1
+          fi          
+
+          # Ensure not both inputs are provided.
+          if [ -n "$GHA_API_ARTIFACT" ] && [ -n "$GHA_API_SPEC" ] && [ "$GHA_API_SPEC" != "specs/*.json" ]; then            
+            echo "::error::Both spec and artifact were provided. Please provide only one."
+            exit 1
+          fi
+
+          # Ensure visibility is valid
+          if [[ ! "$GHA_API_VISIBILITY" =~ ^(public|partner|internal)$ ]]; then
+            echo "::error::Invalid visibility '$GHA_API_VISIBILITY'. Must be one of: public, partner, internal."
+            exit 1
+          fi
+
+  upload-to-bucket:
+    name: Upload to bucket
+    if: |
+      (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) ||
+      (github.event_name == 'pull_request' && 
+       github.event.action == 'closed' && 
+       github.event.pull_request.merged == true && 
+       github.event.pull_request.base.ref == github.event.repository.default_branch)
+    needs: validate-input
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (if spec provided)
+        if: ${{ inputs.artifact == '' }}
+        uses: actions/checkout@v4
+      - name: Download artifact (if artifact provided)
+        if: ${{ inputs.artifact != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.artifact }}
+          path: /tmp/artifacts
+          merge-multiple: true
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      - name: Copy specs to temporary directory
+        env:
+          GHA_API_ARTIFACT: ${{ inputs.artifact }}
+          GHA_API_SPEC: ${{ inputs.spec }}
+          GHA_API_CONTENTS: ${{ inputs.artifact_contents }}
+          GHA_API_VISIBILITY: ${{ inputs.visibility }}
+
+        run: |
+          set -o errexit
+          set -o nounset
+          set -o pipefail
+          shopt -s globstar
+
+          mkdir -p /tmp/specs
+
+          if [ -z "$GHA_API_ARTIFACT" ]; then            
+            cp $GHA_API_SPEC /tmp/specs
+          else
+            #Since gcloud storage rsync does not support GLOB, copy files matching artifact_contents to /tmp/specs for upload 
+            cp /tmp/artifacts/$GHA_API_CONTENTS /tmp/specs
+          fi
+      - name: Upload specs to GCS
+        run: |
+          set -o errexit
+          set -o nounset
+          set -o pipefail
+          echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GHA_API_VISIBILITY}/${GITHUB_REPOSITORY#*/}"
+          gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-developer-portal-prd-001/${GHA_API_VISIBILITY}/${GITHUB_REPOSITORY#*/}"
