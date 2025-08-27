@@ -8,7 +8,7 @@ on:
         type: string
         default: "specs/*.json"
       artifact:
-        description: "OpenAPI specs to publish, as a Github artifact glob pattern."
+        description: "OpenAPI specs to publish, as a GitHub artifact glob pattern."
         type: string
       artifact_contents:
         description: "Glob pattern inside artifacts to include in publishing, only used if artifact is provided."
