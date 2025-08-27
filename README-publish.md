@@ -78,7 +78,7 @@ jobs:
 
 ## Specifying visibility of API
 
-By default, your API will be publically available, if you wish to change the visibility of your API spec, set visibility to one of
+By default, your API will be publicly available, if you wish to change the visibility of your API spec, set visibility to one of
 
 - public (default)
 - partner
