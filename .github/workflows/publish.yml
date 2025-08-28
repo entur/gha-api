@@ -18,7 +18,6 @@ on:
         description: "Visibility of the published specs. Can be 'public', 'partner' or 'internal'."
         type: string
         default: "public"
-        required: false
 
 jobs:
   validate-input:
@@ -106,6 +105,8 @@ jobs:
             cp /tmp/artifacts/$GHA_API_CONTENTS /tmp/specs
           fi
       - name: Upload specs to GCS
+        env:
+          GHA_API_VISIBILITY: ${{ inputs.visibility }}
         run: |
           set -o errexit
           set -o nounset
