@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [4.2.1](https://github.com/entur/gha-api/compare/v4.2.0...v4.2.1) (2025-08-28)
+
+
+### Bug Fixes
+
+* fixes bug where visibility is not set ([#76](https://github.com/entur/gha-api/issues/76)) ([d6212d3](https://github.com/entur/gha-api/commit/d6212d36201af1fe7ca72c79edf3577a04ea3029))
+
 ## [4.2.0](https://github.com/entur/gha-api/compare/v4.1.0...v4.2.0) (2025-08-28)
 
 
