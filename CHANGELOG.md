@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [4.2.0](https://github.com/entur/gha-api/compare/v4.1.0...v4.2.0) (2025-08-28)
+
+
+### Features
+
+* created reusable workflow for uploading spec to dev portal ([#71](https://github.com/entur/gha-api/issues/71)) ([39b038f](https://github.com/entur/gha-api/commit/39b038f000b60ab3238b679273ee9d979fadbba4))
+
 ## [4.1.0](https://github.com/entur/gha-api/compare/v4.0.1...v4.1.0) (2025-08-11)
 
 
