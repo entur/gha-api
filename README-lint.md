@@ -25,7 +25,7 @@ No outputs.
 
 ## Golden path
 
-Place your openAPI specs in the `specs` folder in project root. 
+Place your openAPI specs in the `specs` folder in project root.
 
 ```sh
 λ amazing-app ❯ tree
@@ -37,13 +37,14 @@ Place your openAPI specs in the `specs` folder in project root.
     └── workflows
         └── ci.yml
 ```
+
 Add the following step to your workflow configuration. By default, the action looks for specs to lint in the `specs` folder.
 
 ```yml
 #ci.yml
 
 jobs:
-  Openapi-lint:
+  openapi-lint:
     name: API Lint
     uses: entur/gha-api/.github/workflows/lint.yml@v3
     secrets: inherit
@@ -51,12 +52,12 @@ jobs:
 
 ## Customizing the specs location in the repository
 
-If your specs are located in a different folder in your repository, you can specify the path to the specs using the `spec` input. 
+If your specs are located in a different folder in your repository, you can specify the path to the specs using the `spec` input.
 [Globstar patterns](https://www.linuxjournal.com/content/globstar-new-bash-globbing-option) are supported.
 
 ```yml
 jobs:
-  Openapi-lint:
+  openapi-lint:
     #[...]
     with:
       spec: custom/specs/path/*.yaml
@@ -66,17 +67,16 @@ jobs:
 
 If your specs are not in your repository, but in a GitHub artifact, you can specify the artifact name using the `artifact` input.
 
-Optionally, you can also specify a file pattern inside the artifact using `artifact_contents`. [Globstar patterns](https://www.linuxjournal.com/content/globstar-new-bash-globbing-option) are supported. 
+Optionally, you can also specify a file pattern inside the artifact using `artifact_contents`. [Globstar patterns](https://www.linuxjournal.com/content/globstar-new-bash-globbing-option) are supported.
 
 ```yml
 jobs:
-  Openapi-lint:
+  openapi-lint:
     #[...]
     with:
       artifact: myArtifactName
       artifact_contents: "*.yaml"
 ```
-
 
 ## Failing workflow based on linting results
 
@@ -85,7 +85,7 @@ Setting it to `error` will fail the workflow if there are errors, but will not f
 
 ```yml
 jobs:
-  Openapi-lint:
+  openapi-lint:
     #[...]
     with:
       fail_threshold: warn
@@ -98,14 +98,15 @@ To disable this behavior, set the `upload_to_bucket` input to `false`.
 
 ```yml
 jobs:
-  Openapi-lint:
+  openapi-lint:
     #[...]
     with:
       upload_to_bucket: false
 ```
 
 ### For public repositories
-Upload to bucket will not work out of the box for public repositories, due to the secret `ENTUR_API_DATA_SA` not being available. 
+
+Upload to bucket will not work out of the box for public repositories, due to the secret `ENTUR_API_DATA_SA` not being available.
 For these repositories, you must ask team plattform to manually add `ENTUR_API_DATA_SA` as a repository secret.
 
 ## Linting asyncapi specs (Beta)
@@ -115,7 +116,7 @@ Linting of asyncapi specs has limited support. Linting rules are not complete, a
 
 ```yml
 jobs:
-  Openapi-lint:
+  openapi-lint:
     #[...]
     with:
       spec_type: asyncapi

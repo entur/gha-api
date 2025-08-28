@@ -42,7 +42,7 @@ Add the following step to your workflow configuration. By default, the action lo
 #ci.yml
 
 jobs:
-  Openapi-publish:
+  openapi-publish:
     name: Publish API spec
     uses: entur/gha-api/.github/workflows/publish.yml@v4
     secrets: inherit
@@ -55,7 +55,7 @@ If your specs are located in a different folder in your repository, you can spec
 
 ```yml
 jobs:
-  Openapi-publish:
+  openapi-publish:
     #[...]
     with:
       spec: custom/specs/path/*.yaml
@@ -69,7 +69,7 @@ Optionally, you can also specify a file pattern inside the artifact using `artif
 
 ```yml
 jobs:
-  Openapi-publish:
+  openapi-publish:
     #[...]
     with:
       artifact: myArtifactName
@@ -86,7 +86,7 @@ By default, your API will be publicly available, if you wish to change the visib
 
 ```yml
 jobs:
-  Openapi-publish:
+  openapi-publish:
     #[...]
     with:
       visibility: internal
