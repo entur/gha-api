@@ -36,6 +36,9 @@ jobs:
           set -o nounset  #Treats unset variables as errors          
           set -o pipefail #Makes a pipeline fail if any command in it fails (not just the last)
 
+          # Set default value for GHA_API_VISIBILITY if not set
+          : "${GHA_API_VISIBILITY:=public}"
+
           # Ensure not both inputs are empty.
           if [ -z "$GHA_API_ARTIFACT" ] && [ -z "$GHA_API_SPEC" ]; then            
             echo "::error::Exactly one of spec OR artifact is required."
@@ -97,6 +100,9 @@ jobs:
           set -o pipefail
           shopt -s globstar
 
+          # Set default value for GHA_API_VISIBILITY if not set
+          : "${GHA_API_VISIBILITY:=public}"
+
           mkdir -p /tmp/specs
 
           if [ -z "$GHA_API_ARTIFACT" ]; then            
@@ -110,5 +116,9 @@ jobs:
           set -o errexit
           set -o nounset
           set -o pipefail
+
+          # Set default value for GHA_API_VISIBILITY if not set
+          : "${GHA_API_VISIBILITY:=public}"
+
           echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GHA_API_VISIBILITY}/${GITHUB_REPOSITORY#*/}"
           gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-developer-portal-prd-001/${GHA_API_VISIBILITY}/${GITHUB_REPOSITORY#*/}"
