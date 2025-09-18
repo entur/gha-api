@@ -4,19 +4,21 @@
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-|                                        INPUT                                        |  TYPE  | REQUIRED |     DEFAULT      |                                             DESCRIPTION                                             |
-|-------------------------------------------------------------------------------------|--------|----------|------------------|-----------------------------------------------------------------------------------------------------|
-|              <a name="input_artifact"></a>[artifact](#input_artifact)               | string |  false   |                  |                  OpenAPI specs to publish, as <br>a GitHub artifact glob pattern.                   |
-| <a name="input_artifact_contents"></a>[artifact_contents](#input_artifact_contents) | string |  false   |      `"*"`       | Glob pattern inside artifacts to <br>include in publishing, only used <br>if artifact is provided.  |
-|                    <a name="input_spec"></a>[spec](#input_spec)                     | string |  false   | `"specs/*.json"` |                          OpenAPI specs to publish, as <br>a glob pattern.                           |
-|           <a name="input_visibility"></a>[visibility](#input_visibility)            | string |  false   |    `"public"`    |        Visibility of the published specs. <br>Can be 'public', 'partner' or <br>'internal'.         |
+| INPUT                                                                               | TYPE   | REQUIRED | DEFAULT          | DESCRIPTION                                                                                        |
+| ----------------------------------------------------------------------------------- | ------ | -------- | ---------------- | -------------------------------------------------------------------------------------------------- |
+| <a name="input_artifact"></a>[artifact](#input_artifact)                            | string | false    |                  | OpenAPI specs to publish, as <br>a GitHub artifact glob pattern.                                   |
+| <a name="input_artifact_contents"></a>[artifact_contents](#input_artifact_contents) | string | false    | `"*"`            | Glob pattern inside artifacts to <br>include in publishing, only used <br>if artifact is provided. |
+| <a name="input_spec"></a>[spec](#input_spec)                                        | string | false    | `"specs/*.json"` | OpenAPI specs to publish, as <br>a glob pattern.                                                   |
+| <a name="input_visibility"></a>[visibility](#input_visibility)                      | string | false    | `"public"`       | Visibility of the published specs. <br>Can be 'public', 'partner' or <br>'internal'.               |
 
 <!-- AUTO-DOC-INPUT:END -->
 
 ## Outputs
 
 <!-- AUTO-DOC-OUTPUT:START - Do not remove or modify this section -->
+
 No outputs.
+
 <!-- AUTO-DOC-OUTPUT:END -->
 
 # Usage
@@ -37,12 +39,14 @@ Place your OpenAPI specs in the `specs` folder in project root.
 ```
 
 Add the following step to your workflow configuration. By default, the action looks for specs to lint in the `specs` folder.
+Call this reusable workflow at the same place where your application is deployed to production.
 
 ```yml
-#ci.yml
+#cd.yml
 
 jobs:
   openapi-publish:
+    needs: deploy-to-prod #example of the step deploying to production
     name: Publish API spec
     uses: entur/gha-api/.github/workflows/publish.yml@v4
     secrets: inherit
