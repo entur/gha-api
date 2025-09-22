@@ -113,3 +113,16 @@ jobs:
           set -o pipefail
           echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GHA_API_VISIBILITY}/${GITHUB_REPOSITORY#*/}"
           gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-developer-portal-prd-001/${GHA_API_VISIBILITY}/${GITHUB_REPOSITORY#*/}"
+
+  post-message-to-slack:
+    needs: [upload-to-bucket]
+    uses: entur/gha-slack/.github/workflows/post.yml@v2
+    with:
+      channel_id: "C08E2FV9Q3W" # team-api-build
+      message: |-
+        *${{ github.repository }}* • *${{ github.workflow }}*
+        Result: ${{ needs.upload-to-bucket.result }}
+        Triggered by: ${{ github.event_name }}
+        Actor: ${{ github.actor }}
+        Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    secrets: inherit
