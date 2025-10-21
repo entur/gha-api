@@ -37,12 +37,14 @@ Place your OpenAPI specs in the `specs` folder in project root.
 ```
 
 Add the following step to your workflow configuration. By default, the action looks for specs to lint in the `specs` folder.
+Call this reusable workflow at the same place where your application is deployed to production.
 
 ```yml
-#ci.yml
+#cd.yml
 
 jobs:
   openapi-publish:
+    needs: deploy-to-prod #example of the step deploying to production
     name: Publish API spec
     uses: entur/gha-api/.github/workflows/publish.yml@v4
     secrets: inherit
