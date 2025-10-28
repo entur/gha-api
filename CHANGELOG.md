@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [4.3.0](https://github.com/entur/gha-api/compare/v4.2.1...v4.3.0) (2025-10-28)
+
+
+### Features
+
+* remove conditions when publishing ([#81](https://github.com/entur/gha-api/issues/81)) ([92a3b47](https://github.com/entur/gha-api/commit/92a3b47d1fa548f1e19eb520dbafeffb0eea5809))
+
 ## [4.2.1](https://github.com/entur/gha-api/compare/v4.2.0...v4.2.1) (2025-08-28)
 
 
