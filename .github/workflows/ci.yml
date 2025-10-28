@@ -50,7 +50,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Save spec to the artifact storage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: openapi-good.yaml
           path: fixture/openapi-good.yaml
@@ -69,7 +69,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Save all specs to the artifact storage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: specs
           path: fixture/*.yaml
