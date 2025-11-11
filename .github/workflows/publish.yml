@@ -97,7 +97,6 @@ jobs:
   upload-to-bucket:
     name: Upload to bucket
     needs: [validate-input, lint]
-    if: false
     permissions:
       contents: read
       id-token: write
