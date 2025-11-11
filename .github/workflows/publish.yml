@@ -53,9 +53,51 @@ jobs:
             exit 1
           fi
 
+  lint:
+    name: OpenAPI Lint
+    runs-on: ubuntu-latest
+    needs: validate-input
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository (if spec provided)
+        if: ${{ inputs.artifact == '' }}
+        uses: actions/checkout@v5
+      - name: Download artifact (if artifact provided)
+        if: ${{ inputs.artifact != '' }}
+        uses: actions/download-artifact@v6
+        with:
+          pattern: ${{ inputs.artifact }}
+          path: /tmp/artifacts
+          merge-multiple: true #Downloads all artifacts into /tmp/artifacts, without subdirectories
+      - name: Install Spectral
+        run: npm install -g @stoplight/spectral-cli
+      - name: Validate Spec
+        shell: bash
+        env:
+          GHA_API_ARTIFACT:       ${{ inputs.artifact }}
+          GHA_API_SPEC:           ${{ inputs.spec }}
+          GHA_API_CONTENTS:       ${{ inputs.artifact_contents }}
+        run: |
+          set -o errexit
+          set -o nounset
+          set -o pipefail
+          
+          shopt -s globstar
+
+          if [ -n "$GHA_API_ARTIFACT" ]; then
+            spec_glob="/tmp/artifacts/$GHA_API_CONTENTS"
+          else
+            spec_glob="$GHA_API_SPEC"
+          fi                         
+
+          #Capture return code in $rc, and do not fail workflow.
+          spectral lint "$spec_glob" --ruleset ".spectral-developer-portal.yml"           
+
   upload-to-bucket:
     name: Upload to bucket
-    needs: validate-input
+    needs: [validate-input, lint]
+    if: false
     permissions:
       contents: read
       id-token: write
