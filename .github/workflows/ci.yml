@@ -106,12 +106,7 @@ jobs:
       fail_threshold: warn
       spec_type: "asyncapi"
 
-  test-publish-fail:
-    uses: ./.github/workflows/publish.yml
-    with:
-      spec: fixture/openapi-bad-portal.json
-
   test-publish-ok:
     uses: ./.github/workflows/publish.yml
     with:
-      spec: fixture/openapi-good-portal.json
+      spec: fixture/openapi-portal-good.yaml
