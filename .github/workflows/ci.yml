@@ -110,3 +110,14 @@ jobs:
     uses: ./.github/workflows/publish.yml
     with:
       spec: fixture/openapi-portal-good.yaml
+      upload_to_bucket: false
+
+  test-portal-publish-ok-upload:
+    uses: ./.github/workflows/publish.yml
+    with:
+      spec: fixture/openapi-portal-good-2.yaml
+
+  test-portal-publish-fail:
+    uses: ./.github/workflows/publish.yml
+    with:
+      spec: fixture/openapi-portal-bad.yaml

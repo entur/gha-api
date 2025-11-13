@@ -18,6 +18,10 @@ on:
         description: "Visibility of the published specs. Can be 'public', 'partner' or 'internal'."
         type: string
         default: "public"
+      upload_to_bucket:
+        description: "If true, will upload the spec(s) to a GCS bucket for deploy to Developer Portal."
+        type: boolean
+        default: true
 
 jobs:
   validate-input:
@@ -53,7 +57,7 @@ jobs:
             exit 1
           fi
 
-  lint:
+  validate-spec:
     name: OpenAPI Lint
     runs-on: ubuntu-latest
     needs: validate-input
@@ -95,8 +99,9 @@ jobs:
           spectral lint "$spec_glob" --ruleset ".spectral-developer-portal.yml"           
 
   upload-to-bucket:
+    if: inputs.upload_to_bucket == true
     name: Upload to bucket
-    needs: lint
+    needs: validate-spec
     permissions:
       contents: read
       id-token: write
