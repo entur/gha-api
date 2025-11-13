@@ -99,3 +99,24 @@ jobs:
 
 This reusable workflow will not work out of the box for public repositories, due to the secret `ENTUR_API_DATA_SA` not being available.
 For these repositories, you must ask team plattform to manually add `ENTUR_API_DATA_SA` as a repository secret.
+
+
+## Uploading spec to a GCS bucket
+
+By default, the linting result is uploaded to a GCS bucket for deploy to Developer Portal.
+To disable this behavior, set the `upload_to_bucket` input to `false`. 
+
+This is useful, since the spec is validated (using a minimal set of linting rules) before deploy to Developer Portal.
+Setting flag to false, you can validate your spec in pull requests, so that you know that publish will succeed when merging the PR. 
+
+```yml
+#ci.yml
+
+jobs:
+  openapi-publish:    
+    name: Validate Spec to Publish
+    uses: entur/gha-api/.github/workflows/publish.yml@v4
+    secrets: inherit
+    with:
+      upload_to_bucket: false
+```
