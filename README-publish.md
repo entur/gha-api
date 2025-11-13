@@ -101,7 +101,7 @@ This reusable workflow will not work out of the box for public repositories, due
 For these repositories, you must ask team plattform to manually add `ENTUR_API_DATA_SA` as a repository secret.
 
 
-## Uploading spec to a GCS bucket
+## Uploading spec to GCS bucket
 
 By default, the linting result is uploaded to a GCS bucket for deploy to Developer Portal.
 To disable this behavior, set the `upload_to_bucket` input to `false`. 
