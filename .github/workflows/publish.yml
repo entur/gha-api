@@ -58,7 +58,7 @@ jobs:
           fi
 
   validate-spec:
-    name: OpenAPI Lint
+    name: Validate Spec
     runs-on: ubuntu-latest
     needs: validate-input
     permissions:
