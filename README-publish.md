@@ -4,13 +4,12 @@
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-|                                        INPUT                                        |  TYPE   | REQUIRED |     DEFAULT      |                                             DESCRIPTION                                             |
-|-------------------------------------------------------------------------------------|---------|----------|------------------|-----------------------------------------------------------------------------------------------------|
-|              <a name="input_artifact"></a>[artifact](#input_artifact)               | string  |  false   |                  |                  OpenAPI specs to publish, as <br>a GitHub artifact glob pattern.                   |
-| <a name="input_artifact_contents"></a>[artifact_contents](#input_artifact_contents) | string  |  false   |      `"*"`       | Glob pattern inside artifacts to <br>include in publishing, only used <br>if artifact is provided.  |
-|                    <a name="input_spec"></a>[spec](#input_spec)                     | string  |  false   | `"specs/*.json"` |                          OpenAPI specs to publish, as <br>a glob pattern.                           |
-|  <a name="input_upload_to_bucket"></a>[upload_to_bucket](#input_upload_to_bucket)   | boolean |  false   |      `true`      |      If true, will upload the <br>spec(s) to a GCS bucket <br>for deploy to Developer Portal.       |
-|           <a name="input_visibility"></a>[visibility](#input_visibility)            | string  |  false   |    `"public"`    |        Visibility of the published specs. <br>Can be 'public', 'partner' or <br>'internal'.         |
+|                                        INPUT                                        |  TYPE  | REQUIRED |     DEFAULT      |                                             DESCRIPTION                                             |
+|-------------------------------------------------------------------------------------|--------|----------|------------------|-----------------------------------------------------------------------------------------------------|
+|              <a name="input_artifact"></a>[artifact](#input_artifact)               | string |  false   |                  |                  OpenAPI specs to publish, as <br>a GitHub artifact glob pattern.                   |
+| <a name="input_artifact_contents"></a>[artifact_contents](#input_artifact_contents) | string |  false   |      `"*"`       | Glob pattern inside artifacts to <br>include in publishing, only used <br>if artifact is provided.  |
+|                    <a name="input_spec"></a>[spec](#input_spec)                     | string |  false   | `"specs/*.json"` |                          OpenAPI specs to publish, as <br>a glob pattern.                           |
+|           <a name="input_visibility"></a>[visibility](#input_visibility)            | string |  false   |    `"public"`    |        Visibility of the published specs. <br>Can be 'public', 'partner' or <br>'internal'.         |
 
 <!-- AUTO-DOC-INPUT:END -->
 
