@@ -90,7 +90,7 @@ jobs:
             spec_glob="$GHA_API_SPEC"
           fi                         
           
-          if ! spectral lint "$spec_glob" --ruleset ".spectral-developer-portal.yml"  then
+          if ! spectral lint "$spec_glob" --ruleset ".spectral-developer-portal.yml"; then
             echo "::error::Spec validation failed. Failing workflow."
             exit 1
           fi  
