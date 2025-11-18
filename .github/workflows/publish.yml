@@ -70,6 +70,15 @@ jobs:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
           merge-multiple: true
+      - name: Checkout linting rulesets
+        uses: actions/checkout@v5
+        with:
+          repository: entur/api-guidelines
+          ref: v1.1.1
+          path: rulesets
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .spectral-required.yml
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
       - name: Validate Spec
@@ -90,7 +99,7 @@ jobs:
             spec_glob="$GHA_API_SPEC"
           fi                         
           
-          if ! spectral lint "$spec_glob" --ruleset ".spectral-developer-portal.yml"; then
+          if ! spectral lint "$spec_glob" --ruleset "rulesets/.spectral-required.yml"; then
             echo "::error::Spec validation failed. Failing workflow."
             exit 1
           fi  
