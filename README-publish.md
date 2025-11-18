@@ -99,22 +99,3 @@ jobs:
 
 This reusable workflow will not work out of the box for public repositories, due to the secret `ENTUR_API_DATA_SA` not being available.
 For these repositories, you must ask team plattform to manually add `ENTUR_API_DATA_SA` as a repository secret.
-
-
-## Validate Only
-
-The spec is always validated (using a minimal set of linting rules) before deploy to Developer Portal.
-By setting flag `validate_only` to true, no publish is done to developer portal. Instead, the spec is only validated, so that you know that publish will succeed.
-This should be used in pull requests, so that publish does not fail when merging PR.  
-
-```yml
-#ci.yml
-
-jobs:
-  openapi-publish:    
-    name: Validate Spec to Publish
-    uses: entur/gha-api/.github/workflows/publish.yml@v4
-    secrets: inherit
-    with:
-      validate_only: true
-```

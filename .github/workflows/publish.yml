@@ -18,10 +18,6 @@ on:
         description: "Visibility of the published specs. Can be 'public', 'partner' or 'internal'."
         type: string
         default: "public"
-      validate_only:
-        description: "If true, will not upload the spec(s) to a GCS bucket for deploy to Developer Portal, but only validate that the upload is allowed."
-        type: boolean
-        default: false
 
 jobs:
   validate-input:
@@ -73,7 +69,7 @@ jobs:
         with:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
-          merge-multiple: true #Downloads all artifacts into /tmp/artifacts, without subdirectories
+          merge-multiple: true
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
       - name: Validate Spec
@@ -85,8 +81,7 @@ jobs:
         run: |
           set -o errexit
           set -o nounset
-          set -o pipefail
-          
+          set -o pipefail          
           shopt -s globstar
 
           if [ -n "$GHA_API_ARTIFACT" ]; then
@@ -94,12 +89,13 @@ jobs:
           else
             spec_glob="$GHA_API_SPEC"
           fi                         
-
-          #Capture return code in $rc, and do not fail workflow.
-          spectral lint "$spec_glob" --ruleset ".spectral-developer-portal.yml"           
+          
+          if ! spectral lint "$spec_glob" --ruleset ".spectral-developer-portal.yml"  then
+            echo "::error::Spec validation failed. Failing workflow."
+            exit 1
+          fi  
 
   upload-to-bucket:
-    if: inputs.validate_only == false
     name: Upload to bucket
     needs: validate-spec
     permissions:
