@@ -1,6 +1,23 @@
 # Changelog
 
 
+## [5.0.0](https://github.com/entur/gha-api/compare/v4.2.1...v5.0.0) (2025-11-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* API-568: Lint spec with minimal ruleset on publish to portal.
+
+### Features
+
+* API-568: Lint spec with minimal ruleset on publish to portal. ([84a48bc](https://github.com/entur/gha-api/commit/84a48bcc0350c9b62ac98decb0116017f7160537))
+* remove conditions when publishing ([#81](https://github.com/entur/gha-api/issues/81)) ([92a3b47](https://github.com/entur/gha-api/commit/92a3b47d1fa548f1e19eb520dbafeffb0eea5809))
+
+
+### Bug Fixes
+
+* API-568: Lint spec with minimal ruleset on publish to portal.  ([fc23334](https://github.com/entur/gha-api/commit/fc23334f47d928d92b88db65e109d5bc31787436))
+
 ## [4.2.1](https://github.com/entur/gha-api/compare/v4.2.0...v4.2.1) (2025-08-28)
 
 
