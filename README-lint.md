@@ -91,7 +91,7 @@ jobs:
       fail_threshold: warn
 ```
 
-## Uploading lint results to a GCS bucket
+## Uploading lint results to GCS bucket
 
 By default, the linting result is uploaded to a GCS bucket for statistics purposes.
 To disable this behavior, set the `upload_to_bucket` input to `false`.

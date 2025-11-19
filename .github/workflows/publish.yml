@@ -53,9 +53,60 @@ jobs:
             exit 1
           fi
 
+  validate-spec:
+    name: Validate Spec
+    runs-on: ubuntu-latest
+    needs: validate-input
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository (if spec provided)
+        if: ${{ inputs.artifact == '' }}
+        uses: actions/checkout@v5
+      - name: Download artifact (if artifact provided)
+        if: ${{ inputs.artifact != '' }}
+        uses: actions/download-artifact@v6
+        with:
+          pattern: ${{ inputs.artifact }}
+          path: /tmp/artifacts
+          merge-multiple: true
+      - name: Checkout linting rulesets
+        uses: actions/checkout@v5
+        with:
+          repository: entur/api-guidelines
+          ref: v2.0.0
+          path: rulesets
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .spectral-required.yml
+      - name: Install Spectral
+        run: npm install -g @stoplight/spectral-cli
+      - name: Validate Spec
+        shell: bash
+        env:
+          GHA_API_ARTIFACT:       ${{ inputs.artifact }}
+          GHA_API_SPEC:           ${{ inputs.spec }}
+          GHA_API_CONTENTS:       ${{ inputs.artifact_contents }}
+        run: |
+          set -o errexit
+          set -o nounset
+          set -o pipefail          
+          shopt -s globstar
+
+          if [ -n "$GHA_API_ARTIFACT" ]; then
+            spec_glob="/tmp/artifacts/$GHA_API_CONTENTS"
+          else
+            spec_glob="$GHA_API_SPEC"
+          fi                         
+          
+          if ! spectral lint "$spec_glob" --ruleset "rulesets/.spectral-required.yml"; then
+            echo "::error::Spec validation failed. Failing workflow."
+            exit 1
+          fi  
+
   upload-to-bucket:
     name: Upload to bucket
-    needs: validate-input
+    needs: validate-spec
     permissions:
       contents: read
       id-token: write
