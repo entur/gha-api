@@ -96,7 +96,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: entur/api-guidelines
-          ref: v1.1.1
+          ref: v2.0.0
           path: rulesets
           sparse-checkout-cone-mode: false
           sparse-checkout: |
