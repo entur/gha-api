@@ -101,6 +101,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             .spectral*.yml
+            ./functions/*.js
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
