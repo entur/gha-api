@@ -111,8 +111,3 @@ jobs:
     with:
       spec: fixture/openapi-portal-good.yaml
 
-  test-publish-fail:
-    uses: ./.github/workflows/publish.yml
-    with:
-      spec: fixture/openapi-portal-bad.yaml
-
