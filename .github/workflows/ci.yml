@@ -27,7 +27,7 @@ jobs:
   test-lint-file-globstar-ok:
     uses: ./.github/workflows/lint.yml
     with:
-      spec: fixture/**/openapi-good-*.yaml
+      spec: fixture/**/openapi-good-*.json
       upload_to_bucket: false
       fail_threshold: warn
 
@@ -41,7 +41,7 @@ jobs:
   test-lint-file-glob-all-fail-threshold-never-ok:
     uses: ./.github/workflows/lint.yml
     with:
-      spec: fixture/*.yaml
+      spec: fixture/*
       upload_to_bucket: false
       fail_threshold: never
 
@@ -72,7 +72,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: specs
-          path: fixture/*.yaml
+          path: fixture/*
           retention-days: 1
   # Lints the artifact uploaded in upload-artifact
   test-lint-artifact-with-artifact_contents_glob-ok:
