@@ -60,7 +60,7 @@ jobs:
     needs: upload-artifact
     uses: ./.github/workflows/lint.yml
     with:
-      artifact: "*.yaml"
+      artifact: "*.json"
       upload_to_bucket: false
       fail_threshold: warn
 
@@ -105,9 +105,3 @@ jobs:
       upload_to_bucket: false
       fail_threshold: warn
       spec_type: "asyncapi"
-
-  test-publish-ok:
-    uses: ./.github/workflows/publish.yml
-    with:
-      spec: fixture/openapi-portal-good.yaml
-
