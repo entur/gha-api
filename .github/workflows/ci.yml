@@ -13,14 +13,14 @@ jobs:
   test-lint-file-glob-fail-threshold-warn-ok:
     uses: ./.github/workflows/lint.yml
     with:
-      spec: fixture/openapi-good.yaml
+      spec: fixture/openapi-good.json
       upload_to_bucket: false
       fail_threshold: warn
 
   test-lint-file-glob-fail-threshold-error-ok:
     uses: ./.github/workflows/lint.yml
     with:
-      spec: fixture/openapi-good.yaml
+      spec: fixture/openapi-good.json
       upload_to_bucket: false
       fail_threshold: error
 
@@ -52,8 +52,8 @@ jobs:
       - name: Save spec to the artifact storage
         uses: actions/upload-artifact@v5
         with:
-          name: openapi-good.yaml
-          path: fixture/openapi-good.yaml
+          name: openapi-good.json
+          path: fixture/openapi-good.json
           retention-days: 1
   # Lints the artifact uploaded in upload-artifact
   test-lint-artifact-ok:
@@ -80,7 +80,7 @@ jobs:
     uses: ./.github/workflows/lint.yml
     with:
       artifact: "specs"
-      artifact_contents: "openapi-good.yaml"
+      artifact_contents: "openapi-good.json"
       upload_to_bucket: false
       fail_threshold: warn
 
