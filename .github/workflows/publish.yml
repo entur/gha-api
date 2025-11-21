@@ -122,6 +122,20 @@ jobs:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
           merge-multiple: true
+      - name: Check ENTUR_API_DATA_SA secret exists
+        env:
+          ENTUR_API_DATA_SA: ${{ secrets.ENTUR_API_DATA_SA }}
+          REPO_VISIBILITY: ${{ github.event.repository.visibility }}
+        run: |
+          if [ -z "$ENTUR_API_DATA_SA" ]; then
+            if [ "$REPO_VISIBILITY" = "public" ]; then
+              echo "::error::Upload to bucket will not work out of the box for public repositories, due to the \
+          repository secret ENTUR_API_DATA_SA not being available. Ask Team Plattform to add it."
+            else
+              echo "::error::The repository secret ENTUR_API_DATA_SA is not available. Please ensure it is configured."
+            fi
+            exit 1
+          fi
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v3
         with:
