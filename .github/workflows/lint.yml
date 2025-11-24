@@ -84,7 +84,7 @@ jobs:
     steps:
       - name: Checkout repository (if spec provided)
         if: ${{ inputs.artifact == '' }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Download artifact (if artifact provided)
         if: ${{ inputs.artifact != '' }}
         uses: actions/download-artifact@v6
@@ -93,7 +93,7 @@ jobs:
           path: /tmp/artifacts
           merge-multiple: true #Downloads all artifacts into /tmp/artifacts, without subdirectories
       - name: Checkout linting rulesets
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: entur/api-guidelines
           ref: v2.0.0
@@ -216,7 +216,7 @@ jobs:
     steps:
       - name: Checkout repository (if spec provided)
         if: ${{ inputs.artifact == '' }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Download artifact (if artifact provided)
         if: ${{ inputs.artifact != '' }}
         uses: actions/download-artifact@v6
