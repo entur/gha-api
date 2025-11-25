@@ -48,7 +48,7 @@ jobs:
   upload-artifact:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Save spec to the artifact storage
         uses: actions/upload-artifact@v5
         with:
@@ -67,7 +67,7 @@ jobs:
   upload-artifact-all:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Save all specs to the artifact storage
         uses: actions/upload-artifact@v5
         with:
