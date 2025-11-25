@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [5.1.0](https://github.com/entur/gha-api/compare/v5.0.0...v5.1.0) (2025-11-25)
+
+
+### Features
+
+* Check that ENTUR_API_DATA_SA exists ([#88](https://github.com/entur/gha-api/issues/88)) ([0573930](https://github.com/entur/gha-api/commit/057393054b706c8929d50806ac84484942dc73eb)), closes [#87](https://github.com/entur/gha-api/issues/87)
+
 ## [5.0.0](https://github.com/entur/gha-api/compare/v4.2.1...v5.0.0) (2025-11-19)
 
 
