@@ -35,3 +35,5 @@ jobs:
 ```
 
 [read more](https://github.com/entur/gha-api/blob/main/README-publish.md)
+
+Check your API at https://beta.developer.entur.no/apis/public
