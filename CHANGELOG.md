@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [5.2.0](https://github.com/entur/gha-api/compare/v5.1.0...v5.2.0) (2026-01-12)
+
+
+### Features
+
+* Pin google-github-action versions to sha ([#94](https://github.com/entur/gha-api/issues/94)) ([895c2b6](https://github.com/entur/gha-api/commit/895c2b6b92a910c918c21f21f205edc7635e220e))
+
 ## [5.1.0](https://github.com/entur/gha-api/compare/v5.0.0...v5.1.0) (2025-11-25)
 
 
