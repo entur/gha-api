@@ -9,6 +9,9 @@
       "name": "API Support",
       "url": "https://entur.no",
       "email": "support@entur.no"
+    },
+    "x-entur-metadata": {
+      "id": "example"
     }
   },
 
