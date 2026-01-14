@@ -108,16 +108,3 @@ jobs:
 
 Upload to bucket will not work out of the box for public repositories, due to the secret `ENTUR_API_DATA_SA` not being available.
 For these repositories, you must ask team plattform to manually add `ENTUR_API_DATA_SA` as a repository secret.
-
-## Linting asyncapi specs (Beta)
-
-By default, linting assumes an openapi spec. You can also lint asyncapi specs by setting the `spec_type` input to `asyncapi`.
-Linting of asyncapi specs has limited support. Linting rules are not complete, and lint result is not uploaded to GCS bucket.
-
-```yml
-jobs:
-  openapi-lint:
-    #[...]
-    with:
-      spec_type: asyncapi
-```
