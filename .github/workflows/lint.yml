@@ -22,10 +22,6 @@ on:
         description: "The threshold to fail the build. Accepted values: warn, error, never"
         type: string
         default: "never"
-      spec_type:
-        description: "The type of spec. Accepted values: openapi, asyncapi"
-        type: string
-        default: "openapi"
 
 jobs:
   validate-input:
@@ -38,7 +34,6 @@ jobs:
           GHA_API_LINT_SPEC: ${{ inputs.spec }}
           GHA_API_LINT_ARTIFACT: ${{ inputs.artifact }}
           GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
-          GHA_API_LINT_SPEC_TYPE: ${{ inputs.spec_type }}
         run: |
           set -o errexit  #Exits immediately if any command fails (returns non-zero)
           set -o nounset  #Treats unset variables as errors          
@@ -65,16 +60,7 @@ jobs:
               exit 1
               ;;
           esac
-          
-          # Validate spec_type
-          case "$GHA_API_LINT_SPEC_TYPE" in
-            openapi|asyncapi) 
-              ;;  # OK
-            *) 
-              echo "::error::spec_type must be one of: openapi, asyncapi"
-              exit 1
-              ;;
-          esac
+
   lint:
     name: OpenAPI Lint
     runs-on: ubuntu-latest
@@ -96,7 +82,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: entur/api-guidelines
-          ref: v2.0.0
+          ref: v2.0.2
           path: rulesets
           sparse-checkout-cone-mode: false
           sparse-checkout: |
@@ -111,7 +97,6 @@ jobs:
           GHA_API_LINT_SPEC:           ${{ inputs.spec }}
           GHA_API_LINT_CONTENTS:       ${{ inputs.artifact_contents }}
           GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
-          GHA_API_LINT_SPEC_TYPE:      ${{ inputs.spec_type }}
         run: |
           set -o errexit
           set -o nounset
@@ -131,17 +116,11 @@ jobs:
             exit 1
           fi            
           
-          if [[ "$GHA_API_LINT_SPEC_TYPE" == "asyncapi" ]]; then
-            ruleset="rulesets/.spectral-asyncapi.yml"
-          else
-            ruleset="rulesets/.spectral.yml"
-          fi          
-
           tmp=$(mktemp)
           
           #Instead of using -f markdown, we use json. This is because the markdown format results in warnings being omitted.
           #Capture return code in $rc, and do not fail workflow.
-          spectral lint "$spec_glob" --ruleset "$ruleset" -f json -o "$tmp" && rc=$? || rc=$?
+          spectral lint "$spec_glob" --ruleset "rulesets/.spectral.yml" -f json -o "$tmp" && rc=$? || rc=$?
           
           #Return code 2 means that spectral command failed to run (not linting errors), so fail workflow.
           if [ "$rc" -eq 2 ]; then
@@ -199,8 +178,7 @@ jobs:
   upload-to-bucket:
     name: Upload to bucket
     if: |
-      inputs.upload_to_bucket == true 
-      && inputs.spec_type != 'asyncapi'
+      inputs.upload_to_bucket == true
       && (
         (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) ||
         (github.event_name == 'pull_request' && 
