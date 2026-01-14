@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [5.2.1](https://github.com/entur/gha-api/compare/v5.2.0...v5.2.1) (2026-01-14)
+
+
+### Bug Fixes
+
+* Removed support for asyncapi linting. ([#96](https://github.com/entur/gha-api/issues/96)) ([992bd9a](https://github.com/entur/gha-api/commit/992bd9a17808ca941ed3523c9de413f2f44f74c9))
+
 ## [5.2.0](https://github.com/entur/gha-api/compare/v5.1.0...v5.2.0) (2026-01-12)
 
 
