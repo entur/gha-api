@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [5.3.0](https://github.com/entur/gha-api/compare/v5.2.1...v5.3.0) (2026-02-11)
+
+
+### Features
+
+* Update api-guidelines version to 2.1.0 ([#98](https://github.com/entur/gha-api/issues/98)) ([dce38be](https://github.com/entur/gha-api/commit/dce38be0fb7113022c64f4425671a6ff0e2a0a58))
+
 ## [5.2.1](https://github.com/entur/gha-api/compare/v5.2.0...v5.2.1) (2026-01-14)
 
 
