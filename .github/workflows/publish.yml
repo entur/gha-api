@@ -104,8 +104,8 @@ jobs:
             exit 1
           fi  
 
-  upload-to-bucket:
-    name: Upload to bucket
+  call-publish-endpoint:
+    name: Call publish endpoint
     needs: validate-spec
     permissions:
       contents: read
@@ -137,7 +137,6 @@ jobs:
           create_credentials_file: false
 
       - name: auth test Cloud Run endpoint
-        run: |          
-          echo "curl --fail-with-body -sS -H \"Authorization: Bearer \$TOKEN\" ${{ env.CLOUD_RUN_ENDPOINT }}"
+        run: |                    
           curl --fail-with-body -sS -H "Authorization: Bearer ${{ steps.auth.outputs.id_token }}" \
           ${{ env.CLOUD_RUN_ENDPOINT }}
