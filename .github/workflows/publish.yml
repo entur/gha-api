@@ -111,6 +111,8 @@ jobs:
       contents: read
       id-token: write
     runs-on: ubuntu-latest
+    env:
+      CLOUD_RUN_ENDPOINT: https://europe-west1-ent-apidata-dev.cloudfunctions.net/publish-spec
     steps:
       - name: Checkout repository (if spec provided)
         if: ${{ inputs.artifact == '' }}
@@ -122,53 +124,20 @@ jobs:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
           merge-multiple: true
-      - name: Check ENTUR_API_DATA_SA secret exists
-        env:
-          ENTUR_API_DATA_SA: ${{ secrets.ENTUR_API_DATA_SA }}
-          REPO_VISIBILITY: ${{ github.event.repository.visibility }}
-        run: |
-          if [ -z "$ENTUR_API_DATA_SA" ]; then
-            if [ "$REPO_VISIBILITY" = "public" ]; then
-              echo "::error::Upload to bucket will not work out of the box for public repositories, due to the \
-          repository secret ENTUR_API_DATA_SA not being available. Ask Team Plattform to add it."
-            else
-              echo "::error::The repository secret ENTUR_API_DATA_SA is not available. Please ensure it is configured."
-            fi
-            exit 1
-          fi
-      - name: Authenticate with Google Cloud
+
+      - name: Authenticate with the cloud provider
+        id: auth
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
-          credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
-      - name: Copy specs to temporary directory
-        env:
-          GHA_API_ARTIFACT: ${{ inputs.artifact }}
-          GHA_API_SPEC: ${{ inputs.spec }}
-          GHA_API_CONTENTS: ${{ inputs.artifact_contents }}
-          GHA_API_VISIBILITY: ${{ inputs.visibility }}
+          workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+          token_format: id_token
+          id_token_audience: ${{ env.CLOUD_RUN_ENDPOINT }}
+          id_token_include_email: true
+          create_credentials_file: false
 
-        run: |
-          set -o errexit
-          set -o nounset
-          set -o pipefail
-          shopt -s globstar
-
-          mkdir -p /tmp/specs
-
-          if [ -z "$GHA_API_ARTIFACT" ]; then            
-            cp $GHA_API_SPEC /tmp/specs
-          else
-            #Since gcloud storage rsync does not support GLOB, copy files matching artifact_contents to /tmp/specs for upload 
-            cp /tmp/artifacts/$GHA_API_CONTENTS /tmp/specs
-          fi
-      - name: Upload specs to GCS
-        env:
-          GHA_API_VISIBILITY: ${{ inputs.visibility }}
-        run: |
-          set -o errexit
-          set -o nounset
-          set -o pipefail
-          echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GHA_API_VISIBILITY}/${GITHUB_REPOSITORY#*/}"
-          gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-developer-portal-prd-001/${GHA_API_VISIBILITY}/${GITHUB_REPOSITORY#*/}"
+      - name: auth test Cloud Run endpoint
+        run: |          
+          echo "curl --fail-with-body -sS -H \"Authorization: Bearer \$TOKEN\" ${{ env.CLOUD_RUN_ENDPOINT }}"
+          curl --fail-with-body -sS -H "Authorization: Bearer ${{ steps.auth.outputs.id_token }}" \
+          ${{ env.CLOUD_RUN_ENDPOINT }}
