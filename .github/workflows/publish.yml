@@ -125,7 +125,7 @@ jobs:
           path: /tmp/artifacts
           merge-multiple: true
 
-      - name: Authenticate with the cloud provider
+      - name: Authenticate with Google Cloud
         id: auth
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
@@ -136,7 +136,41 @@ jobs:
           id_token_include_email: true
           create_credentials_file: false
 
-      - name: auth test Cloud Run endpoint
-        run: |                    
-          curl --fail-with-body -sS -H "Authorization: Bearer ${{ steps.auth.outputs.id_token }}" \
-          ${{ env.CLOUD_RUN_ENDPOINT }}
+      - name: Publish specs
+        env:
+          GHA_API_ARTIFACT: ${{ inputs.artifact }}
+          GHA_API_SPEC: ${{ inputs.spec }}
+          GHA_API_CONTENTS: ${{ inputs.artifact_contents }}
+        run: |
+          set -o errexit
+          set -o nounset
+          set -o pipefail
+          shopt -s globstar
+
+          # Determine spec glob pattern based on input type
+          if [ -z "$GHA_API_ARTIFACT" ]; then            
+            spec_glob="$GHA_API_SPEC"
+          else
+            spec_glob="/tmp/artifacts/$GHA_API_CONTENTS"
+          fi
+
+          # Extract repository name (without owner)
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          
+          # Create metadata JSON
+          METADATA="{\"repository\": \"$REPO_NAME\"}"
+
+          # Iterate through all matching spec files and POST them
+          for spec_file in $spec_glob; do
+            if [ -f "$spec_file" ]; then
+              echo "Publishing spec: $spec_file"              
+              
+              curl --fail-with-body -sS \
+                -H "Authorization: Bearer ${{ steps.auth.outputs.id_token }}" \
+                -F "metadata=$METADATA;type=application/json" \
+                -F "spec=@$spec_file" \
+                "${{ env.CLOUD_RUN_ENDPOINT }}/specs"
+              
+              echo "Successfully published: $spec_file"
+            fi
+          done
