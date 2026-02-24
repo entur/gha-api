@@ -116,65 +116,34 @@ jobs:
             exit 1
           fi            
           
-          tmp=$(mktemp)
-          
-          #Instead of using -f markdown, we use json. This is because the markdown format results in warnings being omitted.
+          annotations=$(mktemp)
+          markdown=$(mktemp)
           #Capture return code in $rc, and do not fail workflow.
-          spectral lint "$spec_glob" --ruleset "rulesets/.spectral.yml" -f json -o "$tmp" && rc=$? || rc=$?
+          spectral lint "$spec_glob" --ruleset "rulesets/.spectral.yml" --show-documentation-url -F hint -f github-actions -o.github-actions "$annotations" -f markdown -o.markdown="$markdown" && rc=$? || rc=$?
           
           #Return code 2 means that spectral command failed to run (not linting errors), so fail workflow.
           if [ "$rc" -eq 2 ]; then
             echo "::error::Spectral execution error (exit code $rc)."
             exit $rc
-          fi          
+          fi
+
+          if [ "$rc" -eq 1 ]; then
+            cat $annotations
+            cat $markdown >> $GITHUB_STEP_SUMMARY
+            echo
+
+
+            if [ "$GHA_API_LINT_FAIL_THRESHOLD" != "never" ]; then
+              spectral lint "$spec_glob" --ruleset "rulesets/.spectral.yml" -o "/dev/null" -f json -F "$GHA_API_LINT_FAIL_THRESHOLD" && rc=$? || rc=$?
+
+              if [ "$rc" -ne 0 ]; then
+                echo "::error::Found linting problems. Failing workflow."
+                exit $rc
+              fi
+            fi
+          fi
+
           
-          #All issues          
-          total_count=$(jq 'length // 0' "$tmp")
-          #Error issues
-          error_count=$(jq '[.[] | select(.severity == 0)] | length' "$tmp")
-          warning_count=$(jq '[.[] | select(.severity == 1)] | length' "$tmp")
-
-          #) Get workspace root so we can strip it
-          ws="${GITHUB_WORKSPACE%/}"          
-
-          if [ "$total_count" -gt 0 ]; then
-            {
-              # ─── HEADER ────────────────────────────────────────────────────────
-              echo '| Code | Path | Message | Severity | Start | End  | Source |'
-              echo '| ---- | ---- | ------- | -------- | ----- | ---- | ------ |'
-
-              # ─── ROWS ──────────────────────────────────────────────────────────
-              jq -r --arg ws "$ws/" '
-                .[] |
-                (if .severity == 0 then "Error"
-                 elif .severity == 1 then "Warn"
-                 elif .severity == 2 then "Info"
-                 elif .severity == 3 then "Hint"
-                 else (.severity|tostring) end) as $sev |
-                # collapse JSON-path array into dot-path
-                (.path | join(".")) as $jsonPath |
-                # build start/end as "line:char"
-                "\(.range.start.line):\(.range.start.character)" as $start |
-                "\(.range.end.line):\(.range.end.character)"   as $end |
-                # strip the workspace prefix from source
-                (.source | sub("^"+$ws; "")) as $src |
-                # emit the table row
-                "| \(.code) | \($jsonPath) | \(.message) | \($sev) | \($start) | \($end) | \($src) |"
-              ' "$tmp"
-              } >> "$GITHUB_STEP_SUMMARY"
-            else
-              echo "No issues found." >> "$GITHUB_STEP_SUMMARY"
-            fi
-                        
-            if [ "$error_count" -gt 0 ] && [ "$GHA_API_LINT_FAIL_THRESHOLD" != "never" ]; then
-              echo "::error::Found linting errors. Failing workflow."
-              exit 1
-            fi                       
-
-            if [ "$warning_count" -gt 0 ] && [ "$GHA_API_LINT_FAIL_THRESHOLD" = "warn" ]; then
-              echo "::error::Found linting warnings. Failing workflow."
-              exit 1
-            fi
   upload-to-bucket:
     name: Upload to bucket
     if: |
