@@ -93,8 +93,8 @@ jobs:
             exit 1
           fi  
 
-  call-publish-endpoint:
-    name: Call publish endpoint
+  upload:
+    name: Upload specs
     needs: validate-spec
     permissions:
       contents: read
