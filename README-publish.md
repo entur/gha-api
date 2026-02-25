@@ -77,24 +77,3 @@ jobs:
       artifact: myArtifactName
       artifact_contents: "*.yaml"
 ```
-
-## Specifying visibility of API
-
-By default, your API will be publicly available, if you wish to change the visibility of your API spec, set visibility to one of
-
-- public (default)
-- partner
-- internal
-
-```yml
-jobs:
-  openapi-publish:
-    #[...]
-    with:
-      visibility: internal
-```
-
-### For public repositories
-
-This reusable workflow will not work out of the box for public repositories, due to the secret `ENTUR_API_DATA_SA` not being available.
-For these repositories, you must ask team plattform to manually add `ENTUR_API_DATA_SA` as a repository secret.

@@ -14,10 +14,6 @@ on:
         description: "Glob pattern inside artifacts to include in publishing, only used if artifact is provided."
         type: string
         default: "*"
-      visibility:
-        description: "Visibility of the published specs. Can be 'public', 'partner' or 'internal'."
-        type: string
-        default: "public"
 
 jobs:
   validate-input:
@@ -29,7 +25,6 @@ jobs:
         env:
           GHA_API_SPEC: ${{ inputs.spec }}
           GHA_API_ARTIFACT: ${{ inputs.artifact }}
-          GHA_API_VISIBILITY: ${{ inputs.visibility }}
         run: |
           set -o errexit  #Exits immediately if any command fails (returns non-zero)
           set -o nounset  #Treats unset variables as errors          
@@ -44,12 +39,6 @@ jobs:
           # Ensure not both inputs are provided.
           if [ -n "$GHA_API_ARTIFACT" ] && [ -n "$GHA_API_SPEC" ] && [ "$GHA_API_SPEC" != "specs/*.json" ]; then            
             echo "::error::Both spec and artifact were provided. Please provide only one."
-            exit 1
-          fi
-
-          # Ensure visibility is valid
-          if [[ ! "$GHA_API_VISIBILITY" =~ ^(public|partner|internal)$ ]]; then
-            echo "::error::Invalid visibility '$GHA_API_VISIBILITY'. Must be one of: public, partner, internal."
             exit 1
           fi
 
@@ -163,7 +152,7 @@ jobs:
           # Iterate through all matching spec files and POST them
           for spec_file in $spec_glob; do
             if [ -f "$spec_file" ]; then
-              echo "Publishing spec: $spec_file"              
+              echo "Publishing spec: $spec_file"
               
               curl --fail-with-body -sS \
                 -H "Authorization: Bearer ${{ steps.auth.outputs.id_token }}" \
@@ -171,6 +160,6 @@ jobs:
                 -F "spec=@$spec_file" \
                 "${{ env.CLOUD_RUN_ENDPOINT }}"
               
-              echo "\nSuccessfully published: $spec_file"
+              echo "Successfully published: $spec_file"
             fi
           done
