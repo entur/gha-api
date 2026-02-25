@@ -130,6 +130,7 @@ jobs:
           GHA_API_ARTIFACT: ${{ inputs.artifact }}
           GHA_API_SPEC: ${{ inputs.spec }}
           GHA_API_CONTENTS: ${{ inputs.artifact_contents }}
+          ID_TOKEN: ${{ steps.auth.outputs.id_token }}
         run: |
           set -o errexit
           set -o nounset
@@ -155,7 +156,7 @@ jobs:
               echo "Publishing spec: $spec_file"
               
               curl --fail-with-body -sS \
-                -H "Authorization: Bearer ${{ steps.auth.outputs.id_token }}" \
+                -H "Authorization: Bearer $ID_TOKEN" \
                 -F "metadata=$METADATA;type=application/json" \
                 -F "spec=@$spec_file" \
                 "${{ env.CLOUD_RUN_ENDPOINT }}"
