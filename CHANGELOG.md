@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [5.4.0](https://github.com/entur/gha-api/compare/v5.3.0...v5.4.0) (2026-02-25)
+
+
+### Features
+
+* ETU-67864 Use api-guidelines 2.2.0 ([#101](https://github.com/entur/gha-api/issues/101)) ([3a3e50f](https://github.com/entur/gha-api/commit/3a3e50fe79b68ba827cd6c8c57f3ff5f4c9ad74f))
+* ETU-68622 Annotate spec file with lint problems, and url to guidelines ([#102](https://github.com/entur/gha-api/issues/102)) ([9931274](https://github.com/entur/gha-api/commit/99312744cb58273cce3dbbe37516557173e4d265))
+
 ## [5.3.0](https://github.com/entur/gha-api/compare/v5.2.1...v5.3.0) (2026-02-11)
 
 
