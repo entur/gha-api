@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Example Service 2",
+    "title": "Example Service",
     "version": "1.0.0",
     "description": "A long and descriptive description",
     "termsOfService": "https://developer.entur.org/terms-of-service",
