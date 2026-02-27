@@ -14,10 +14,6 @@ on:
         description: "Glob pattern inside artifacts to include in publishing, only used if artifact is provided."
         type: string
         default: "*"
-      visibility:
-        description: "Visibility of the published specs. Can be 'public', 'partner' or 'internal'."
-        type: string
-        default: "public"
 
 jobs:
   validate-input:
@@ -29,7 +25,6 @@ jobs:
         env:
           GHA_API_SPEC: ${{ inputs.spec }}
           GHA_API_ARTIFACT: ${{ inputs.artifact }}
-          GHA_API_VISIBILITY: ${{ inputs.visibility }}
         run: |
           set -o errexit  #Exits immediately if any command fails (returns non-zero)
           set -o nounset  #Treats unset variables as errors          
@@ -44,12 +39,6 @@ jobs:
           # Ensure not both inputs are provided.
           if [ -n "$GHA_API_ARTIFACT" ] && [ -n "$GHA_API_SPEC" ] && [ "$GHA_API_SPEC" != "specs/*.json" ]; then            
             echo "::error::Both spec and artifact were provided. Please provide only one."
-            exit 1
-          fi
-
-          # Ensure visibility is valid
-          if [[ ! "$GHA_API_VISIBILITY" =~ ^(public|partner|internal)$ ]]; then
-            echo "::error::Invalid visibility '$GHA_API_VISIBILITY'. Must be one of: public, partner, internal."
             exit 1
           fi
 
@@ -104,13 +93,15 @@ jobs:
             exit 1
           fi  
 
-  upload-to-bucket:
-    name: Upload to bucket
+  upload:
+    name: Upload specs
     needs: validate-spec
     permissions:
       contents: read
       id-token: write
     runs-on: ubuntu-latest
+    env:
+      CLOUD_RUN_ENDPOINT: https://europe-west1-ent-apidata-prd.cloudfunctions.net/publish-spec
     steps:
       - name: Checkout repository (if spec provided)
         if: ${{ inputs.artifact == '' }}
@@ -122,53 +113,56 @@ jobs:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
           merge-multiple: true
-      - name: Check ENTUR_API_DATA_SA secret exists
-        env:
-          ENTUR_API_DATA_SA: ${{ secrets.ENTUR_API_DATA_SA }}
-          REPO_VISIBILITY: ${{ github.event.repository.visibility }}
-        run: |
-          if [ -z "$ENTUR_API_DATA_SA" ]; then
-            if [ "$REPO_VISIBILITY" = "public" ]; then
-              echo "::error::Upload to bucket will not work out of the box for public repositories, due to the \
-          repository secret ENTUR_API_DATA_SA not being available. Ask Team Plattform to add it."
-            else
-              echo "::error::The repository secret ENTUR_API_DATA_SA is not available. Please ensure it is configured."
-            fi
-            exit 1
-          fi
+
       - name: Authenticate with Google Cloud
+        id: auth
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
-          credentials_json: "${{ secrets.ENTUR_API_DATA_SA }}"
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
-      - name: Copy specs to temporary directory
+          workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+          token_format: id_token
+          id_token_audience: ${{ env.CLOUD_RUN_ENDPOINT }}
+          id_token_include_email: true
+          create_credentials_file: false
+
+      - name: Publish specs
         env:
           GHA_API_ARTIFACT: ${{ inputs.artifact }}
           GHA_API_SPEC: ${{ inputs.spec }}
           GHA_API_CONTENTS: ${{ inputs.artifact_contents }}
-          GHA_API_VISIBILITY: ${{ inputs.visibility }}
-
+          ID_TOKEN: ${{ steps.auth.outputs.id_token }}
+          CLOUD_RUN_ENDPOINT: ${{ env.CLOUD_RUN_ENDPOINT }}
         run: |
           set -o errexit
           set -o nounset
           set -o pipefail
           shopt -s globstar
 
-          mkdir -p /tmp/specs
-
+          # Determine spec glob pattern based on input type
           if [ -z "$GHA_API_ARTIFACT" ]; then            
-            cp $GHA_API_SPEC /tmp/specs
+            spec_glob="$GHA_API_SPEC"
           else
-            #Since gcloud storage rsync does not support GLOB, copy files matching artifact_contents to /tmp/specs for upload 
-            cp /tmp/artifacts/$GHA_API_CONTENTS /tmp/specs
+            spec_glob="/tmp/artifacts/$GHA_API_CONTENTS"
           fi
-      - name: Upload specs to GCS
-        env:
-          GHA_API_VISIBILITY: ${{ inputs.visibility }}
-        run: |
-          set -o errexit
-          set -o nounset
-          set -o pipefail
-          echo "Starting to sync files in /tmp/specs/ to GCS Bucket to path /${GHA_API_VISIBILITY}/${GITHUB_REPOSITORY#*/}"
-          gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-developer-portal-prd-001/${GHA_API_VISIBILITY}/${GITHUB_REPOSITORY#*/}"
+
+          # Extract repository name (without owner)
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          
+          # Create metadata JSON
+          METADATA="{\"repository\": \"$REPO_NAME\"}"
+
+          # Iterate through all matching spec files and PUT them
+          for spec_file in $spec_glob; do
+            if [ -f "$spec_file" ]; then
+              echo "Publishing spec: $spec_file"
+              
+              curl --fail-with-body -sS \
+                -X PUT \
+                -H "Authorization: Bearer $ID_TOKEN" \
+                -F "metadata=$METADATA;type=application/json" \
+                -F "spec=@$spec_file" \
+                "$CLOUD_RUN_ENDPOINT"
+              
+              echo "Successfully published: $spec_file"
+            fi
+          done

@@ -10,7 +10,7 @@
 Reusable GitHub Actions to help Entur teams:
 
 - Lint OpenAPI specs with Spectral
-- Publish OpenAPI specs to the developer portal storage (with visibility control)
+- Publish OpenAPI specs to the developer portal storage
 
 ## Get started
 
