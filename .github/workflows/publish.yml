@@ -101,7 +101,7 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     env:
-      CLOUD_RUN_ENDPOINT: https://europe-west1-ent-apidata-prd.cloudfunctions.net/publish-spec
+      CLOUD_RUN_ENDPOINT: https://europe-west1-ent-apidata-dev.cloudfunctions.net/publish-spec
     steps:
       - name: Checkout repository (if spec provided)
         if: ${{ inputs.artifact == '' }}
