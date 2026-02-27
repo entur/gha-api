@@ -84,6 +84,11 @@ jobs:
       upload_to_bucket: false
       fail_threshold: warn
 
+  publish-api-registry:
+    uses: ./.github/workflows/publish.yml
+    with:
+      spec: fixture/openapi-good.json
+
   update-lint-doc:
     if: ${{ github.event.pull_request.head.repo.full_name == 'entur/gha-api' }}
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
