@@ -151,12 +151,13 @@ jobs:
           # Create metadata JSON
           METADATA="{\"repository\": \"$REPO_NAME\"}"
 
-          # Iterate through all matching spec files and POST them
+          # Iterate through all matching spec files and PUT them
           for spec_file in $spec_glob; do
             if [ -f "$spec_file" ]; then
               echo "Publishing spec: $spec_file"
               
               curl --fail-with-body -sS \
+                -X PUT \
                 -H "Authorization: Bearer $ID_TOKEN" \
                 -F "metadata=$METADATA;type=application/json" \
                 -F "spec=@$spec_file" \
