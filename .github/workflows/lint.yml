@@ -73,7 +73,7 @@ jobs:
         uses: actions/checkout@v6
       - name: Download artifact (if artifact provided)
         if: ${{ inputs.artifact != '' }}
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
@@ -166,7 +166,7 @@ jobs:
         uses: actions/checkout@v6
       - name: Download artifact (if artifact provided)
         if: ${{ inputs.artifact != '' }}
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
