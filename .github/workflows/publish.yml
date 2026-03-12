@@ -1,4 +1,4 @@
-name: Publish OpenAPI spec to developer portal
+name: Entur/API/Publish
 
 on:
   workflow_call:

@@ -1,4 +1,4 @@
-name: Validate OpenAPI specification
+name: Entur/API/Validate
 
 on:
   workflow_call:
@@ -13,7 +13,7 @@ on:
 
 jobs:
   validate-spec:
-    name: Validate spec
+    name: Validate OpenAPI Specification
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -21,47 +21,14 @@ jobs:
     env:
       CLOUD_RUN_ENDPOINT: https://europe-west1-ent-apidata-prd.cloudfunctions.net/publish-spec
     steps:
-      - name: Checkout repository (if spec provided)
+      - uses: actions/checkout@v6
         if: ${{ inputs.artifact == '' }}
-        uses: actions/checkout@v6
-      - name: Download artifact (if artifact provided)
+
+      - uses: actions/download-artifact@v8
         if: ${{ inputs.artifact != '' }}
-        uses: actions/download-artifact@v8
         with:
           name: ${{ inputs.artifact }}
           path: /tmp/artifact
-      - name: Checkout linting rulesets
-        uses: actions/checkout@v6
-        with:
-          repository: entur/api-guidelines
-          ref: v2.2.1
-          path: rulesets
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            .spectral-required.yml
-      - name: Install Spectral
-        run: npm install -g @stoplight/spectral-cli
-      - name: Validate spec
-        shell: bash
-        env:
-          GHA_API_ARTIFACT:       ${{ inputs.artifact }}
-          GHA_API_PATH:           ${{ inputs.path }}
-        run: |
-          set -o errexit
-          set -o nounset
-          set -o pipefail          
-          shopt -s globstar
-
-          if [ -n "$GHA_API_ARTIFACT" ]; then
-            spec_path="/tmp/artifact/$GHA_API_PATH"
-          else
-            spec_path="$GHA_API_PATH"
-          fi                         
-          
-          if ! spectral lint "$spec_path" --ruleset "rulesets/.spectral-required.yml"; then
-            echo "::error::Spec validation failed. Failing workflow."
-            exit 1
-          fi  
 
       - name: Authenticate with Google Cloud
         id: auth
@@ -74,33 +41,47 @@ jobs:
           id_token_include_email: true
           create_credentials_file: false
 
-      - name: Validate spec publication
+      - name: Checkout linting rulesets
+        uses: actions/checkout@v6
+        with:
+          repository: entur/api-guidelines
+          ref: v2.2.1
+          path: rulesets
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .spectral-required.yml
+
+      - name: Validate
+        shell: bash
         env:
           GHA_API_ARTIFACT: ${{ inputs.artifact }}
-          GHA_API_PATH: ${{ inputs.path }}
-          ID_TOKEN: ${{ steps.auth.outputs.id_token }}
-          CLOUD_RUN_ENDPOINT: ${{ env.CLOUD_RUN_ENDPOINT }}
+          GHA_API_PATH:     ${{ inputs.path }}
+          ID_TOKEN:         ${{ steps.auth.outputs.id_token }}
         run: |
           set -o errexit
           set -o nounset
-          set -o pipefail
+          set -o pipefail          
           shopt -s globstar
 
-          # Determine spec glob pattern based on input type
-          if [ -z "$GHA_API_ARTIFACT" ]; then            
-            spec_path="$GHA_API_PATH"
+          if [ -n "$GHA_API_ARTIFACT" ]; then
+            spec_path="/tmp/artifact/$GHA_API_PATH"
           else
-            spec_path="/tmp/artifacts/$GHA_API_PATH"
-          fi
+            spec_path="$GHA_API_PATH"
+          fi                         
 
+          echo "Validating spec: $spec_path"
+
+          npm install -g @stoplight/spectral-cli
+          if ! spectral lint "$spec_path" --ruleset "rulesets/.spectral-required.yml"; then
+            echo "::error::Spec validation failed. Failing workflow."
+            exit 1
+          fi
+          
           # Extract repository name (without owner)
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
           
           # Create metadata JSON
           METADATA="{\"repository\": \"$REPO_NAME\"}"
-
-          # Iterate through all matching spec files and PUT them
-          echo "Publishing spec: $spec_path"
           
           curl --fail-with-body -sS \
             -X PUT \
