@@ -82,7 +82,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: entur/api-guidelines
-          ref: v2.2.2
+          ref: v2.2.3
           path: rulesets
           sparse-checkout-cone-mode: false
           sparse-checkout: |
