@@ -1,4 +1,4 @@
-name: Lint OpenAPI specs
+name: Entur/API/Lint
 
 on:
   workflow_call:
