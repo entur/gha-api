@@ -4,11 +4,10 @@
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-|                                        INPUT                                        |  TYPE  | REQUIRED |     DEFAULT      |                                             DESCRIPTION                                             |
-|-------------------------------------------------------------------------------------|--------|----------|------------------|-----------------------------------------------------------------------------------------------------|
-|              <a name="input_artifact"></a>[artifact](#input_artifact)               | string |  false   |                  |                  OpenAPI specs to publish, as <br>a GitHub artifact glob pattern.                   |
-| <a name="input_artifact_contents"></a>[artifact_contents](#input_artifact_contents) | string |  false   |      `"*"`       | Glob pattern inside artifacts to <br>include in publishing, only used <br>if artifact is provided.  |
-|                    <a name="input_spec"></a>[spec](#input_spec)                     | string |  false   | `"specs/*.json"` |                          OpenAPI specs to publish, as <br>a glob pattern.                           |
+|                          INPUT                           |  TYPE  | REQUIRED | DEFAULT |                 DESCRIPTION                  |
+|----------------------------------------------------------|--------|----------|---------|----------------------------------------------|
+| <a name="input_artifact"></a>[artifact](#input_artifact) | string |  false   |         | Artifact where OpenAPI spec is <br>located.  |
+|       <a name="input_path"></a>[path](#input_path)       | string |   true   |         |             Path to OpenAPI spec             |
 
 <!-- AUTO-DOC-INPUT:END -->
 
