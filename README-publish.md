@@ -9,7 +9,6 @@
 |              <a name="input_artifact"></a>[artifact](#input_artifact)               | string |  false   |                  |                  OpenAPI specs to publish, as <br>a GitHub artifact glob pattern.                   |
 | <a name="input_artifact_contents"></a>[artifact_contents](#input_artifact_contents) | string |  false   |      `"*"`       | Glob pattern inside artifacts to <br>include in publishing, only used <br>if artifact is provided.  |
 |                    <a name="input_spec"></a>[spec](#input_spec)                     | string |  false   | `"specs/*.json"` |                          OpenAPI specs to publish, as <br>a glob pattern.                           |
-|           <a name="input_visibility"></a>[visibility](#input_visibility)            | string |  false   |    `"public"`    |        Visibility of the published specs. <br>Can be 'public', 'partner' or <br>'internal'.         |
 
 <!-- AUTO-DOC-INPUT:END -->
 
@@ -77,24 +76,3 @@ jobs:
       artifact: myArtifactName
       artifact_contents: "*.yaml"
 ```
-
-## Specifying visibility of API
-
-By default, your API will be publicly available, if you wish to change the visibility of your API spec, set visibility to one of
-
-- public (default)
-- partner
-- internal
-
-```yml
-jobs:
-  openapi-publish:
-    #[...]
-    with:
-      visibility: internal
-```
-
-### For public repositories
-
-This reusable workflow will not work out of the box for public repositories, due to the secret `ENTUR_API_DATA_SA` not being available.
-For these repositories, you must ask team plattform to manually add `ENTUR_API_DATA_SA` as a repository secret.
