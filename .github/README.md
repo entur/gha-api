@@ -8,6 +8,7 @@
 Github reusable workflows to help Entur teams:
 
 - [Lint OpenAPI specs](../README-lint.md)
+- [Validate OpenAPI specs](../README-validate.md)
 - [Publish OpenAPI specs to the developer portal](../README-publish.md)
 
 ## Golden Path
@@ -28,7 +29,7 @@ Let's look at an example. Our repo is called amazing-app, and it contains an Ope
         └── cd.yml
 ```
 
-Lint the spec in the CI workflow:
+Lint and validate the spec in the CI workflow:
 
 ```yaml
 # ci.yml
@@ -40,6 +41,9 @@ on:
 jobs:
   openapi-lint:
     uses: entur/gha-api/.github/workflows/lint.yml@v6
+    secrets: inherit
+  openapi-validate:
+    uses: entur/gha-api/.github/workflows/validate.yml@v6
     secrets: inherit
 ```
 
