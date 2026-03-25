@@ -38,7 +38,7 @@ jobs:
       upload_to_bucket: false
       fail_threshold: never
 
-  test-publish-file-external-refs:
+  test-validate-file-external-refs:
     uses: ./.github/workflows/publish.yml
     with:
       path: fixture/external-refs/openapi.yaml
