@@ -1,21 +1,16 @@
-name: Lint OpenAPI specs
+name: Entur/API/Lint
 
 on:
   workflow_call:
     inputs:
-      spec:
-        description: "OpenAPI specs to lint, as a glob pattern."
+      path:
+        description: "Path to OpenAPI specfication"
         type: string
-        default: "specs/*.json"
       artifact:
-        description: "OpenAPI specs to lint, as a Github artifact glob pattern."
+        description: "Artifact containing the OpenAPI specification."
         type: string
-      artifact_contents:
-        description: "Glob pattern inside artifacts to include in linting, only used if artifact is provided."
-        type: string
-        default: "*"
       upload_to_bucket:
-        description: "If true, will upload the spec(s) to a GCS bucket for analytics."
+        description: "If true, will upload the spec to a GCS bucket for analytics."
         type: boolean
         default: true
       fail_threshold:
@@ -24,35 +19,24 @@ on:
         default: "never"
 
 jobs:
-  validate-input:
-    name: Validate input
-    if: ${{ github.actor != 'dependabot[bot]' }}
+  evaluate-input:
+    name: Evaluate input
     runs-on: ubuntu-latest
+    outputs:
+      spec_path: ${{ steps.resolve-spec-path.outputs.spec_path }}
+    env:
+      GHA_API_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
+      GHA_API_ARTIFACT:       ${{ inputs.artifact }}
+      GHA_API_PATH:           ${{ inputs.path }}
     steps:
-      - name: Validate inputs
-        env:
-          GHA_API_LINT_SPEC: ${{ inputs.spec }}
-          GHA_API_LINT_ARTIFACT: ${{ inputs.artifact }}
-          GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
+      - name: Validate
         run: |
           set -o errexit  #Exits immediately if any command fails (returns non-zero)
           set -o nounset  #Treats unset variables as errors          
           set -o pipefail #Makes a pipeline fail if any command in it fails (not just the last)
-          
-          # Ensure not both inputs are empty.
-          if [ -z "$GHA_API_LINT_ARTIFACT" ] && [ -z "$GHA_API_LINT_SPEC" ]; then            
-            echo "::error::Exactly one of spec OR artifact is required."
-            exit 1
-          fi          
-
-          # Ensure not both inputs are provided.
-          if [ -n "$GHA_API_LINT_ARTIFACT" ] && [ -n "$GHA_API_LINT_SPEC" ] && [ "$GHA_API_LINT_SPEC" != "specs/*.json" ]; then            
-            echo "::error::Both spec and artifact were provided. Please provide only one."
-            exit 1
-          fi
 
           # Validate fail_threshold
-          case "$GHA_API_LINT_FAIL_THRESHOLD" in
+          case "$GHA_API_FAIL_THRESHOLD" in
             warn|error|never) 
               ;;  # OK
             *) 
@@ -60,11 +44,29 @@ jobs:
               exit 1
               ;;
           esac
-
+      - name: Resolve spec path
+        id: resolve-spec-path
+        run: |
+          # Resolve spec path based on inputs
+          if [ -n "$GHA_API_ARTIFACT" ]; then
+            if [ -n "$GHA_API_PATH" ]; then
+              spec_path="/tmp/artifacts/$GHA_API_PATH"
+            else
+              spec_path="/tmp/artifacts/openapi.yaml"
+            fi
+          else
+            if [ -n "$GHA_API_PATH" ]; then
+              spec_path="$GHA_API_PATH"
+            else
+              spec_path="specs/openapi.yaml"
+            fi
+          fi
+          
+          echo "spec_path=$spec_path" >> "$GITHUB_OUTPUT"
   lint:
     name: OpenAPI Lint
     runs-on: ubuntu-latest
-    needs: validate-input
+    needs: evaluate-input
     permissions:
       contents: read
     steps:
@@ -77,7 +79,6 @@ jobs:
         with:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
-          merge-multiple: true #Downloads all artifacts into /tmp/artifacts, without subdirectories
       - name: Checkout linting rulesets
         uses: actions/checkout@v6
         with:
@@ -88,15 +89,12 @@ jobs:
           sparse-checkout: |
             .spectral*.yml
             functions/*.js
-      - name: Install Spectral
-        run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
         shell: bash
         env:
-          GHA_API_LINT_ARTIFACT:       ${{ inputs.artifact }}
-          GHA_API_LINT_SPEC:           ${{ inputs.spec }}
-          GHA_API_LINT_CONTENTS:       ${{ inputs.artifact_contents }}
-          GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
+          SPECTRAL_VERSION:       "6.15.0"
+          GHA_API_PATH:           ${{ needs.evaluate-input.outputs.spec_path }}
+          GHA_API_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
         run: |
           set -o errexit
           set -o nounset
@@ -104,22 +102,10 @@ jobs:
         
           shopt -s globstar
 
-          if [ -n "$GHA_API_LINT_ARTIFACT" ]; then
-            spec_glob="/tmp/artifacts/$GHA_API_LINT_CONTENTS"
-          else
-            spec_glob="$GHA_API_LINT_SPEC"
-          fi          
-
-          #This is needed, because calling spectral with a glob that does not match any files will succeed, which is not what we want.
-          if ! compgen -G "$spec_glob" > /dev/null; then
-            echo "::error::No file matches '$spec_glob'"
-            exit 1
-          fi            
-          
           annotations=$(mktemp)
           markdown=$(mktemp)
           #Capture return code in $rc, and do not fail workflow.
-          spectral lint "$spec_glob" --ruleset "rulesets/.spectral.yml" --show-documentation-url -F hint -f github-actions -o.github-actions "$annotations" -f markdown -o.markdown="$markdown" && rc=$? || rc=$?
+          npx @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral.yml" --show-documentation-url -F hint -f github-actions -o.github-actions "$annotations" -f markdown -o.markdown="$markdown" && rc=$? || rc=$?
           
           #Return code 2 means that spectral command failed to run (not linting errors), so fail workflow.
           if [ "$rc" -eq 2 ]; then
@@ -132,9 +118,8 @@ jobs:
             cat $markdown >> $GITHUB_STEP_SUMMARY
             echo
 
-
-            if [ "$GHA_API_LINT_FAIL_THRESHOLD" != "never" ]; then
-              spectral lint "$spec_glob" --ruleset "rulesets/.spectral.yml" -o "/dev/null" -f json -F "$GHA_API_LINT_FAIL_THRESHOLD" && rc=$? || rc=$?
+            if [ "$GHA_API_FAIL_THRESHOLD" != "never" ]; then
+              npx @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral.yml" -o "/dev/null" -f json -F "$GHA_API_FAIL_THRESHOLD" && rc=$? || rc=$?
 
               if [ "$rc" -ne 0 ]; then
                 echo "::error::Found linting problems. Failing workflow."
@@ -155,7 +140,7 @@ jobs:
          github.event.pull_request.merged == true && 
          github.event.pull_request.base.ref == github.event.repository.default_branch)
       )
-    needs: validate-input
+    needs: evaluate-input
     permissions:
       contents: read
       id-token: write
@@ -170,7 +155,6 @@ jobs:
         with:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
-          merge-multiple: true
       - name: Check ENTUR_API_DATA_SA secret exists
         env:
           ENTUR_API_DATA_SA: ${{ secrets.ENTUR_API_DATA_SA }}
@@ -193,9 +177,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
       - name: Copy specs to temporary directory
         env:
-          GHA_API_LINT_ARTIFACT: ${{ inputs.artifact }}
-          GHA_API_LINT_SPEC:     ${{ inputs.spec }}
-          GHA_API_LINT_CONTENTS: ${{ inputs.artifact_contents }}
+          GHA_API_PATH: ${{ needs.evaluate-input.outputs.spec_path }}
         run: |
           set -o errexit
           set -o nounset
@@ -204,12 +186,7 @@ jobs:
 
           mkdir -p /tmp/specs
 
-          if [ -z "$GHA_API_LINT_ARTIFACT" ]; then            
-            cp $GHA_API_LINT_SPEC /tmp/specs
-          else
-            #Since gcloud storage rsync does not support GLOB, copy files matching artifact_contents to /tmp/specs for upload 
-            cp /tmp/artifacts/$GHA_API_LINT_CONTENTS /tmp/specs
-          fi
+          cp $GHA_API_PATH /tmp/specs
       - name: Upload specs to GCS
         run: |
           set -o errexit

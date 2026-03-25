@@ -1,51 +1,45 @@
-name: Publish OpenAPI specs to developer portal
+name: Entur/API/Publish
 
 on:
   workflow_call:
     inputs:
-      spec:
-        description: "OpenAPI specs to publish, as a glob pattern."
+      path:
+        description: "Path to OpenAPI specfication"
         type: string
-        default: "specs/*.json"
       artifact:
-        description: "OpenAPI specs to publish, as a GitHub artifact glob pattern."
+        description: "Artifact containing the OpenAPI specification."
         type: string
-      artifact_contents:
-        description: "Glob pattern inside artifacts to include in publishing, only used if artifact is provided."
-        type: string
-        default: "*"
 
 jobs:
-  validate-input:
-    name: Validate input
-    if: ${{ github.actor != 'dependabot[bot]' }}
+  evaluate-input:
+    name: Evaluate input
     runs-on: ubuntu-latest
+    outputs:
+      spec_path: ${{ steps.resolve-spec-path.outputs.spec_path }}
     steps:
-      - name: Validate inputs
-        env:
-          GHA_API_SPEC: ${{ inputs.spec }}
-          GHA_API_ARTIFACT: ${{ inputs.artifact }}
+      - name: Resolve spec path
+        id: resolve-spec-path
         run: |
-          set -o errexit  #Exits immediately if any command fails (returns non-zero)
-          set -o nounset  #Treats unset variables as errors          
-          set -o pipefail #Makes a pipeline fail if any command in it fails (not just the last)
-
-          # Ensure not both inputs are empty.
-          if [ -z "$GHA_API_ARTIFACT" ] && [ -z "$GHA_API_SPEC" ]; then            
-            echo "::error::Exactly one of spec OR artifact is required."
-            exit 1
-          fi          
-
-          # Ensure not both inputs are provided.
-          if [ -n "$GHA_API_ARTIFACT" ] && [ -n "$GHA_API_SPEC" ] && [ "$GHA_API_SPEC" != "specs/*.json" ]; then            
-            echo "::error::Both spec and artifact were provided. Please provide only one."
-            exit 1
+          # Resolve spec path based on inputs
+          if [ -n "$GHA_API_ARTIFACT" ]; then
+            if [ -n "$GHA_API_PATH" ]; then
+              spec_path="/tmp/artifacts/$GHA_API_PATH"
+            else
+              spec_path="/tmp/artifacts/openapi.yaml"
+            fi
+          else
+            if [ -n "$GHA_API_PATH" ]; then
+              spec_path="$GHA_API_PATH"
+            else
+              spec_path="specs/openapi.yaml"
+            fi
           fi
-
+          
+          echo "spec_path=$spec_path" >> "$GITHUB_OUTPUT"
   validate-spec:
-    name: Validate Spec
+    needs: evaluate-input
+    name: Validate spec
     runs-on: ubuntu-latest
-    needs: validate-input
     permissions:
       contents: read
     steps:
@@ -56,9 +50,8 @@ jobs:
         if: ${{ inputs.artifact != '' }}
         uses: actions/download-artifact@v8
         with:
-          pattern: ${{ inputs.artifact }}
-          path: /tmp/artifacts
-          merge-multiple: true
+          name: ${{ inputs.artifact }}
+          path: /tmp/artifact
       - name: Checkout linting rulesets
         uses: actions/checkout@v6
         with:
@@ -68,34 +61,25 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             .spectral-required.yml
-      - name: Install Spectral
-        run: npm install -g @stoplight/spectral-cli
-      - name: Validate Spec
+      - name: Validate spec
         shell: bash
         env:
-          GHA_API_ARTIFACT:       ${{ inputs.artifact }}
-          GHA_API_SPEC:           ${{ inputs.spec }}
-          GHA_API_CONTENTS:       ${{ inputs.artifact_contents }}
+          SPECTRAL_VERSION: "6.15.0"
+          GHA_API_PATH:     ${{ needs.evaluate-input.outputs.spec_path }}
         run: |
           set -o errexit
           set -o nounset
           set -o pipefail          
           shopt -s globstar
 
-          if [ -n "$GHA_API_ARTIFACT" ]; then
-            spec_glob="/tmp/artifacts/$GHA_API_CONTENTS"
-          else
-            spec_glob="$GHA_API_SPEC"
-          fi                         
-          
-          if ! spectral lint "$spec_glob" --ruleset "rulesets/.spectral-required.yml"; then
+          if ! npx @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
             echo "::error::Spec validation failed. Failing workflow."
             exit 1
           fi  
 
   upload:
-    name: Upload specs
-    needs: validate-spec
+    name: Upload spec
+    needs: [evaluate-input, validate-spec]
     permissions:
       contents: read
       id-token: write
@@ -110,9 +94,8 @@ jobs:
         if: ${{ inputs.artifact != '' }}
         uses: actions/download-artifact@v8
         with:
-          pattern: ${{ inputs.artifact }}
-          path: /tmp/artifacts
-          merge-multiple: true
+          name: ${{ inputs.artifact }}
+          path: /tmp/artifact
 
       - name: Authenticate with Google Cloud
         id: auth
@@ -125,25 +108,16 @@ jobs:
           id_token_include_email: true
           create_credentials_file: false
 
-      - name: Publish specs
+      - name: Upload
         env:
-          GHA_API_ARTIFACT: ${{ inputs.artifact }}
-          GHA_API_SPEC: ${{ inputs.spec }}
-          GHA_API_CONTENTS: ${{ inputs.artifact_contents }}
-          ID_TOKEN: ${{ steps.auth.outputs.id_token }}
-          CLOUD_RUN_ENDPOINT: ${{ env.CLOUD_RUN_ENDPOINT }}
+          GHA_API_PATH: ${{ needs.evaluate-input.outputs.spec_path }}
+          ID_TOKEN:     ${{ steps.auth.outputs.id_token }}
+        shell: bash
         run: |
           set -o errexit
           set -o nounset
           set -o pipefail
           shopt -s globstar
-
-          # Determine spec glob pattern based on input type
-          if [ -z "$GHA_API_ARTIFACT" ]; then            
-            spec_glob="$GHA_API_SPEC"
-          else
-            spec_glob="/tmp/artifacts/$GHA_API_CONTENTS"
-          fi
 
           # Extract repository name (without owner)
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
@@ -151,18 +125,13 @@ jobs:
           # Create metadata JSON
           METADATA="{\"repository\": \"$REPO_NAME\"}"
 
-          # Iterate through all matching spec files and PUT them
-          for spec_file in $spec_glob; do
-            if [ -f "$spec_file" ]; then
-              echo "Publishing spec: $spec_file"
+          echo "Publishing spec: $GHA_API_PATH"
               
-              curl --fail-with-body -sS \
-                -X PUT \
-                -H "Authorization: Bearer $ID_TOKEN" \
-                -F "metadata=$METADATA;type=application/json" \
-                -F "spec=@$spec_file" \
-                "$CLOUD_RUN_ENDPOINT"
+          curl --fail-with-body -sS \
+            -X PUT \
+            -H "Authorization: Bearer $ID_TOKEN" \
+            -F "metadata=$METADATA;type=application/json" \
+            -F "spec=@$GHA_API_PATH" \
+            "$CLOUD_RUN_ENDPOINT"
               
-              echo "Successfully published: $spec_file"
-            fi
-          done
+          echo "Successfully published: $GHA_API_PATH"
