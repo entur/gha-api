@@ -1,5 +1,33 @@
 # Changelog
 
+## [6.0.0](blabla)
+
+Migration guide
+
+### Breaking changes
+`gha-api/lint` and `gha-api/publish`
+  - Parameter `spec` has been renamed to `path`, and it no longer has a default value.
+  - `path` does not support glob patterns, as `spec` did. Instead, if you need to lint or publish multiple specs, call the workflow multiple times or use a matrix strategy. For example:
+    ```
+    openapi-lint:
+      uses: entur/gha-api/.github/workflows/lint.yml@v6
+      strategy:
+        fail-fast: false
+        matrix:
+            spec:
+            - specs/spec1.json
+            - specs/spec2.json
+      with:
+        path: ${{ matrix.spec }}
+      secrets: inherit
+    ```
+  - Parameter `artifact_contents` has been removed. Instead, if `artifact` is specified, `path` should refer to a file in the artifact, instead of in the repository.
+  - Parameter `artifact` can no longer be a glob pattern
+
+### Features
+#### New workflow `gha-api/validate`
+Call this workflow in your CI pipeline to validate that your specification can be published to the developer documentation. If this workflow fails, publishing the same specification using `gha-api/publish` will also fail. `gha-api/validate` uses the same input parameters as `gha-api/lint` and `gha-api/validate`.
+
 
 ## [5.4.3](https://github.com/entur/gha-api/compare/v5.4.2...v5.4.3) (2026-03-16)
 
