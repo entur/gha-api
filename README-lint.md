@@ -1,5 +1,7 @@
 # `gha-api/lint`
 
+Lint an OpenAPI specification according to [Enturs API guidelines](https://github.com/entur/api-guidelines).
+
 ## Inputs
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
@@ -22,59 +24,43 @@ No outputs.
 
 # Usage
 
-## Golden path
-
-Place your openAPI specs in the `specs` folder in project root.
-
-```sh
-λ amazing-app ❯ tree
-.
-├── README.md
-├── specs
-    └── spec.json
-└── .github
-    └── workflows
-        └── ci.yml
-```
-
-Add the following step to your workflow configuration. By default, the action looks for specs to lint in the `specs` folder.
+Add the following step to your workflow configuration.
+By default, the workflow looks for a specification at `specs/openapi.yaml`.
 
 ```yml
 #ci.yml
 
 jobs:
   openapi-lint:
-    name: API Lint
-    uses: entur/gha-api/.github/workflows/lint.yml@v3
+    uses: entur/gha-api/.github/workflows/lint.yml@v6
     secrets: inherit
 ```
 
-## Customizing the specs location in the repository
-
-If your specs are located in a different folder in your repository, you can specify the path to the specs using the `spec` input.
-[Globstar patterns](https://www.linuxjournal.com/content/globstar-new-bash-globbing-option) are supported.
+## Specifying path to spec
+If your spec is in another file, you can specify it using the `path` input.
 
 ```yml
+#ci.yml
+
 jobs:
   openapi-lint:
-    #[...]
+    uses: entur/gha-api/.github/workflows/lint.yml@v6
     with:
-      spec: custom/specs/path/*.yaml
+      path: specs/openapi.json
+    secrets: inherit
 ```
 
-## Linting specs from a GitHub artifact
+## Using a generated spec
 
-If your specs are not in your repository, but in a GitHub artifact, you can specify the artifact name using the `artifact` input.
-
-Optionally, you can also specify a file pattern inside the artifact using `artifact_contents`. [Globstar patterns](https://www.linuxjournal.com/content/globstar-new-bash-globbing-option) are supported.
+If your spec is generated as part of your workflow, you can specify the artifact name using the `artifact` input.
+When `artifact` is specified, `path` should refer to a file inside the artifact, by default `openapi.yaml`.
 
 ```yml
 jobs:
   openapi-lint:
-    #[...]
+    uses: entur/gha-api/.github/workflows/lint.yml@v6
     with:
       artifact: myArtifactName
-      artifact_contents: "*.yaml"
 ```
 
 ## Failing workflow based on linting results
@@ -92,7 +78,8 @@ jobs:
 
 ## Uploading lint results to GCS bucket
 
-By default, the linting result is uploaded to a GCS bucket for statistics purposes.
+By default, the linting result is uploaded to a GCS bucket for statistics purposes,
+if the workflow detects that it is running on the main branch.
 To disable this behavior, set the `upload_to_bucket` input to `false`.
 
 ```yml
