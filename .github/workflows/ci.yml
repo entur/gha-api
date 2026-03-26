@@ -78,16 +78,3 @@ jobs:
       upload_to_bucket: false
       fail_threshold: warn
 
-  update-lint-doc:
-    if: ${{ github.event.pull_request.head.repo.full_name == 'entur/gha-api' }}
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
-    with:
-      workflow_file: .github/workflows/lint.yml
-      readme_file: README-lint.md
-
-  update-publish-doc:
-    if: ${{ github.event.pull_request.head.repo.full_name == 'entur/gha-api' }}
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
-    with:
-      workflow_file: .github/workflows/publish.yml
-      readme_file: README-publish.md
