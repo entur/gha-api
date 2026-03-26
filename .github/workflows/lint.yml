@@ -29,6 +29,15 @@ jobs:
       GHA_API_ARTIFACT:       ${{ inputs.artifact }}
       GHA_API_PATH:           ${{ inputs.path }}
     steps:
+      - name: Checkout repository (if spec provided)
+        if: ${{ inputs.artifact == '' }}
+        uses: actions/checkout@v6
+      - name: Download artifact (if artifact provided)
+        if: ${{ inputs.artifact != '' }}
+        uses: actions/download-artifact@v8
+        with:
+          pattern: ${{ inputs.artifact }}
+          path: /tmp/artifacts
       - name: Validate
         run: |
           set -o errexit  #Exits immediately if any command fails (returns non-zero)
@@ -60,6 +69,13 @@ jobs:
             else
               spec_path="specs/openapi.yaml"
             fi
+          fi
+          
+          echo "Path to spec resolved to $spec_path"
+          
+          if [ ! -f $spec_path ]; then
+            echo "File $spec_path not found."
+            exit 1
           fi
           
           echo "spec_path=$spec_path" >> "$GITHUB_OUTPUT"
