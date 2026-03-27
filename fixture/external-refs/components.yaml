@@ -1,0 +1,8 @@
+schemas:
+  Response:
+    type: object
+    properties:
+      foo:
+        type: string
+      bar:
+        type: number

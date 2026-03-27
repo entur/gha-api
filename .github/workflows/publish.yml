@@ -10,13 +10,29 @@ on:
         description: "Artifact containing the OpenAPI specification."
         type: string
 
+env:
+  REDOCLY_VERSION: "2.25.1"
+  SPECTRAL_VERSION: "6.15.0"
+
 jobs:
   evaluate-input:
     name: Evaluate input
     runs-on: ubuntu-latest
     outputs:
       spec_path: ${{ steps.resolve-spec-path.outputs.spec_path }}
+    env:
+      GHA_API_ARTIFACT:       ${{ inputs.artifact }}
+      GHA_API_PATH:           ${{ inputs.path }}
     steps:
+      - name: Checkout repository (if spec provided)
+        if: ${{ inputs.artifact == '' }}
+        uses: actions/checkout@v6
+      - name: Download artifact (if artifact provided)
+        if: ${{ inputs.artifact != '' }}
+        uses: actions/download-artifact@v8
+        with:
+          pattern: ${{ inputs.artifact }}
+          path: /tmp/artifacts
       - name: Resolve spec path
         id: resolve-spec-path
         run: |
@@ -33,6 +49,13 @@ jobs:
             else
               spec_path="specs/openapi.yaml"
             fi
+          fi
+
+          echo "Path to spec resolved to $spec_path"
+          
+          if [ ! -f $spec_path ]; then
+            echo "File $spec_path not found."
+            exit 1
           fi
           
           echo "spec_path=$spec_path" >> "$GITHUB_OUTPUT"
@@ -64,7 +87,6 @@ jobs:
       - name: Validate spec
         shell: bash
         env:
-          SPECTRAL_VERSION: "6.15.0"
           GHA_API_PATH:     ${{ needs.evaluate-input.outputs.spec_path }}
         run: |
           set -o errexit
@@ -74,6 +96,11 @@ jobs:
 
           if ! npx @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
             echo "::error::Spec validation failed. Failing workflow."
+            exit 1
+          fi  
+
+          if ! npx @redocly/cli@$REDOCLY_VERSION bundle $GHA_API_PATH; then
+            echo "::error::Spec bundling failed. Failing workflow."
             exit 1
           fi  
 
@@ -96,7 +123,9 @@ jobs:
         with:
           name: ${{ inputs.artifact }}
           path: /tmp/artifact
-
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - name: Authenticate with Google Cloud
         id: auth
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
@@ -110,14 +139,18 @@ jobs:
 
       - name: Upload
         env:
-          GHA_API_PATH: ${{ needs.evaluate-input.outputs.spec_path }}
-          ID_TOKEN:     ${{ steps.auth.outputs.id_token }}
+          GHA_API_PATH:    ${{ needs.evaluate-input.outputs.spec_path }}
+          ID_TOKEN:        ${{ steps.auth.outputs.id_token }}
         shell: bash
         run: |
           set -o errexit
           set -o nounset
           set -o pipefail
           shopt -s globstar
+
+          filename=$(basename $GHA_API_PATH)
+          mkdir -p /tmp/specs
+          npx @redocly/cli@$REDOCLY_VERSION bundle -o /tmp/specs/$filename $GHA_API_PATH
 
           # Extract repository name (without owner)
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
@@ -126,12 +159,12 @@ jobs:
           METADATA="{\"repository\": \"$REPO_NAME\"}"
 
           echo "Publishing spec: $GHA_API_PATH"
-              
+          
           curl --fail-with-body -sS \
             -X PUT \
             -H "Authorization: Bearer $ID_TOKEN" \
             -F "metadata=$METADATA;type=application/json" \
-            -F "spec=@$GHA_API_PATH" \
+            -F "spec=@/tmp/specs/$filename" \
             "$CLOUD_RUN_ENDPOINT"
-              
+          
           echo "Successfully published: $GHA_API_PATH"
