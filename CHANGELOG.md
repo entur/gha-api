@@ -1,6 +1,25 @@
 # Changelog
 
 
+## [6.0.0](https://github.com/entur/gha-api/compare/v5.4.3...v6.0.0) (2026-03-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* ETU-66996 Improve inputs to gha-api ([#115](https://github.com/entur/gha-api/issues/115))
+* Integration with new publish-spec service
+
+### Features
+
+* Add support for bundling (using redocly) ([#116](https://github.com/entur/gha-api/issues/116)) ([54170f0](https://github.com/entur/gha-api/commit/54170f01f20609ab451e6bd7f6fa5f53c6c30645))
+* ETU-66996 Improve inputs to gha-api ([#115](https://github.com/entur/gha-api/issues/115)) ([a59892b](https://github.com/entur/gha-api/commit/a59892bbb2a0bca97db5f9a4c77a564f341f8c67))
+* Integration with new publish-spec service ([89e3416](https://github.com/entur/gha-api/commit/89e3416d03ac343fe77d475010cfea7d69041f72))
+
+
+### Bug Fixes
+
+* Remove unintended ifs in cd.yml ([f4fc4f1](https://github.com/entur/gha-api/commit/f4fc4f11fbe9b1611b5aa20ecf86e6f195f2f945))
+
 ## [5.4.3](https://github.com/entur/gha-api/compare/v5.4.2...v5.4.3) (2026-03-16)
 
 
