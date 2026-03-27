@@ -8,17 +8,18 @@ permissions:
   contents: write
   issues: write
 jobs:
+  release:
+    uses: entur/gha-meta/.github/workflows/release.yml@v1
   update-lint-doc:
+    needs: release
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
       workflow_file: .github/workflows/lint.yml
       readme_file: README-lint.md
 
   update-publish-doc:
+    needs: release
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
       workflow_file: .github/workflows/publish.yml
       readme_file: README-publish.md
-  release:
-    needs: [update-lint-doc, update-publish-doc]
-    uses: entur/gha-meta/.github/workflows/release.yml@v1
