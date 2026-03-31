@@ -12,20 +12,22 @@ jobs:
     uses: entur/gha-meta/.github/workflows/release.yml@v1
   update-lint-doc:
     needs: release
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    uses: egrimstad/gha-meta/.github/workflows/auto-doc.yml@main
     with:
       workflow_file: .github/workflows/lint.yml
       readme_file: README-lint.md
 
   update-publish-doc:
     needs: release
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    uses: egrimstad/gha-meta/.github/workflows/auto-doc.yml@main
     with:
       workflow_file: .github/workflows/publish.yml
       readme_file: README-publish.md
   update-validate-doc:
     needs: release
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    uses: egrimstad/gha-meta/.github/workflows/auto-doc.yml@main
     with:
+      commit_default_author: 'github_actions'
+      branch: 'release-please--branches--main'
       workflow_file: .github/workflows/validate.yml
       readme_file: README-validate.md
