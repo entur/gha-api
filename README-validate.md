@@ -1,10 +1,7 @@
-# `gha-api/publish`
+# `gha-api/validate`
 
-Publish an OpenAPI specification to [Enturs developer documentation](https://beta.developer.entur.no).
+Check that an OpenAPI specification is valid and ready to be published using [`gha-api/publish`](README-publish.md).
 
-
-> [!TIP]
-> `gha-api/publish` is usually called in your deployment workflow. If you want to validate that `gha-api/publish` will work before you merge a pull request, use [`gha-api/validate`](README-validate.md) in your integration workflow.
 ## Inputs
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
@@ -28,11 +25,11 @@ Add the following step to your workflow configuration.
 By default, the workflow looks for a specification at `specs/openapi.yaml`.
 
 ```yml
-#cd.yml
+#ci.yml
 
 jobs:
-  openapi-publish:
-    uses: entur/gha-api/.github/workflows/publish.yml@v6
+  openapi-validate:
+    uses: entur/gha-api/.github/workflows/validate.yml@v6
     secrets: inherit
 ```
 
@@ -40,11 +37,11 @@ jobs:
 If your spec is in another file, you can specify it using the `path` input.
 
 ```yml
-#cd.yml
+#ci.yml
 
 jobs:
-  openapi-publish:
-    uses: entur/gha-api/.github/workflows/publish.yml@v6
+  openapi-validate:
+    uses: entur/gha-api/.github/workflows/validate.yml@v6
     with:
       path: specs/openapi.json
     secrets: inherit
@@ -56,10 +53,10 @@ If your spec is generated as part of your workflow, you can specify the artifact
 When `artifact` is specified, `path` should refer to a file inside the artifact, by default `openapi.yaml`.
 
 ```yml
-#cd.yml
+#ci.yml
 jobs:
-  openapi-publish:
-    uses: entur/gha-api/.github/workflows/publish.yml@v6
+  openapi-validate:
+    uses: entur/gha-api/.github/workflows/validate.yml@v6
     with:
       artifact: myArtifactName
 ```

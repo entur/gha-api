@@ -23,3 +23,9 @@ jobs:
     with:
       workflow_file: .github/workflows/publish.yml
       readme_file: README-publish.md
+  update-validate-doc:
+    needs: release
+    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
+    with:
+      workflow_file: .github/workflows/validate.yml
+      readme_file: README-validate.md
