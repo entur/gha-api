@@ -71,3 +71,32 @@ jobs:
     uses: entur/gha-api/.github/workflows/validate.yml@v6
     secrets: inherit
 ```
+
+## Migrating
+
+### v5 -> v6
+The main change in v6 is that `gha-api/publish` now publishes specifications to the new [`api-spec-registry`](https://github.com/entur/api-spec-registry), instead of to a GCP bucket. This enables better validation and feedback, as well as laying the groundwork for more exciting functionality. However, it requires a few backwards incompatible changes, described below. If you have problems upgrading, contact us on Slack, `#talk-api`.
+
+#### Update your spec
+`info.x-entur-metadata` now has a few mandatory fields. For example:
+
+```yaml
+openapi: "3.1.2"
+info:
+  x-entur-metadata:
+    id: items
+    owner: team-api
+    audience: partner
+```
+See api-guidelines for more information: https://github.com/entur/api-guidelines/blob/main/guidelines.md#24-entur-metadata.
+
+#### Update your workflow calls
+- The input parameter `spec` has been renamed to `path`. In addition, it no longer supports globs, so if you have multiple specs in your repository, you need to call the workflow multiple times, for example by using a [matrix strategy](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/run-job-variations). Its default value has been changed from `specs/*.json` to `specs/openapi.yaml`.
+
+- The input parameter `artifact` can no longer be a glob pattern.
+- The input parameter `artifact_contents` has been removed. Instead, when specifying `artifact`, the `path` parameter is used to determine which file inside the artifact to use. In this case, the default value is `openapi.yaml`.
+
+- The input parameter `visibility` parameter to `gha-api/publish` has been removed. Instead, use the field `audience` in `info.x-entur-metadata`. Note that the value `"public"` has been renamed to `"open"`.
+
+#### Bundling
+All workflows in `gha-api` now run a bundling step using Redocly, so you no longer need to do it yourself before calling the workflows.
