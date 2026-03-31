@@ -104,6 +104,7 @@ jobs:
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
       - name: Lint OpenAPI
+        id: lint
         shell: bash
         env:
           GHA_API_LINT_ARTIFACT:       ${{ inputs.artifact }}
@@ -154,6 +155,10 @@ jobs:
           error_count=$(jq '[.[] | select(.severity == 0)] | length' "$tmp")
           warning_count=$(jq '[.[] | select(.severity == 1)] | length' "$tmp")
 
+          echo "total_count=$total_count" >> "$GITHUB_OUTPUT"
+          echo "error_count=$error_count" >> "$GITHUB_OUTPUT"
+          echo "warning_count=$warning_count" >> "$GITHUB_OUTPUT"
+
           #) Get workspace root so we can strip it
           ws="${GITHUB_WORKSPACE%/}"          
 
@@ -195,6 +200,80 @@ jobs:
               echo "::error::Found linting warnings. Failing workflow."
               exit 1
             fi
+      - name: Send analytics to PostHog
+        if: always()
+        continue-on-error: true
+        env:
+          POSTHOG_API_KEY:             ${{ secrets.POSTHOG_KEY }}
+          GHA_API_LINT_SPEC:           ${{ inputs.spec }}
+          GHA_API_LINT_ARTIFACT:       ${{ inputs.artifact }}
+          GHA_API_LINT_CONTENTS:       ${{ inputs.artifact_contents }}
+          GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
+          GHA_API_LINT_SPEC_TYPE:      ${{ inputs.spec_type }}
+          GHA_API_LINT_UPLOAD:         ${{ inputs.upload_to_bucket }}
+          LINT_TOTAL:                  ${{ steps.lint.outputs.total_count }}
+          LINT_ERRORS:                 ${{ steps.lint.outputs.error_count }}
+          LINT_WARNINGS:               ${{ steps.lint.outputs.warning_count }}
+          LINT_OUTCOME:                ${{ steps.lint.outcome }}
+        run: |
+          # Extract the ref from GITHUB_WORKFLOW_REF (e.g. "entur/gha-api/.github/workflows/lint.yml@refs/tags/v4.2.1")
+          workflow_version="${GITHUB_WORKFLOW_REF##*@}"
+
+          source="spec"
+          if [ -n "$GHA_API_LINT_ARTIFACT" ]; then
+            source="artifact"
+          fi
+
+          payload=$(jq -n \
+            --arg  api_key          "$POSTHOG_API_KEY" \
+            --arg  repo             "$GITHUB_REPOSITORY" \
+            --arg  workflow_version "$workflow_version" \
+            --arg  ruleset_version  "v1.1.1" \
+            --arg  spec             "$GHA_API_LINT_SPEC" \
+            --arg  artifact         "$GHA_API_LINT_ARTIFACT" \
+            --arg  contents         "$GHA_API_LINT_CONTENTS" \
+            --arg  fail_threshold   "$GHA_API_LINT_FAIL_THRESHOLD" \
+            --arg  spec_type        "$GHA_API_LINT_SPEC_TYPE" \
+            --argjson upload        "$GHA_API_LINT_UPLOAD" \
+            --arg  source           "$source" \
+            --argjson total_issues  "${LINT_TOTAL:-0}" \
+            --argjson error_count   "${LINT_ERRORS:-0}" \
+            --argjson warning_count "${LINT_WARNINGS:-0}" \
+            --arg  lint_outcome     "$LINT_OUTCOME" \
+            --arg  ref_name         "$GITHUB_REF_NAME" \
+            --arg  event_name       "$GITHUB_EVENT_NAME" \
+            --arg  actor            "$GITHUB_ACTOR" \
+            --arg  run_id           "$GITHUB_RUN_ID" \
+            '{
+              api_key: $api_key,
+              event: "lint_workflow_executed",
+              distinct_id: $repo,
+              properties: {
+                workflow_version:           $workflow_version,
+                ruleset_version:            $ruleset_version,
+                input_spec:                 $spec,
+                input_artifact:             $artifact,
+                input_artifact_contents:    $contents,
+                input_fail_threshold:       $fail_threshold,
+                input_spec_type:            $spec_type,
+                input_upload_to_bucket:     $upload,
+                input_source:               $source,
+                total_issues:               $total_issues,
+                error_count:                $error_count,
+                warning_count:              $warning_count,
+                lint_outcome:               $lint_outcome,
+                repository:                 $repo,
+                ref_name:                   $ref_name,
+                event_name:                 $event_name,
+                actor:                      $actor,
+                run_id:                     $run_id
+              }
+            }')
+
+          curl -s --max-time 5 \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            https://eu.posthog.com/capture/
   upload-to-bucket:
     name: Upload to bucket
     if: |
