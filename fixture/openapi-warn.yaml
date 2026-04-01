@@ -6,6 +6,10 @@ info:
   contact:
     name: "Support"
     email: "support@example.com"
+  x-entur-metadata:
+    id: example
+    owner: team-api
+    audience: partner
 servers:
   - url: "https://example.com"
 tags:
