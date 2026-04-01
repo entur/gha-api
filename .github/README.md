@@ -75,6 +75,8 @@ jobs:
 ## Migrating
 
 ### v5 -> v6
+See an example: https://github.com/entur/notification-channel/pull/400
+
 The main change in v6 is that `gha-api/publish` now publishes specifications to the new [`api-spec-registry`](https://github.com/entur/api-spec-registry), instead of to a GCP bucket. This enables better validation and feedback, as well as laying the groundwork for more exciting functionality. However, it requires a few backwards incompatible changes, described below. If you have problems upgrading, contact us on Slack, `#talk-api`.
 
 #### Update your spec
