@@ -20,7 +20,7 @@ jobs:
       readme_file: README-lint.md
 
   update-publish-doc:
-    needs: release
+    needs: update-lint-doc
     uses: egrimstad/gha-meta/.github/workflows/auto-doc.yml@main
     with:
       commit_default_author: 'github_actions'
@@ -28,7 +28,7 @@ jobs:
       workflow_file: .github/workflows/publish.yml
       readme_file: README-publish.md
   update-validate-doc:
-    needs: release
+    needs: update-publish-doc
     uses: egrimstad/gha-meta/.github/workflows/auto-doc.yml@main
     with:
       commit_default_author: 'github_actions'
