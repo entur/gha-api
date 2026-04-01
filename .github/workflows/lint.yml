@@ -134,8 +134,8 @@ jobs:
           annotations=$(mktemp)
           markdown=$(mktemp)
           #Capture return code in $rc, and do not fail workflow.
-          npx @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral.yml" --show-documentation-url -F hint -f github-actions -o.github-actions "$annotations" -f markdown -o.markdown="$markdown" && rc=$? || rc=$?
-
+          npx --ignore-scripts @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral.yml" --show-documentation-url -F hint -f github-actions -o.github-actions "$annotations" -f markdown -o.markdown="$markdown" && rc=$? || rc=$?
+          
           #Return code 2 means that spectral command failed to run (not linting errors), so fail workflow.
           if [ "$rc" -eq 2 ]; then
             echo "::error::Spectral execution error (exit code $rc)."
@@ -148,7 +148,7 @@ jobs:
             echo
 
             if [ "$GHA_API_FAIL_THRESHOLD" != "never" ]; then
-              npx @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral.yml" -o "/dev/null" -f json -F "$GHA_API_FAIL_THRESHOLD" && rc=$? || rc=$?
+              npx --ignore-scripts @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral.yml" -o "/dev/null" -f json -F "$GHA_API_FAIL_THRESHOLD" && rc=$? || rc=$?
 
               if [ "$rc" -ne 0 ]; then
                 echo "::error::Found linting problems. Failing workflow."

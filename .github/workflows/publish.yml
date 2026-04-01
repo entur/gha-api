@@ -107,12 +107,12 @@ jobs:
           set -o pipefail          
           shopt -s globstar
 
-          if ! npx @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
+          if ! npx --ignore-scripts @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
             echo "::error::Spec validation failed. Failing workflow."
             exit 1
           fi  
 
-          if ! npx @redocly/cli@$REDOCLY_VERSION bundle $GHA_API_PATH; then
+          if ! npx --ignore-scripts @redocly/cli@$REDOCLY_VERSION bundle $GHA_API_PATH; then
             echo "::error::Spec bundling failed. Failing workflow."
             exit 1
           fi  
@@ -163,7 +163,7 @@ jobs:
 
           filename=$(basename $GHA_API_PATH)
           mkdir -p /tmp/specs
-          npx @redocly/cli@$REDOCLY_VERSION bundle -o /tmp/specs/$filename $GHA_API_PATH
+          npx --ignore-scripts @redocly/cli@$REDOCLY_VERSION bundle -o /tmp/specs/$filename $GHA_API_PATH
 
           # Extract repository name (without owner)
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
