@@ -1,6 +1,26 @@
 # Changelog
 
 
+## [6.0.0](https://github.com/entur/gha-api/compare/v5.4.3...v6.0.0) (2026-04-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* Upgrade api-guidelines to 3.0.0 ([#120](https://github.com/entur/gha-api/issues/120))
+* Rework input parameters to `gha-api/lint` and `gha-api/publish`. See [migration guide](https://github.com/entur/gha-api?tab=readme-ov-file#v5---v6).
+* gha-api/publish: Fields in `info.x-entur-metadata` are now required and the workflow will fail if the specification does not contain them. See api-guidelines: https://github.com/entur/api-guidelines/blob/main/guidelines.md#24-entur-metadata
+
+### Features
+
+* Add new workflow `gha-api/validate`. [See README for usage](https://github.com/entur/gha-api/blob/main/README-validate.md). ([7e00dbe](https://github.com/entur/gha-api/commit/7e00dbe9d7e738240d8f9b26f12df4fd3917cd70))
+* Add support for bundling (using redocly) ([#116](https://github.com/entur/gha-api/issues/116)) ([54170f0](https://github.com/entur/gha-api/commit/54170f01f20609ab451e6bd7f6fa5f53c6c30645))
+* gha-api/publish: Fields in `info.x-entur-metadata` are now required and the workflow will fail if the specification does not contain them. See api-guidelines: https://github.com/entur/api-guidelines/blob/main/guidelines.md#24-entur-metadata ([89e3416](https://github.com/entur/gha-api/commit/89e3416d03ac343fe77d475010cfea7d69041f72))
+* gha-api/publish: Publish to new api-spec-registry ([89e3416](https://github.com/entur/gha-api/commit/89e3416d03ac343fe77d475010cfea7d69041f72))
+* gha-api/publish: Remove input parameter `visibility`. This parameter is now specified as the field `info.x-entur-metadata.audience` in the specification itself. Note that the value `public` has been renamed to `open`. ([89e3416](https://github.com/entur/gha-api/commit/89e3416d03ac343fe77d475010cfea7d69041f72))
+* Rework input parameters to `gha-api/lint` and `gha-api/publish`. See [migration guide](https://github.com/entur/gha-api?tab=readme-ov-file#v5---v6). ([a59892b](https://github.com/entur/gha-api/commit/a59892bbb2a0bca97db5f9a4c77a564f341f8c67))
+* Upgrade api-guidelines to 3.0.0 ([#120](https://github.com/entur/gha-api/issues/120)) ([e66a604](https://github.com/entur/gha-api/commit/e66a604f50809ef43e7e513f5c7b51bc046010de))
+
+
 ## [5.4.3](https://github.com/entur/gha-api/compare/v5.4.2...v5.4.3) (2026-03-16)
 
 

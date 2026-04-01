@@ -6,13 +6,12 @@ Lint an OpenAPI specification according to [Enturs API guidelines](https://githu
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-|                                        INPUT                                        |  TYPE   | REQUIRED |     DEFAULT      |                                           DESCRIPTION                                            |
-|-------------------------------------------------------------------------------------|---------|----------|------------------|--------------------------------------------------------------------------------------------------|
-|              <a name="input_artifact"></a>[artifact](#input_artifact)               | string  |  false   |                  |                  OpenAPI specs to lint, as <br>a Github artifact glob pattern.                   |
-| <a name="input_artifact_contents"></a>[artifact_contents](#input_artifact_contents) | string  |  false   |      `"*"`       | Glob pattern inside artifacts to <br>include in linting, only used <br>if artifact is provided.  |
-|     <a name="input_fail_threshold"></a>[fail_threshold](#input_fail_threshold)      | string  |  false   |    `"never"`     |          The threshold to fail the <br>build. Accepted values: warn, error, <br>never            |
-|                    <a name="input_spec"></a>[spec](#input_spec)                     | string  |  false   | `"specs/*.json"` |                          OpenAPI specs to lint, as <br>a glob pattern.                           |
-|  <a name="input_upload_to_bucket"></a>[upload_to_bucket](#input_upload_to_bucket)   | boolean |  false   |      `true`      |             If true, will upload the <br>spec(s) to a GCS bucket <br>for analytics.              |
+|                                      INPUT                                       |  TYPE   | REQUIRED |  DEFAULT  |                                  DESCRIPTION                                  |
+|----------------------------------------------------------------------------------|---------|----------|-----------|-------------------------------------------------------------------------------|
+|             <a name="input_artifact"></a>[artifact](#input_artifact)             | string  |  false   |           |                Artifact containing the OpenAPI specification.                 |
+|    <a name="input_fail_threshold"></a>[fail_threshold](#input_fail_threshold)    | string  |  false   | `"never"` | The threshold to fail the <br>build. Accepted values: warn, error, <br>never  |
+|                   <a name="input_path"></a>[path](#input_path)                   | string  |  false   |           |                         Path to OpenAPI specfication                          |
+| <a name="input_upload_to_bucket"></a>[upload_to_bucket](#input_upload_to_bucket) | boolean |  false   |  `true`   |     If true, will upload the <br>spec to a GCS bucket <br>for analytics.      |
 
 <!-- AUTO-DOC-INPUT:END -->
 
