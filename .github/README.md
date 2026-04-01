@@ -68,7 +68,7 @@ jobs:
 
   openapi-publish:
     needs: helm-deploy # Publish specification after deployment to production has suceeded
-    uses: entur/gha-api/.github/workflows/validate.yml@v6
+    uses: entur/gha-api/.github/workflows/publish.yml@v6
     secrets: inherit
 ```
 
