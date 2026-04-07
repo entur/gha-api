@@ -160,68 +160,43 @@ jobs:
         if: always()
         continue-on-error: true
         env:
-          GHA_API_LINT_PATH:           ${{ inputs.path }}
-          GHA_API_LINT_ARTIFACT:       ${{ inputs.artifact }}
-          GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
-          GHA_API_LINT_UPLOAD:         ${{ inputs.upload_to_bucket }}
-          LINT_TOTAL:                  ${{ steps.lint.outputs.total_count }}
-          LINT_ERRORS:                 ${{ steps.lint.outputs.error_count }}
-          LINT_WARNINGS:               ${{ steps.lint.outputs.warning_count }}
-          LINT_OUTCOME:                ${{ steps.lint.outcome }}
+          LINT_PATH:      ${{ inputs.path }}
+          LINT_ARTIFACT:  ${{ inputs.artifact }}
+          LINT_THRESHOLD: ${{ inputs.fail_threshold }}
+          LINT_UPLOAD:    ${{ inputs.upload_to_bucket }}
+          LINT_TOTAL:     ${{ steps.lint.outputs.total_count }}
+          LINT_ERRORS:    ${{ steps.lint.outputs.error_count }}
+          LINT_WARNINGS:  ${{ steps.lint.outputs.warning_count }}
+          LINT_OUTCOME:   ${{ steps.lint.outcome }}
         run: |
-          # Extract the ref from GITHUB_WORKFLOW_REF (e.g. "entur/gha-api/.github/workflows/lint.yml@refs/tags/v4.2.1")
           workflow_version="${GITHUB_WORKFLOW_REF##*@}"
+          source=$([[ -n "$LINT_ARTIFACT" ]] && echo "artifact" || echo "path")
 
-          source="path"
-          if [ -n "$GHA_API_LINT_ARTIFACT" ]; then
-            source="artifact"
-          fi
-
-          payload=$(jq -n \
-            --arg  api_key          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk" \
-            --arg  repo             "$GITHUB_REPOSITORY" \
-            --arg  workflow_version "$workflow_version" \
-            --arg  ruleset_version  "v3.0.0" \
-            --arg  path             "$GHA_API_LINT_PATH" \
-            --arg  artifact         "$GHA_API_LINT_ARTIFACT" \
-            --arg  fail_threshold   "$GHA_API_LINT_FAIL_THRESHOLD" \
-            --argjson upload        "$GHA_API_LINT_UPLOAD" \
-            --arg  source           "$source" \
-            --argjson total_issues  "${LINT_TOTAL:-0}" \
-            --argjson error_count   "${LINT_ERRORS:-0}" \
-            --argjson warning_count "${LINT_WARNINGS:-0}" \
-            --arg  lint_outcome     "$LINT_OUTCOME" \
-            --arg  ref_name         "$GITHUB_REF_NAME" \
-            --arg  event_name       "$GITHUB_EVENT_NAME" \
-            --arg  actor            "$GITHUB_ACTOR" \
-            --arg  run_id           "$GITHUB_RUN_ID" \
-            '{
-              api_key: $api_key,
-              event: "lint_workflow_executed",
-              distinct_id: $repo,
-              properties: {
-                workflow_version:       $workflow_version,
-                ruleset_version:        $ruleset_version,
-                input_path:             $path,
-                input_artifact:         $artifact,
-                input_fail_threshold:   $fail_threshold,
-                input_upload_to_bucket: $upload,
-                input_source:           $source,
-                total_issues:           $total_issues,
-                error_count:            $error_count,
-                warning_count:          $warning_count,
-                lint_outcome:           $lint_outcome,
-                repository:             $repo,
-                ref_name:               $ref_name,
-                event_name:             $event_name,
-                actor:                  $actor,
-                run_id:                 $run_id
-              }
-            }')
-
-          curl -s --max-time 5 \
-            -H "Content-Type: application/json" \
-            -d "$payload" \
+          curl -s --max-time 5 -H "Content-Type: application/json" \
+            -d "$(jq -cn \
+              --arg  api_key    "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk" \
+              --arg  repo       "$GITHUB_REPOSITORY" \
+              --arg  version    "$workflow_version" \
+              --arg  path       "$LINT_PATH" \
+              --arg  artifact   "$LINT_ARTIFACT" \
+              --arg  threshold  "$LINT_THRESHOLD" \
+              --argjson upload  "$LINT_UPLOAD" \
+              --arg  source     "$source" \
+              --argjson total   "${LINT_TOTAL:-0}" \
+              --argjson errors  "${LINT_ERRORS:-0}" \
+              --argjson warnings "${LINT_WARNINGS:-0}" \
+              --arg  outcome    "$LINT_OUTCOME" \
+              --arg  actor      "$GITHUB_ACTOR" \
+              --arg  ref        "$GITHUB_REF_NAME" \
+              --arg  event      "$GITHUB_EVENT_NAME" \
+              --arg  run_id     "$GITHUB_RUN_ID" \
+              '{api_key:$api_key,event:"lint_workflow_executed",distinct_id:$repo,
+                properties:{workflow_version:$version,ruleset_version:"v3.0.0",
+                  input_path:$path,input_artifact:$artifact,input_fail_threshold:$threshold,
+                  input_upload_to_bucket:$upload,input_source:$source,
+                  total_issues:$total,error_count:$errors,warning_count:$warnings,
+                  lint_outcome:$outcome,repository:$repo,ref_name:$ref,
+                  event_name:$event,actor:$actor,run_id:$run_id}}')" \
             https://eu.posthog.com/capture/
 
   upload-to-bucket:
