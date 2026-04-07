@@ -152,34 +152,25 @@ jobs:
         if: always()
         continue-on-error: true
         env:
-          GHA_API_LINT_PATH:           ${{ inputs.path }}
-          GHA_API_LINT_ARTIFACT:       ${{ inputs.artifact }}
-          GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
-          GHA_API_LINT_UPLOAD:         ${{ inputs.upload_to_bucket }}
+          GHA_API_LINT_INPUTS: ${{ toJSON(inputs) }}
         run: |
           payload=$(jq -n \
-            --arg  api_key          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk" \
-            --arg  repo             "$GITHUB_REPOSITORY" \
-            --arg  workflow_version "$GHA_API_VERSION" \
-            --arg  path             "$GHA_API_LINT_PATH" \
-            --arg  artifact         "$GHA_API_LINT_ARTIFACT" \
-            --arg  fail_threshold   "$GHA_API_LINT_FAIL_THRESHOLD" \
-            --argjson upload        "$GHA_API_LINT_UPLOAD" \
-            --arg  event_name       "$GITHUB_EVENT_NAME" \
-            --arg  run_id           "$GITHUB_RUN_ID" \
+            --arg     api_key          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk" \
+            --arg     repo             "$GITHUB_REPOSITORY" \
+            --arg     workflow_version "$GHA_API_VERSION" \
+            --argjson inputs           "$GHA_API_LINT_INPUTS" \
+            --arg     event_name       "$GITHUB_EVENT_NAME" \
+            --arg     run_id           "$GITHUB_RUN_ID" \
             '{
               api_key: $api_key,
               event: "lint_workflow_executed",
               distinct_id: $repo,
               properties: {
-                workflow_version:       $workflow_version,
-                input_path:             $path,
-                input_artifact:         $artifact,
-                input_fail_threshold:   $fail_threshold,
-                input_upload_to_bucket: $upload,
-                repository:             $repo,
-                event_name:             $event_name,
-                run_id:                 $run_id
+                workflow_version: $workflow_version,
+                inputs:           $inputs,
+                repository:       $repo,
+                event_name:       $event_name,
+                run_id:           $run_id
               }
             }')
 
