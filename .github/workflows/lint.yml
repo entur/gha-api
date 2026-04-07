@@ -133,9 +133,9 @@ jobs:
             exit $rc
           fi
 
-          total_count=$(grep -c "^::" "$annotations" 2>/dev/null || echo 0)
-          error_count=$(grep -c "^::error" "$annotations" 2>/dev/null || echo 0)
-          warning_count=$(grep -c "^::warning" "$annotations" 2>/dev/null || echo 0)
+          total_count=$(grep -c "^::" "$annotations" 2>/dev/null || true)
+          error_count=$(grep -c "^::error" "$annotations" 2>/dev/null || true)
+          warning_count=$(grep -c "^::warning" "$annotations" 2>/dev/null || true)
 
           echo "total_count=$total_count" >> "$GITHUB_OUTPUT"
           echo "error_count=$error_count" >> "$GITHUB_OUTPUT"
