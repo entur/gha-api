@@ -167,7 +167,7 @@ jobs:
               distinct_id: $repo,
               properties: {
                 workflow_version: $workflow_version,
-                inputs:           $inputs,
+                inputs:           ($inputs | .fail_threshold //= "never" | .upload_to_bucket //= true),
                 repository:       $repo,
                 event_name:       $event_name,
                 run_id:           $run_id
