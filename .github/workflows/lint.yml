@@ -164,13 +164,14 @@ jobs:
           GHA_API_LINT_ARTIFACT:       ${{ inputs.artifact }}
           GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
           GHA_API_LINT_UPLOAD:         ${{ inputs.upload_to_bucket }}
+          GHA_API_JOB_WORKFLOW_REF:    ${{ github.job_workflow_ref }}
           LINT_TOTAL:                  ${{ steps.lint.outputs.total_count }}
           LINT_ERRORS:                 ${{ steps.lint.outputs.error_count }}
           LINT_WARNINGS:               ${{ steps.lint.outputs.warning_count }}
           LINT_OUTCOME:                ${{ steps.lint.outcome }}
         run: |
-          # Extract the ref from GITHUB_WORKFLOW_REF (e.g. "entur/gha-api/.github/workflows/lint.yml@refs/tags/v4.2.1")
-          workflow_version="${GITHUB_WORKFLOW_REF##*@}"
+          # Extract the ref from job_workflow_ref (e.g. "entur/gha-api/.github/workflows/lint.yml@refs/tags/v6.0.0")
+          workflow_version="${GHA_API_JOB_WORKFLOW_REF##*@}"
 
           source="path"
           if [ -n "$GHA_API_LINT_ARTIFACT" ]; then
