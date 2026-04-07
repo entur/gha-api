@@ -21,6 +21,7 @@ on:
 env:
   REDOCLY_VERSION: "2.25.1"
   SPECTRAL_VERSION: "6.15.0"
+  GHA_API_VERSION: "v6.0.0"
 
 jobs:
   evaluate-input:
@@ -164,15 +165,11 @@ jobs:
           GHA_API_LINT_ARTIFACT:       ${{ inputs.artifact }}
           GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
           GHA_API_LINT_UPLOAD:         ${{ inputs.upload_to_bucket }}
-          GHA_API_JOB_WORKFLOW_REF:    ${{ github.job_workflow_ref }}
           LINT_TOTAL:                  ${{ steps.lint.outputs.total_count }}
           LINT_ERRORS:                 ${{ steps.lint.outputs.error_count }}
           LINT_WARNINGS:               ${{ steps.lint.outputs.warning_count }}
           LINT_OUTCOME:                ${{ steps.lint.outcome }}
         run: |
-          # Extract the ref from job_workflow_ref (e.g. "entur/gha-api/.github/workflows/lint.yml@refs/tags/v6.0.0")
-          workflow_version="${GHA_API_JOB_WORKFLOW_REF##*@}"
-
           source="path"
           if [ -n "$GHA_API_LINT_ARTIFACT" ]; then
             source="artifact"
@@ -181,7 +178,7 @@ jobs:
           payload=$(jq -n \
             --arg  api_key          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk" \
             --arg  repo             "$GITHUB_REPOSITORY" \
-            --arg  workflow_version "$workflow_version" \
+            --arg  workflow_version "$GHA_API_VERSION" \
             --arg  ruleset_version  "v3.0.0" \
             --arg  path             "$GHA_API_LINT_PATH" \
             --arg  artifact         "$GHA_API_LINT_ARTIFACT" \
