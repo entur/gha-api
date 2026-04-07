@@ -111,7 +111,6 @@ jobs:
             .spectral*.yml
             functions/*.js
       - name: Lint OpenAPI
-        id: lint
         shell: bash
         env:
           GHA_API_PATH:           ${{ needs.evaluate-input.outputs.spec_path }}
@@ -133,14 +132,6 @@ jobs:
             echo "::error::Spectral execution error (exit code $rc)."
             exit $rc
           fi
-
-          total_count=$(grep -c "^::" "$annotations" 2>/dev/null || true)
-          error_count=$(grep -c "^::error" "$annotations" 2>/dev/null || true)
-          warning_count=$(grep -c "^::warning" "$annotations" 2>/dev/null || true)
-
-          echo "total_count=$total_count" >> "$GITHUB_OUTPUT"
-          echo "error_count=$error_count" >> "$GITHUB_OUTPUT"
-          echo "warning_count=$warning_count" >> "$GITHUB_OUTPUT"
 
           if [ "$rc" -eq 1 ]; then
             cat $annotations
@@ -165,33 +156,16 @@ jobs:
           GHA_API_LINT_ARTIFACT:       ${{ inputs.artifact }}
           GHA_API_LINT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
           GHA_API_LINT_UPLOAD:         ${{ inputs.upload_to_bucket }}
-          LINT_TOTAL:                  ${{ steps.lint.outputs.total_count }}
-          LINT_ERRORS:                 ${{ steps.lint.outputs.error_count }}
-          LINT_WARNINGS:               ${{ steps.lint.outputs.warning_count }}
-          LINT_OUTCOME:                ${{ steps.lint.outcome }}
         run: |
-          source="path"
-          if [ -n "$GHA_API_LINT_ARTIFACT" ]; then
-            source="artifact"
-          fi
-
           payload=$(jq -n \
             --arg  api_key          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk" \
             --arg  repo             "$GITHUB_REPOSITORY" \
             --arg  workflow_version "$GHA_API_VERSION" \
-            --arg  ruleset_version  "v3.0.0" \
             --arg  path             "$GHA_API_LINT_PATH" \
             --arg  artifact         "$GHA_API_LINT_ARTIFACT" \
             --arg  fail_threshold   "$GHA_API_LINT_FAIL_THRESHOLD" \
             --argjson upload        "$GHA_API_LINT_UPLOAD" \
-            --arg  source           "$source" \
-            --argjson total_issues  "${LINT_TOTAL:-0}" \
-            --argjson error_count   "${LINT_ERRORS:-0}" \
-            --argjson warning_count "${LINT_WARNINGS:-0}" \
-            --arg  lint_outcome     "$LINT_OUTCOME" \
-            --arg  ref_name         "$GITHUB_REF_NAME" \
             --arg  event_name       "$GITHUB_EVENT_NAME" \
-            --arg  actor            "$GITHUB_ACTOR" \
             --arg  run_id           "$GITHUB_RUN_ID" \
             '{
               api_key: $api_key,
@@ -199,20 +173,12 @@ jobs:
               distinct_id: $repo,
               properties: {
                 workflow_version:       $workflow_version,
-                ruleset_version:        $ruleset_version,
                 input_path:             $path,
                 input_artifact:         $artifact,
                 input_fail_threshold:   $fail_threshold,
                 input_upload_to_bucket: $upload,
-                input_source:           $source,
-                total_issues:           $total_issues,
-                error_count:            $error_count,
-                warning_count:          $warning_count,
-                lint_outcome:           $lint_outcome,
                 repository:             $repo,
-                ref_name:               $ref_name,
                 event_name:             $event_name,
-                actor:                  $actor,
                 run_id:                 $run_id
               }
             }')
