@@ -204,7 +204,7 @@ jobs:
         if: always()
         continue-on-error: true
         env:
-          POSTHOG_API_KEY:             ${{ secrets.POSTHOG_KEY }}
+          POSTHOG_API_KEY:             phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk
           GHA_API_LINT_SPEC:           ${{ inputs.spec }}
           GHA_API_LINT_ARTIFACT:       ${{ inputs.artifact }}
           GHA_API_LINT_CONTENTS:       ${{ inputs.artifact_contents }}
