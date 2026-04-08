@@ -17,15 +17,13 @@ inputs:
     required: false
     default: "{}"
   api_key:
-    description: "PostHog project API key. If omitted, no event is sent."
-    required: false
-    default: ""
+    description: "PostHog project API key"
+    required: true
 
 runs:
   using: composite
   steps:
     - name: Send event
-      if: ${{ inputs.api_key != '' }}
       shell: bash
       env:
         POSTHOG_API_KEY:  ${{ inputs.api_key }}
