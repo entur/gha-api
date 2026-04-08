@@ -17,6 +17,10 @@ on:
         description: "The threshold to fail the build. Accepted values: warn, error, never"
         type: string
         default: "never"
+    secrets:
+      POSTHOG_KEY:
+        description: "PostHog project API key for analytics. If omitted, no analytics are sent."
+        required: false
 
 env:
   REDOCLY_VERSION: "2.25.1"
@@ -148,36 +152,17 @@ jobs:
             fi
           fi
 
-      - name: Send analytics to PostHog
-        if: always()
-        continue-on-error: true
-        env:
-          GHA_API_LINT_INPUTS: ${{ toJSON(inputs) }}
-        run: |
-          payload=$(jq -n \
-            --arg     api_key          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk" \
-            --arg     repo             "$GITHUB_REPOSITORY" \
-            --arg     workflow_version "$GHA_API_VERSION" \
-            --argjson inputs           "$GHA_API_LINT_INPUTS" \
-            --arg     event_name       "$GITHUB_EVENT_NAME" \
-            --arg     run_id           "$GITHUB_RUN_ID" \
-            '{
-              api_key: $api_key,
-              event: "lint_workflow_executed",
-              distinct_id: $repo,
-              properties: {
-                workflow_version: $workflow_version,
-                inputs:           ($inputs | .fail_threshold //= "never" | .upload_to_bucket //= true),
-                repository:       $repo,
-                event_name:       $event_name,
-                run_id:           $run_id
-              }
-            }')
-
-          curl -s --max-time 5 \
-            -H "Content-Type: application/json" \
-            -d "$payload" \
-            https://eu.posthog.com/capture/
+  analytics:
+    needs: lint
+    if: always()
+    uses: ./.github/workflows/posthog.yml
+    with:
+      workflow_name:    lint
+      workflow_version: ${{ env.GHA_API_VERSION }}
+      outcome:          ${{ needs.lint.result }}
+      workflow_inputs:  ${{ toJSON(inputs) }}
+    secrets:
+      api_key: ${{ secrets.POSTHOG_KEY }}
 
   upload-to-bucket:
     name: Upload to bucket
