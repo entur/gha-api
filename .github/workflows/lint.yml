@@ -17,10 +17,6 @@ on:
         description: "The threshold to fail the build. Accepted values: warn, error, never"
         type: string
         default: "never"
-    secrets:
-      POSTHOG_KEY:
-        description: "PostHog project API key for analytics. If omitted, no analytics are sent."
-        required: false
 
 env:
   REDOCLY_VERSION: "2.25.1"
@@ -152,17 +148,15 @@ jobs:
             fi
           fi
 
-  analytics:
-    needs: lint
-    if: always()
-    uses: ./.github/workflows/posthog.yml
-    with:
-      workflow_name:    lint
-      workflow_version: ${{ env.GHA_API_VERSION }}
-      outcome:          ${{ needs.lint.result }}
-      workflow_inputs:  ${{ toJSON(inputs) }}
-    secrets:
-      api_key: ${{ secrets.POSTHOG_KEY }}
+      - name: Send analytics
+        if: always()
+        uses: ./.github/actions/posthog
+        with:
+          workflow_name:    lint
+          workflow_version: ${{ env.GHA_API_VERSION }}
+          outcome:          ${{ job.status }}
+          workflow_inputs:  ${{ toJSON(inputs) }}
+          api_key:          ${{ secrets.POSTHOG_KEY }}
 
   upload-to-bucket:
     name: Upload to bucket
