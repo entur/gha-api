@@ -9,11 +9,11 @@ inputs:
     description: "Version of the workflow (e.g. 6.0.0)"
     required: true
   outcome:
-    description: "Outcome of the workflow job. Accepted values: success, failure, cancelled, skipped (e.g. job.status)"
+    description: "Outcome of the workflow job. Accepted values: success, failure, cancelled, skipped (e.g. ${{ job.status }})"
     required: false
     default: "unknown"
   workflow_inputs:
-    description: "Workflow inputs as a JSON string (e.g. toJSON(inputs))"
+    description: "Workflow inputs as a JSON string (e.g. ${{ toJSON(inputs) }})"
     required: false
     default: "{}"
   api_key:
