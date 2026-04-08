@@ -156,7 +156,7 @@ jobs:
           workflow_version: ${{ env.GHA_API_VERSION }}
           outcome:          ${{ job.status }}
           workflow_inputs:  ${{ toJSON(inputs) }}
-          api_key:          ${{ secrets.POSTHOG_KEY }}
+          api_key:          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
 
   upload-to-bucket:
     name: Upload to bucket
