@@ -25,7 +25,7 @@ on:
 env:
   REDOCLY_VERSION: "2.25.1"
   SPECTRAL_VERSION: "6.15.0"
-  GHA_API_VERSION: "6.0.0"
+  GHA_API_VERSION: "6.0.0" # x-release-please-version
 
 jobs:
   evaluate-input:
