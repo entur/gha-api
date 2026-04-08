@@ -9,7 +9,7 @@ inputs:
     description: "Version of the workflow (e.g. 6.0.0)"
     required: true
   outcome:
-    description: "Outcome of the workflow job (success, failure, cancelled, skipped)"
+    description: "Outcome of the workflow job (e.g. job.status: success, failure, cancelled, skipped)"
     required: false
     default: "unknown"
   workflow_inputs:
