@@ -154,7 +154,6 @@ jobs:
         with:
           workflow_name:    lint
           workflow_version: ${{ env.GHA_API_VERSION }}
-          outcome:          ${{ job.status }}
           workflow_inputs:  ${{ toJSON(inputs) }}
           api_key:          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
 

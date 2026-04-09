@@ -8,10 +8,6 @@ inputs:
   workflow_version:
     description: "Version of the workflow (e.g. 6.0.0)"
     required: true
-  outcome:
-    description: "Outcome of the workflow job. Accepted values: success, failure, cancelled, skipped (e.g. ${{ job.status }})"
-    required: false
-    default: "unknown"
   workflow_inputs:
     description: "Workflow inputs as a JSON string (e.g. ${{ toJSON(inputs) }})"
     required: false
@@ -29,7 +25,6 @@ runs:
         POSTHOG_API_KEY:  ${{ inputs.api_key }}
         WORKFLOW_NAME:    ${{ inputs.workflow_name }}
         WORKFLOW_VERSION: ${{ inputs.workflow_version }}
-        OUTCOME:          ${{ inputs.outcome }}
         WORKFLOW_INPUTS:  ${{ inputs.workflow_inputs }}
       run: |
         payload=$(jq -n \
@@ -37,7 +32,6 @@ runs:
           --arg     repo     "$GITHUB_REPOSITORY" \
           --arg     name     "$WORKFLOW_NAME" \
           --arg     version  "$WORKFLOW_VERSION" \
-          --arg     outcome  "$OUTCOME" \
           --argjson inputs   "$WORKFLOW_INPUTS" \
           --arg     event    "$GITHUB_EVENT_NAME" \
           --arg     run_id   "$GITHUB_RUN_ID" \
@@ -48,7 +42,6 @@ runs:
             properties: {
               workflow_name:    $name,
               workflow_version: $version,
-              outcome:          $outcome,
               inputs:           $inputs,
               repository:       $repo,
               event_name:       $event,
