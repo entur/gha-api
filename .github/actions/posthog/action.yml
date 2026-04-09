@@ -39,7 +39,7 @@ runs:
 
         WORKFLOW_VERSION=""
         if [ -n "$GHA_REF" ]; then
-          WORKFLOW_VERSION=$(curl -sf "https://raw.githubusercontent.com/entur/gha-api/${GHA_SHA}/version.txt" || echo "")
+          WORKFLOW_VERSION="${GHA_REF}"
         elif [ -n "$GHA_SHA" ]; then
           WORKFLOW_VERSION="${GHA_SHA:0:7}"
         fi
