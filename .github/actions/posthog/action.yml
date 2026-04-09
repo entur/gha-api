@@ -22,7 +22,6 @@ runs:
         POSTHOG_API_KEY:  ${{ inputs.api_key }}
         WORKFLOW_NAME:    ${{ inputs.workflow_name }}
         WORKFLOW_INPUTS:  ${{ inputs.workflow_inputs }}
-        GITHUB_TOKEN:     ${{ github.token }}
       run: |
         set +e
         set +o pipefail
@@ -31,7 +30,6 @@ runs:
         REF="${GITHUB_WORKFLOW_REF##*@}"   # e.g. refs/tags/v6 or refs/heads/main
         REF_NAME="${REF##*/}"              # e.g. v6 or main
         WORKFLOW_VERSION=$(curl -sf \
-          -H "Authorization: Bearer $GITHUB_TOKEN" \
           "https://raw.githubusercontent.com/entur/gha-api/${REF_NAME}/version.txt" || echo "")
 
         payload=$(jq -n \
