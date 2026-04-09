@@ -44,6 +44,8 @@ runs:
           WORKFLOW_VERSION="${GHA_SHA:0:7}"
         fi
 
+        echo "Workflow version: $WORKFLOW_VERSION"
+
         payload=$(jq -n \
           --arg     api_key  "$POSTHOG_API_KEY" \
           --arg     repo     "$GITHUB_REPOSITORY" \
