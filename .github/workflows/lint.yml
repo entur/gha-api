@@ -86,7 +86,6 @@ jobs:
           echo "spec_path=$spec_path" >> "$GITHUB_OUTPUT"
       - name: Send analytics
         if: always()
-        continue-on-error: true
         uses: ./.github/actions/posthog
         with:
           workflow_name:    lint

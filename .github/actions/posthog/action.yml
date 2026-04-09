@@ -27,6 +27,8 @@ runs:
         WORKFLOW_VERSION: ${{ inputs.workflow_version }}
         WORKFLOW_INPUTS:  ${{ inputs.workflow_inputs }}
       run: |
+        set +e
+        set +o pipefail
         payload=$(jq -n \
           --arg     api_key  "$POSTHOG_API_KEY" \
           --arg     repo     "$GITHUB_REPOSITORY" \
@@ -54,4 +56,4 @@ runs:
         curl -s --max-time 5 \
           -H "Content-Type: application/json" \
           -d "$payload" \
-          https://eu.posthog.com/capture/
+          https://eu.posthog.com/capture/ || true
