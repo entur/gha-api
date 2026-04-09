@@ -64,7 +64,7 @@ jobs:
           echo "spec_path=$spec_path" >> "$GITHUB_OUTPUT"
       - name: Send analytics
         if: always()
-        uses: ./.github/actions/posthog
+        uses: entur/gha-api/.github/actions/posthog@main
         with:
           workflow_name:   publish
           workflow_inputs: ${{ toJSON(inputs) }}
