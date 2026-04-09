@@ -126,7 +126,7 @@ jobs:
           echo "Validating spec: $GHA_API_PATH"
 
           echo "Linting with minimal ruleset..."
-          if ! npx @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
+          if ! npx --ignore-scripts @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
             echo "::error::Spec validation failed. Failing workflow."
             exit 1
           fi
@@ -134,7 +134,7 @@ jobs:
           echo "Bundling..."
           filename=$(basename $GHA_API_PATH)
           mkdir -p /tmp/specs
-          npx @redocly/cli@$REDOCLY_VERSION bundle -o /tmp/specs/$filename $GHA_API_PATH
+          npx --ignore-scripts @redocly/cli@$REDOCLY_VERSION bundle -o /tmp/specs/$filename $GHA_API_PATH
           
           # Extract repository name (without owner)
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
