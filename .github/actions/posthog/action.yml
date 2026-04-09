@@ -1,0 +1,59 @@
+name: PostHog Capture
+description: Send a workflow analytics event to PostHog
+
+inputs:
+  workflow_name:
+    description: "Name of the workflow. Used as the event name: {workflow_name}_executed"
+    required: true
+  workflow_version:
+    description: "Version of the workflow (e.g. 6.0.0)"
+    required: true
+  workflow_inputs:
+    description: "Workflow inputs as a JSON string (e.g. toJSON(inputs))"
+    required: false
+    default: "{}"
+  api_key:
+    description: "PostHog project API key"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Send event
+      shell: bash
+      env:
+        POSTHOG_API_KEY:  ${{ inputs.api_key }}
+        WORKFLOW_NAME:    ${{ inputs.workflow_name }}
+        WORKFLOW_VERSION: ${{ inputs.workflow_version }}
+        WORKFLOW_INPUTS:  ${{ inputs.workflow_inputs }}
+      run: |
+        set +e
+        set +o pipefail
+        payload=$(jq -n \
+          --arg     api_key  "$POSTHOG_API_KEY" \
+          --arg     repo     "$GITHUB_REPOSITORY" \
+          --arg     name     "$WORKFLOW_NAME" \
+          --arg     version  "$WORKFLOW_VERSION" \
+          --argjson inputs   "$WORKFLOW_INPUTS" \
+          --arg     event    "$GITHUB_EVENT_NAME" \
+          --arg     run_id   "$GITHUB_RUN_ID" \
+          '{
+            api_key:     $api_key,
+            event:       ($name + "_executed"),
+            distinct_id: $repo,
+            properties: (
+              {
+                workflow_name:    $name,
+                workflow_version: $version,
+                repository:       $repo,
+                event_name:       $event,
+                run_id:           $run_id
+              }
+              + ($inputs | with_entries(.key = ("input_" + .key)))
+            )
+          }')
+
+        curl -s --max-time 5 \
+          -H "Content-Type: application/json" \
+          -d "$payload" \
+          https://eu.posthog.com/capture/ || true

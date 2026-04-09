@@ -10,6 +10,8 @@ permissions:
 jobs:
   release:
     uses: entur/gha-meta/.github/workflows/release.yml@v1
+    with:
+      release_type: manifest
   update-lint-doc:
     needs: release
     uses: egrimstad/gha-meta/.github/workflows/auto-doc.yml@main

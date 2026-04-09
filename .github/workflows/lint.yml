@@ -21,6 +21,7 @@ on:
 env:
   REDOCLY_VERSION: "2.25.1"
   SPECTRAL_VERSION: "6.15.0"
+  GHA_API_VERSION: "6.0.0" # x-release-please-version
 
 jobs:
   evaluate-input:
@@ -83,6 +84,14 @@ jobs:
           fi
           
           echo "spec_path=$spec_path" >> "$GITHUB_OUTPUT"
+      - name: Send analytics
+        if: always()
+        uses: ./.github/actions/posthog
+        with:
+          workflow_name:    lint
+          workflow_version: ${{ env.GHA_API_VERSION }}
+          workflow_inputs:  ${{ toJSON(inputs) }}
+          api_key:          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
   lint:
     name: OpenAPI Lint
     runs-on: ubuntu-latest
@@ -118,14 +127,14 @@ jobs:
           set -o errexit
           set -o nounset
           set -o pipefail
-        
+
           shopt -s globstar
 
           annotations=$(mktemp)
           markdown=$(mktemp)
           #Capture return code in $rc, and do not fail workflow.
           npx @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral.yml" --show-documentation-url -F hint -f github-actions -o.github-actions "$annotations" -f markdown -o.markdown="$markdown" && rc=$? || rc=$?
-          
+
           #Return code 2 means that spectral command failed to run (not linting errors), so fail workflow.
           if [ "$rc" -eq 2 ]; then
             echo "::error::Spectral execution error (exit code $rc)."
@@ -146,7 +155,8 @@ jobs:
               fi
             fi
           fi
- 
+
+
   upload-to-bucket:
     name: Upload to bucket
     if: |

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "simple",
+  "extra-files": [
+    ".github/workflows/lint.yml",
+    ".github/workflows/publish.yml",
+    ".github/workflows/validate.yml"
+  ],
+  "packages": {
+    ".": {}
+  }
+}

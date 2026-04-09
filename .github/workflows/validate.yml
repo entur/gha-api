@@ -13,6 +13,7 @@ on:
 env:
   REDOCLY_VERSION: "2.25.1"
   SPECTRAL_VERSION: "6.15.0"
+  GHA_API_VERSION: "6.0.0" # x-release-please-version
 
 jobs:
   evaluate-input:
@@ -59,6 +60,14 @@ jobs:
           fi
           
           echo "spec_path=$spec_path" >> "$GITHUB_OUTPUT"
+      - name: Send analytics
+        if: always()
+        uses: ./.github/actions/posthog
+        with:
+          workflow_name:    validate
+          workflow_version: ${{ env.GHA_API_VERSION }}
+          workflow_inputs:  ${{ toJSON(inputs) }}
+          api_key:          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
   validate-spec:
     name: OpenAPI Validate
     needs: evaluate-input
@@ -141,3 +150,4 @@ jobs:
             "$CLOUD_RUN_ENDPOINT?dryRun=true"
           
           echo "Successfully validated: $GHA_API_PATH"
+
