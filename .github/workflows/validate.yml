@@ -18,6 +18,9 @@ jobs:
   evaluate-input:
     name: Evaluate input
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     outputs:
       spec_path: ${{ steps.resolve-spec-path.outputs.spec_path }}
     env:
