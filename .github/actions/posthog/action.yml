@@ -27,20 +27,24 @@ runs:
         set +e
         set +o pipefail
 
-        # Resolve version by finding this reusable workflow's SHA in the caller's run,
-        # then fetching version.txt at that SHA from entur/gha-api.
+        # Resolve version by finding this reusable workflow's entry in the caller's run.
         # (GITHUB_WORKFLOW_REF is the caller's ref, not the reusable workflow's ref)
-        GHA_SHA=$(curl -sf \
+        RUN_DATA=$(curl -sf \
           -H "Authorization: Bearer $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github+json" \
-          "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
-          | jq -r '(.referenced_workflows // [])[] | select(.path | startswith("entur/gha-api/")) | .sha' \
-          | head -1 || echo "")
+          "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" || echo "{}")
+
+        GHA_SHA=$(echo "$RUN_DATA" | jq -r '(.referenced_workflows // [])[] | select(.path | startswith("entur/gha-api/")) | .sha' | head -1)
+        GHA_REF=$(echo "$RUN_DATA" | jq -r '(.referenced_workflows // [])[] | select(.path | startswith("entur/gha-api/")) | .ref // ""' | head -1)
 
         WORKFLOW_VERSION=""
-        if [ -n "$GHA_SHA" ]; then
-          WORKFLOW_VERSION=$(curl -sf "https://raw.githubusercontent.com/entur/gha-api/${GHA_SHA}/version.txt" || echo "")
+        if [ -n "$GHA_REF" ]; then
+          WORKFLOW_VERSION="${GHA_REF}"
+        elif [ -n "$GHA_SHA" ]; then
+          WORKFLOW_VERSION="${GHA_SHA:0:7}"
         fi
+
+        echo "Workflow version: $WORKFLOW_VERSION"
 
         payload=$(jq -n \
           --arg     api_key  "$POSTHOG_API_KEY" \
