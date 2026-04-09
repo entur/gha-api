@@ -21,12 +21,14 @@ on:
 env:
   REDOCLY_VERSION: "2.25.1"
   SPECTRAL_VERSION: "6.15.0"
-  GHA_API_VERSION: "6.0.0" # x-release-please-version
 
 jobs:
   evaluate-input:
     name: Evaluate input
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     outputs:
       spec_path: ${{ steps.resolve-spec-path.outputs.spec_path }}
     env:
@@ -88,10 +90,9 @@ jobs:
         if: always()
         uses: ./.github/actions/posthog
         with:
-          workflow_name:    lint
-          workflow_version: ${{ env.GHA_API_VERSION }}
-          workflow_inputs:  ${{ toJSON(inputs) }}
-          api_key:          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
+          workflow_name:   lint
+          workflow_inputs: ${{ toJSON(inputs) }}
+          api_key:         "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
   lint:
     name: OpenAPI Lint
     runs-on: ubuntu-latest
