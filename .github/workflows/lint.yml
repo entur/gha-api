@@ -43,6 +43,12 @@ jobs:
         with:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
+      - name: Checkout actions (if artifact provided)
+        if: ${{ inputs.artifact != '' }}
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: .github/actions
+          sparse-checkout-cone-mode: false
       - name: Validate
         run: |
           set -o errexit  #Exits immediately if any command fails (returns non-zero)
