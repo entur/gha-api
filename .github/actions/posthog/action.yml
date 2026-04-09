@@ -39,14 +39,16 @@ runs:
             api_key:     $api_key,
             event:       ($name + "_executed"),
             distinct_id: $repo,
-            properties: {
-              workflow_name:    $name,
-              workflow_version: $version,
-              inputs:           $inputs,
-              repository:       $repo,
-              event_name:       $event,
-              run_id:           $run_id
-            }
+            properties: (
+              {
+                workflow_name:    $name,
+                workflow_version: $version,
+                repository:       $repo,
+                event_name:       $event,
+                run_id:           $run_id
+              }
+              + ($inputs | with_entries(.key = ("input_" + .key)))
+            )
           }')
 
         curl -s --max-time 5 \
