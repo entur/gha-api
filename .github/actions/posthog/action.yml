@@ -9,7 +9,7 @@ inputs:
     description: "Version of the workflow (e.g. 6.0.0)"
     required: true
   workflow_inputs:
-    description: "Workflow inputs as a JSON string (e.g. ${{ toJSON(inputs) }})"
+    description: "Workflow inputs as a JSON string (e.g. toJSON(inputs))"
     required: false
     default: "{}"
   api_key:
