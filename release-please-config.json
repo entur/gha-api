@@ -3,7 +3,8 @@
   "release-type": "simple",
   "extra-files": [
     ".github/workflows/lint.yml",
-    ".github/workflows/publish.yml"
+    ".github/workflows/publish.yml",
+    ".github/workflows/validate.yml"
   ],
   "packages": {
     ".": {}

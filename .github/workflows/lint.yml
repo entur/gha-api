@@ -84,6 +84,15 @@ jobs:
           fi
           
           echo "spec_path=$spec_path" >> "$GITHUB_OUTPUT"
+      - name: Send analytics
+        if: always()
+        continue-on-error: true
+        uses: ./.github/actions/posthog
+        with:
+          workflow_name:    lint
+          workflow_version: ${{ env.GHA_API_VERSION }}
+          workflow_inputs:  ${{ toJSON(inputs) }}
+          api_key:          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
   lint:
     name: OpenAPI Lint
     runs-on: ubuntu-latest
@@ -148,14 +157,6 @@ jobs:
             fi
           fi
 
-      - name: Send analytics
-        if: always()
-        uses: ./.github/actions/posthog
-        with:
-          workflow_name:    lint
-          workflow_version: ${{ env.GHA_API_VERSION }}
-          workflow_inputs:  ${{ toJSON(inputs) }}
-          api_key:          "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
 
   upload-to-bucket:
     name: Upload to bucket
