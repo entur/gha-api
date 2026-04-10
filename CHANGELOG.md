@@ -1,6 +1,18 @@
 # Changelog
 
 
+## [6.1.0](https://github.com/entur/gha-api/compare/v6.0.0...v6.1.0) (2026-04-09)
+
+
+### Features
+
+* Add PostHog analytics ([efa5830](https://github.com/entur/gha-api/commit/efa58307704b6e7ef515436ac698fac9c8e0abdd))
+
+
+### Bug Fixes
+
+* Add ignore-scripts parameter to npx ([#121](https://github.com/entur/gha-api/issues/121)) ([95d415a](https://github.com/entur/gha-api/commit/95d415ad954902ebc413af9322580a1458b014ba))
+
 ## [6.0.0](https://github.com/entur/gha-api/compare/v5.4.3...v6.0.0) (2026-04-01)
 
 
