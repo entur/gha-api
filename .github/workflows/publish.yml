@@ -52,6 +52,13 @@ jobs:
             echo "::error::Invalid visibility '$GHA_API_VISIBILITY'. Must be one of: public, partner, internal."
             exit 1
           fi
+      - name: Send analytics
+        if: always()
+        uses: entur/gha-api/.github/actions/posthog@main
+        with:
+          workflow_name:   lint
+          workflow_inputs: ${{ toJSON(inputs) }}
+          api_key:         "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
 
   validate-spec:
     name: Validate Spec
