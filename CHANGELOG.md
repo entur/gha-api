@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [5.5.0](https://github.com/entur/gha-api/compare/v5.4.4...v5.5.0) (2026-04-10)
+
+
+### Features
+
+* Add PostHog analytics ([208ad5d](https://github.com/entur/gha-api/commit/208ad5d7459a2e07b7d2f46e29d1f669d8ce4bbb))
+
 ## [5.4.4](https://github.com/entur/gha-api/compare/v5.4.3...v5.4.4) (2026-03-31)
 
 
