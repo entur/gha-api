@@ -173,6 +173,9 @@ jobs:
 
           echo "Publishing spec: $GHA_API_PATH"
 
+          # Make path relative to workspace root for GitHub annotations
+          RELATIVE_PATH="${GHA_API_PATH#$GITHUB_WORKSPACE/}"
+
           RESPONSE=$(curl --fail-with-body -sS \
             -X PUT \
             -H "Authorization: Bearer $ID_TOKEN" \
@@ -180,7 +183,7 @@ jobs:
             -F "spec=@/tmp/specs/$filename" \
             "$CLOUD_RUN_ENDPOINT") || {
             DETAIL=$(echo "$RESPONSE" | jq -r '.detail')
-            echo "::error file=$GHA_API_PATH,line=1::$DETAIL"
+            echo "::error file=$RELATIVE_PATH,line=1::$DETAIL"
             exit 1
           }
 
