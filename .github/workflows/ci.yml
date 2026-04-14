@@ -86,5 +86,5 @@ jobs:
   test-publish-fail:
     uses: ./.github/workflows/publish.yml
     with:
-      path: fixture/openapi-bad.yaml
+      path: fixture/api-spec-registry/openapi.yaml
     secrets: inherit
