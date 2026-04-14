@@ -143,12 +143,17 @@ jobs:
           METADATA="{\"repository\": \"$REPO_NAME\"}"
           
           echo "Uploading to api-spec-registry with dryRun=true..."
-          curl --fail-with-body -sS \
+          
+          RESPONSE=$(curl --fail-with-body -sS \
             -X PUT \
             -H "Authorization: Bearer $ID_TOKEN" \
             -F "metadata=$METADATA;type=application/json" \
             -F "spec=@/tmp/specs/$filename" \
-            "$CLOUD_RUN_ENDPOINT?dryRun=true"
+            "$CLOUD_RUN_ENDPOINT?dryRun=true") || {
+            DETAIL=$(echo "$RESPONSE" | jq -r '.detail')
+            echo "::error file=$GHA_API_PATH,line=1::$DETAIL"
+            exit 1
+          }          
           
           echo "Successfully validated: $GHA_API_PATH"
 
