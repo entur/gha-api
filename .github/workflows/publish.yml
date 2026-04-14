@@ -180,7 +180,7 @@ jobs:
             -F "spec=@/tmp/specs/$filename" \
             "$CLOUD_RUN_ENDPOINT") || {
             DETAIL=$(echo "$RESPONSE" | jq -r '.detail')
-            echo "::error::$DETAIL"
+            echo "::error file=$GHA_API_PATH,line=1::$DETAIL"
             exit 1
           }
 
