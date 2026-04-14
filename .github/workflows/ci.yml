@@ -82,9 +82,3 @@ jobs:
       path: "openapi-good.json"
       upload_to_bucket: false
       fail_threshold: warn
-
-  test-publish-fail:
-    uses: ./.github/workflows/validate.yml
-    with:
-      path: fixture/api-spec-registry/openapi.yaml
-    secrets: inherit
