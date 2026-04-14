@@ -82,4 +82,3 @@ jobs:
       path: "openapi-good.json"
       upload_to_bucket: false
       fail_threshold: warn
-
