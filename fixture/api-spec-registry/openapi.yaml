@@ -9,7 +9,7 @@ info:
     url: https://entur.no
     email: support@entur.no
   x-entur-metadata:
-    id: api-spec-registry
+    id: gha-api
     owner: team-api
     audience: internal
 tags:
