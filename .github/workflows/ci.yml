@@ -83,3 +83,8 @@ jobs:
       upload_to_bucket: false
       fail_threshold: warn
 
+  test-publish-fail:
+    uses: ./.github/workflows/publish.yml
+    with:
+      path: fixture/openapi-bad.yaml
+    secrets: inherit
