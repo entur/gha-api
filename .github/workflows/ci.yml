@@ -82,3 +82,8 @@ jobs:
       path: "openapi-good.json"
       upload_to_bucket: false
       fail_threshold: warn
+
+  test-publish-file-external-refs:
+    uses: ./.github/workflows/publish.yml
+    with:
+      path: fixture/external-refs/openapi.yaml
