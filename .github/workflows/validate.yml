@@ -86,7 +86,7 @@ jobs:
         if: ${{ inputs.artifact != '' }}
         with:
           name: ${{ inputs.artifact }}
-          path: /tmp/artifact
+          path: /tmp/artifacts
       - uses: actions/setup-node@v6
         with:
           node-version: 24

@@ -82,3 +82,9 @@ jobs:
       path: "openapi-good.json"
       upload_to_bucket: false
       fail_threshold: warn
+  test-validate-artifact-with-artifact_contents_glob-ok:
+    needs: upload-artifact-all
+    uses: ./.github/workflows/validate.yml
+    with:
+      artifact: "specs"
+      path: "openapi-good.json"
