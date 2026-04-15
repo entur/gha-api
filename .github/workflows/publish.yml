@@ -131,7 +131,7 @@ jobs:
             -H "Authorization: Bearer $ID_TOKEN" \
             -F "metadata=$METADATA;type=application/json" \
             -F "spec=@/tmp/specs/$filename" \
-            "$CLOUD_RUN_ENDPOINT?dryRun=true") || {
+            "$CLOUD_RUN_ENDPOINT") || {
             DETAIL=$(echo "$RESPONSE" | jq -r '.detail')
             echo "::error file=$GHA_API_PATH,line=1::$DETAIL"
             exit 1
