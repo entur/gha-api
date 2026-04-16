@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [6.1.1](https://github.com/entur/gha-api/compare/v6.1.0...v6.1.1) (2026-04-15)
+
+
+### Bug Fixes
+
+* Emit github error annotation on error from backend on publish / validate ([305874f](https://github.com/entur/gha-api/commit/305874f6de344a2df207693f48b6a2b480a0d0ce))
+* Fix typo in artifact download causing error ([#133](https://github.com/entur/gha-api/issues/133)) ([f761b70](https://github.com/entur/gha-api/commit/f761b70129e2727cae6b51a2a9cc98e7e6eaec1a))
+
 ## [6.1.0](https://github.com/entur/gha-api/compare/v6.0.0...v6.1.0) (2026-04-09)
 
 
