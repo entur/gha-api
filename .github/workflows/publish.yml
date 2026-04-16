@@ -16,7 +16,7 @@ env:
 
 jobs:
   publish:
-    name: Publish spec
+    name: OpenAPI Publish
     runs-on: ubuntu-latest
     permissions:
       contents: read

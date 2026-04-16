@@ -24,7 +24,7 @@ env:
 
 jobs:
   lint:
-    name: Lint
+    name: OpenAPI Lint
     runs-on: ubuntu-latest
     permissions:
       contents: read
