@@ -20,7 +20,7 @@ on:
 
 env:
   REDOCLY_VERSION: "2.25.1"
-  SPECTRAL_VERSION: "6.15.0"
+  SPECTRAL_VERSION: "6.15.1"
 
 jobs:
   lint:
