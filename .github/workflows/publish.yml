@@ -62,9 +62,6 @@ jobs:
           fi
           
           echo "spec_path=$spec_path" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
       - name: Checkout linting rulesets
         uses: actions/checkout@v6
         with:
