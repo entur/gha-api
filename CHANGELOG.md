@@ -1,6 +1,16 @@
 # Changelog
 
 
+## [6.1.2](https://github.com/entur/gha-api/compare/v6.1.1...v6.1.2) (2026-04-21)
+
+
+### Bug Fixes
+
+* Bump api-guidelines to 3.0.1 ([#138](https://github.com/entur/gha-api/issues/138)) ([7602609](https://github.com/entur/gha-api/commit/76026096b9fff737e1c21fdb0c84f9083be3490e))
+* **deps:** Bump @stoplight/spectral-cli to v6.15.1 ([#137](https://github.com/entur/gha-api/issues/137)) ([7e73c53](https://github.com/entur/gha-api/commit/7e73c53163eb0998230f250b835b92c8d74609c0))
+* Merge multi-job workflows  to single job ([49021da](https://github.com/entur/gha-api/commit/49021da9fca05ed279e0341a552364c70333b915))
+* Removed setup-node, node 20 is included in ubuntu-latest, which is fine. Node 24 not needed. ([e129a24](https://github.com/entur/gha-api/commit/e129a2491e667929ddc5033171a0faef30acb7df))
+
 ## [6.1.1](https://github.com/entur/gha-api/compare/v6.1.0...v6.1.1) (2026-04-15)
 
 
