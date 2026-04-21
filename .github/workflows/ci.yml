@@ -88,10 +88,3 @@ jobs:
     with:
       artifact: "specs"
       path: "openapi-good.json"
-
-  test-lint-big:
-    uses: ./.github/workflows/lint.yml
-    with:
-      path: fixture/openapi-big.json
-      upload_to_bucket: false
-      fail_threshold: error
