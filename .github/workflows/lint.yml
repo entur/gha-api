@@ -131,7 +131,7 @@ jobs:
 
           if [ "$rc" -eq 1 ]; then
             cat $annotations
-            # Truncate to stay under GitHub's 1024k step summary limit
+            # Truncate to stay under GitHub's 1024k step summary limit. Leave 200 bytes for warning message.
             max_size=$((1024 * 1024 - 200))
             if [ "$(wc -c < "$markdown")" -gt "$max_size" ]; then
               head -c "$max_size" "$markdown" >> $GITHUB_STEP_SUMMARY
