@@ -131,7 +131,14 @@ jobs:
 
           if [ "$rc" -eq 1 ]; then
             cat $annotations
-            cat $markdown >> $GITHUB_STEP_SUMMARY
+            # Truncate to stay under GitHub's 1024k step summary limit
+            max_size=$((1000 * 1024))
+            if [ "$(wc -c < "$markdown")" -gt "$max_size" ]; then
+              head -c "$max_size" "$markdown" >> $GITHUB_STEP_SUMMARY
+              echo -e "\n\n> **Warning:** Summary was truncated because it exceeded the 1024k size limit." >> $GITHUB_STEP_SUMMARY
+            else
+              cat $markdown >> $GITHUB_STEP_SUMMARY
+            fi
             echo
 
             if [ "$GHA_API_FAIL_THRESHOLD" != "never" ]; then
