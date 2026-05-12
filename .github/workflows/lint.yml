@@ -17,6 +17,11 @@ on:
         description: "The threshold to fail the build. Accepted values: warn, error, never"
         type: string
         default: "never"
+      annotations:
+        description: "Annotate files with lint problems. Accepted values: all (annotate all files), none (dont annotate any files)"
+        type: string
+        default: all
+
 
 env:
   REDOCLY_VERSION: "2.25.1"
@@ -32,6 +37,7 @@ jobs:
       id-token: write
     env:
       GHA_API_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
+      GHA_API_ANNOTATIONS:    ${{ inputs.annotations }}
       GHA_API_ARTIFACT:       ${{ inputs.artifact }}
       GHA_API_PATH:           ${{ inputs.path }}
       SHOULD_UPLOAD: >-
@@ -67,6 +73,16 @@ jobs:
               ;;  # OK
             *) 
               echo "::error::fail_threshold must be one of: warn, error, never"
+              exit 1
+              ;;
+          esac
+
+          # Validate annotations
+          case "$GHA_API_ANNOTATIONS" in
+            all|none) 
+              ;;  # OK
+            *) 
+              echo "::error::annotatons must be one of: all, none"
               exit 1
               ;;
           esac
@@ -111,6 +127,7 @@ jobs:
         env:
           GHA_API_PATH:           ${{ steps.resolve-spec-path.outputs.spec_path }}
           GHA_API_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
+          GHA_API_ANNOTATIONS: ${{ inputs.annotations }}
         run: |
           set -o errexit
           set -o nounset
@@ -130,7 +147,10 @@ jobs:
           fi
 
           if [ "$rc" -eq 1 ]; then
-            cat $annotations
+            if [ "$GHA_API_ANNOTATIONS" = "all" ]; then
+              cat $annotations
+            fi
+
             # Truncate to stay under GitHub's 1024k step summary limit. Leave 200 bytes for warning message.
             max_size=$((1024 * 1024 - 200))
             if [ "$(wc -c < "$markdown")" -gt "$max_size" ]; then
