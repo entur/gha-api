@@ -38,6 +38,14 @@ jobs:
       upload_to_bucket: false
       fail_threshold: never
 
+  test-lint-file-fail-threshold-never-ok-hide-annotations:
+    uses: ./.github/workflows/lint.yml
+    with:
+      path: fixture/openapi-bad.yaml
+      upload_to_bucket: false
+      annotations: none
+      fail_threshold: never
+
   test-validate-file-external-refs:
     uses: ./.github/workflows/validate.yml
     with:

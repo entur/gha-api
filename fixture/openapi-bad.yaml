@@ -1,1 +1,4 @@
 openapi: "3.1.0"
+info:
+  x-entur-metadata:
+    id: example-id
