@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.2.0](https://github.com/entur/gha-api/compare/v6.1.2...v6.2.0) (2026-05-18)
+
+
+### Features
+
+* **ETU-71559:** Add input "annotations" to disable annotations ([#140](https://github.com/entur/gha-api/issues/140)) ([d5fcf6b](https://github.com/entur/gha-api/commit/d5fcf6bf186b34b7fc35760c6eb5827e08aac471))
+
 ## [6.1.2](https://github.com/entur/gha-api/compare/v6.1.1...v6.1.2) (2026-04-21)
 
 
