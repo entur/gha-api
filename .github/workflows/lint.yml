@@ -61,6 +61,9 @@ jobs:
         with:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - name: Validate
         run: |
           set -o errexit  #Exits immediately if any command fails (returns non-zero)
