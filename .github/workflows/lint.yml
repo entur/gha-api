@@ -26,6 +26,8 @@ on:
 env:
   REDOCLY_VERSION: "2.25.1"
   SPECTRAL_VERSION: "6.15.1"
+  NPM_CONFIG_IGNORE_SCRIPTS: true
+  NPM_CONFIG_MIN_RELEASE_AGE: 4
 
 jobs:
   lint:
@@ -137,6 +139,9 @@ jobs:
           set -o pipefail
 
           shopt -s globstar
+
+          npm config get min-release-age
+          npm config get ignore-scripts
 
           annotations=$(mktemp)
           markdown=$(mktemp)
