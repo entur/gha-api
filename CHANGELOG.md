@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.2.1](https://github.com/entur/gha-api/compare/v6.2.0...v6.2.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* **security, ETU-72347:** Set min-release-age for npx using env variables ([#142](https://github.com/entur/gha-api/issues/142)) ([e61f0cc](https://github.com/entur/gha-api/commit/e61f0cc479a064a613c0aca78c3b2ee911564001))
+
 ## [6.2.0](https://github.com/entur/gha-api/compare/v6.1.2...v6.2.0) (2026-05-18)
 
 
