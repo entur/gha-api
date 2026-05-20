@@ -11,8 +11,10 @@ on:
         type: string
 
 env:
-  REDOCLY_VERSION: "2.25.1"
-  SPECTRAL_VERSION: "6.15.1"
+  REDOCLY_VERSION: "2.30.6"
+  SPECTRAL_VERSION: "6.16.0"
+  NPM_CONFIG_IGNORE_SCRIPTS: true
+  NPM_CONFIG_MIN_RELEASE_AGE: 4
 
 jobs:
   publish:
@@ -36,6 +38,9 @@ jobs:
         with:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - name: Resolve spec path
         id: resolve-spec-path
         run: |
@@ -81,12 +86,12 @@ jobs:
           set -o pipefail          
           shopt -s globstar
 
-          if ! npx --ignore-scripts @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
+          if ! npx @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
             echo "::error::Spec validation failed. Failing workflow."
             exit 1
           fi  
 
-          if ! npx --ignore-scripts @redocly/cli@$REDOCLY_VERSION bundle $GHA_API_PATH; then
+          if ! npx @redocly/cli@$REDOCLY_VERSION bundle $GHA_API_PATH; then
             echo "::error::Spec bundling failed. Failing workflow."
             exit 1
           fi  
@@ -113,7 +118,7 @@ jobs:
 
           filename=$(basename $GHA_API_PATH)
           mkdir -p /tmp/specs
-          npx --ignore-scripts @redocly/cli@$REDOCLY_VERSION bundle -o /tmp/specs/$filename $GHA_API_PATH
+          npx @redocly/cli@$REDOCLY_VERSION bundle -o /tmp/specs/$filename $GHA_API_PATH
 
           # Extract repository name (without owner)
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
