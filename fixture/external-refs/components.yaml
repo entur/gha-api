@@ -4,5 +4,9 @@ schemas:
     properties:
       foo:
         type: string
+        example: 23
       bar:
         type: number
+    example:
+      foo: 23
+      bar: "lala"
