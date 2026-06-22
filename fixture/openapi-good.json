@@ -69,10 +69,13 @@
             "example": "Item 100"
           }
         },
-        "example": {
+        "examples": [{
           "id": "100",
           "name": "Item 100"
-        }
+        }, {
+          "id": "100",
+          "name": null
+        }]
       },
       "Items": {
         "type": "array",

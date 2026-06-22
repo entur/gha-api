@@ -11,8 +11,9 @@ on:
         type: string
 
 env:
-  REDOCLY_VERSION: "2.30.6"
-  SPECTRAL_VERSION: "6.16.0"
+  REDOCLY: npx --ignore-scripts @redocly/cli@2.30.6
+  # Need to force spectral-rulesets version to work around https://github.com/stoplightio/spectral/issues/2959
+  SPECTRAL: npx --ignore-scripts -p @stoplight/spectral-cli@6.16.0 -p @stoplight/spectral-rulesets@1.22.2 spectral
   NPM_CONFIG_IGNORE_SCRIPTS: true
   NPM_CONFIG_MIN_RELEASE_AGE: 4
 
@@ -102,7 +103,7 @@ jobs:
           echo "Validating spec: $GHA_API_PATH"
 
           echo "Linting with minimal ruleset..."
-          if ! npx --ignore-scripts @stoplight/spectral-cli@$SPECTRAL_VERSION lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
+          if ! $SPECTRAL lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
             echo "::error::Spec validation failed. Failing workflow."
             exit 1
           fi
@@ -110,7 +111,7 @@ jobs:
           echo "Bundling..."
           filename=$(basename $GHA_API_PATH)
           mkdir -p /tmp/specs
-          npx --ignore-scripts @redocly/cli@$REDOCLY_VERSION bundle -o /tmp/specs/$filename $GHA_API_PATH
+          $REDOCLY bundle -o /tmp/specs/$filename $GHA_API_PATH
 
           # Extract repository name (without owner)
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
