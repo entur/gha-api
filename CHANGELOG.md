@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.2.3](https://github.com/entur/gha-api/compare/v6.2.2...v6.2.3) (2026-06-22)
+
+
+### Bug Fixes
+
+* **ETU-73873:** Override spectral-rulesets version ([#146](https://github.com/entur/gha-api/issues/146)) ([19bd1a2](https://github.com/entur/gha-api/commit/19bd1a2b239d3546bdca987648e1d5487f4cb39b))
+
 ## [6.2.2](https://github.com/entur/gha-api/compare/v6.2.1...v6.2.2) (2026-05-29)
 
 
