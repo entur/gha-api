@@ -32,7 +32,7 @@ jobs:
     steps:
       - name: Checkout repository (if spec provided)
         if: ${{ inputs.artifact == '' }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Download artifact (if artifact provided)
         if: ${{ inputs.artifact != '' }}
         uses: actions/download-artifact@v8
@@ -80,7 +80,7 @@ jobs:
           create_credentials_file: false
 
       - name: Checkout linting rulesets
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: entur/api-guidelines
           ref: v3.0.3
