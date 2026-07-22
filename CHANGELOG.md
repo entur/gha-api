@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.5.2](https://github.com/entur/gha-api/compare/v5.5.1...v5.5.2) (2026-07-22)
+
+
+### Bug Fixes
+
+* ETU-74954: Set min-release-age and ignore-scripts ([045aec8f](https://github.com/entur/gha-api/commit/045aec8fed91b8840d2645670b7c39b6b213d352))
+
+## [5.5.1](https://github.com/entur/gha-api/compare/v5.5.0...v5.5.1) (2026-05-29)
+
+
+### Bug Fixes
+
+* fix: Fix publish workflow_name input to posthog analytics
 
 ## [5.5.0](https://github.com/entur/gha-api/compare/v5.4.4...v5.5.0) (2026-04-10)
 
