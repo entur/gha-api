@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.1](https://github.com/entur/gha-api/compare/v3.0.0...v3.0.1) (2026-07-22)
+
+### Bug Fixes
+
+* ETU-74954: Set min-release-age and ignore-scripts ([b4541f48](https://github.com/entur/gha-api/commit/b4541f48b632595573f320c317ba81a599885da3))
+
 ## [3.0.0](https://github.com/entur/gha-api/compare/v2.0.0...v3.0.0) (2025-05-12)
 
 
