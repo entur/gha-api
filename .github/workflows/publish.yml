@@ -19,6 +19,10 @@ on:
         type: string
         default: "public"
 
+env:
+  NPM_CONFIG_IGNORE_SCRIPTS: true
+  NPM_CONFIG_MIN_RELEASE_AGE: 4
+
 jobs:
   validate-input:
     name: Validate input
@@ -77,6 +81,9 @@ jobs:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
           merge-multiple: true
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
       - name: Checkout linting rulesets
         uses: actions/checkout@v6
         with:
