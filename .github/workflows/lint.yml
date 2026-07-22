@@ -27,6 +27,10 @@ on:
         type: string
         default: "openapi"
 
+env:
+  NPM_CONFIG_IGNORE_SCRIPTS: true
+  NPM_CONFIG_MIN_RELEASE_AGE: 4
+
 jobs:
   validate-input:
     name: Validate input
@@ -92,6 +96,9 @@ jobs:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
           merge-multiple: true #Downloads all artifacts into /tmp/artifacts, without subdirectories
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
       - name: Checkout linting rulesets
         uses: actions/checkout@v5
         with:
