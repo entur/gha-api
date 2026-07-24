@@ -1,0 +1,53 @@
+name: Setup spectral
+
+description: Downloads and installs spectral
+
+
+runs:
+  using: composite
+  steps:
+    # Restore from cache if available
+    - name: Restore cache
+      id: restore-cache
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          ~/.local/bin/spectral
+        key: spectral-cli-bin_v1.1.6_linux-x64
+
+    # Download spectral-cli binary if not cached
+    - name: Setup spectral-cli
+      if: steps.restore-cache.outputs.cache-hit != 'true'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        SPECTRAL_CLI_BIN_VERSION: v1.1.6
+        SPECTRAL_CLI_BIN_CHECKSUM: d05a6e8b729d5c6e20a476747bedb7f3f83f2a6cb9838ae28d986ee537fad371
+      shell: bash
+      run: |
+        # Print every statement if debugging
+        [ -n "${{ runner.debug }}" ] && set -x
+
+        asset_name="spectral-cli-bin_${SPECTRAL_CLI_BIN_VERSION}_linux-x64"
+        filename="$HOME/.local/bin/spectral"
+
+        mkdir -p "$HOME/.local/bin"
+        gh release download -R entur/spectral-cli-bin ${SPECTRAL_CLI_BIN_VERSION} -p ${asset_name} -O ${filename}
+        if ! (echo "$SPECTRAL_CLI_BIN_CHECKSUM $filename" | sha256sum --check --status); then
+          echo "Checksum mismatch for ${filename}:"
+          echo "  Expected: $SPECTRAL_CLI_BIN_CHECKSUM"
+          echo "  Actual: $(sha256sum $filename)"
+          exit 1
+        fi
+
+        chmod +x $filename
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+        echo "Installed spectral $(spectral --version)"
+
+    - name: Save cache
+      if: steps.restore-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ~/.local/bin/spectral
+        key: ${{ steps.restore-cache.outputs.cache-primary-key }}
