@@ -1,0 +1,53 @@
+name: Setup redocly
+
+description: Downloads and installs redocly
+
+
+runs:
+  using: composite
+  steps:
+    # Restore from cache if available
+    - name: Restore cache
+      id: restore-cache
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          ~/.local/bin/redocly
+        key: redocly-cli-bin_v1.0.0_linux-x64
+
+    # Download redocly-cli binary if not cached
+    - name: Setup redocly-cli
+      if: steps.restore-cache.outputs.cache-hit != 'true'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REDOCLY_CLI_BIN_VERSION: v1.0.0
+        REDOCLY_CLI_BIN_CHECKSUM: 28415064919bf55571912794d8192143e202f538a166efbba72da95bfb031795
+      shell: bash
+      run: |
+        # Print every statement if debugging
+        [ -n "${{ runner.debug }}" ] && set -x
+
+        asset_name="redocly-cli-bin_${REDOCLY_CLI_BIN_VERSION}_linux-x64"
+        filename="$HOME/.local/bin/redocly"
+
+        mkdir -p "$HOME/.local/bin"
+        gh release download -R entur/redocly-cli-bin ${REDOCLY_CLI_BIN_VERSION} -p ${asset_name} -O ${filename}
+        if ! (echo "$REDOCLY_CLI_BIN_CHECKSUM $filename" | sha256sum --check --status); then
+          echo "Checksum mismatch for ${filename}:"
+          echo "  Expected: $REDOCLY_CLI_BIN_CHECKSUM"
+          echo "  Actual: $(sha256sum $filename)"
+          exit 1
+        fi
+
+        chmod +x $filename
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+        echo "Installed redocly $(redocly --version)"
+
+    - name: Save cache
+      if: steps.restore-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ~/.local/bin/redocly
+        key: ${{ steps.restore-cache.outputs.cache-primary-key }}
