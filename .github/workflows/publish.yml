@@ -10,13 +10,6 @@ on:
         description: "Artifact containing the OpenAPI specification."
         type: string
 
-env:
-  REDOCLY: npx --ignore-scripts @redocly/cli@2.30.6
-  # Need to force spectral-rulesets version to work around https://github.com/stoplightio/spectral/issues/2959
-  SPECTRAL: npx --ignore-scripts -p @stoplight/spectral-cli@6.16.0 -p @stoplight/spectral-rulesets@1.22.2 spectral
-  NPM_CONFIG_IGNORE_SCRIPTS: true
-  NPM_CONFIG_MIN_RELEASE_AGE: 4
-
 jobs:
   publish:
     name: OpenAPI Publish
@@ -39,9 +32,6 @@ jobs:
         with:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
       - name: Resolve spec path
         id: resolve-spec-path
         run: |
@@ -77,6 +67,14 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             .spectral-required.yml
+      - uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 #v1.1.1
+        name: Setup spectral
+        with:
+          uses: ${{ job.workflow_repository }}/.github/actions/setup-spectral@${{ job.workflow_sha }}
+      - uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 #v1.1.1
+        name: Setup redocly
+        with:
+          uses: ${{ job.workflow_repository }}/.github/actions/setup-redocly@${{ job.workflow_sha }}
       - name: Validate spec
         shell: bash
         env:
@@ -87,12 +85,12 @@ jobs:
           set -o pipefail          
           shopt -s globstar
 
-          if ! $SPECTRAL lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
+          if ! spectral lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
             echo "::error::Spec validation failed. Failing workflow."
             exit 1
           fi  
 
-          if ! $REDOCLY bundle $GHA_API_PATH; then
+          if ! redocly bundle $GHA_API_PATH; then
             echo "::error::Spec bundling failed. Failing workflow."
             exit 1
           fi  
@@ -119,7 +117,7 @@ jobs:
 
           filename=$(basename $GHA_API_PATH)
           mkdir -p /tmp/specs
-          $REDOCLY bundle -o /tmp/specs/$filename $GHA_API_PATH
+          redocly bundle -o /tmp/specs/$filename $GHA_API_PATH
 
           # Extract repository name (without owner)
           REPO_NAME="${GITHUB_REPOSITORY#*/}"

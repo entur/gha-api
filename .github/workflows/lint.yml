@@ -23,13 +23,6 @@ on:
         default: all
 
 
-env:
-  REDOCLY: npx --ignore-scripts @redocly/cli@2.30.6
-  # Need to force spectral-rulesets version to work around https://github.com/stoplightio/spectral/issues/2959
-  SPECTRAL: npx --ignore-scripts -p @stoplight/spectral-cli@6.16.0 -p @stoplight/spectral-rulesets@1.22.2 spectral
-  NPM_CONFIG_IGNORE_SCRIPTS: true
-  NPM_CONFIG_MIN_RELEASE_AGE: 4
-
 jobs:
   lint:
     name: OpenAPI Lint
@@ -64,9 +57,6 @@ jobs:
         with:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
       - name: Validate
         run: |
           set -o errexit  #Exits immediately if any command fails (returns non-zero)
@@ -128,6 +118,14 @@ jobs:
           sparse-checkout: |
             .spectral*.yml
             functions/*.js
+      - uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 #v1.1.1
+        name: Setup spectral
+        with:
+          uses: ${{ job.workflow_repository }}/.github/actions/setup-spectral@${{ job.workflow_sha }}
+      - uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 #v1.1.1
+        name: Setup redocly
+        with:
+          uses: ${{ job.workflow_repository }}/.github/actions/setup-redocly@${{ job.workflow_sha }}
       - name: Lint OpenAPI
         shell: bash
         env:
@@ -144,7 +142,7 @@ jobs:
           annotations=$(mktemp)
           markdown=$(mktemp)
           #Capture return code in $rc, and do not fail workflow.
-          $SPECTRAL lint "$GHA_API_PATH" --ruleset "rulesets/.spectral.yml" --show-documentation-url -F hint -f github-actions -o.github-actions "$annotations" -f markdown -o.markdown="$markdown" && rc=$? || rc=$?
+          spectral lint "$GHA_API_PATH" --ruleset "rulesets/.spectral.yml" --show-documentation-url -F hint -f github-actions -o.github-actions "$annotations" -f markdown -o.markdown="$markdown" && rc=$? || rc=$?
           
           #Return code 2 means that spectral command failed to run (not linting errors), so fail workflow.
           if [ "$rc" -eq 2 ]; then
@@ -168,7 +166,7 @@ jobs:
             echo
 
             if [ "$GHA_API_FAIL_THRESHOLD" != "never" ]; then
-              $SPECTRAL lint "$GHA_API_PATH" --ruleset "rulesets/.spectral.yml" -o "/dev/null" -f json -F "$GHA_API_FAIL_THRESHOLD" && rc=$? || rc=$?
+              spectral lint "$GHA_API_PATH" --ruleset "rulesets/.spectral.yml" -o "/dev/null" -f json -F "$GHA_API_FAIL_THRESHOLD" && rc=$? || rc=$?
 
               if [ "$rc" -ne 0 ]; then
                 echo "::error::Found linting problems. Failing workflow."
@@ -211,7 +209,7 @@ jobs:
 
           filename=$(basename $GHA_API_PATH)
           mkdir -p /tmp/specs
-          $REDOCLY bundle -o /tmp/specs/$filename $GHA_API_PATH
+          redocly bundle -o /tmp/specs/$filename $GHA_API_PATH
 
           cp $GHA_API_PATH /tmp/specs
       - name: Upload specs to GCS
