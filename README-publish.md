@@ -12,7 +12,7 @@ Publish an OpenAPI specification to [Enturs developer documentation](https://bet
 |                          INPUT                           |  TYPE  | REQUIRED | DEFAULT |                  DESCRIPTION                   |
 |----------------------------------------------------------|--------|----------|---------|------------------------------------------------|
 | <a name="input_artifact"></a>[artifact](#input_artifact) | string |  false   |         | Artifact containing the OpenAPI specification. |
-|       <a name="input_path"></a>[path](#input_path)       | string |  false   |         |          Path to OpenAPI specfication          |
+|       <a name="input_path"></a>[path](#input_path)       | string |  false   |         |         Path to OpenAPI specification          |
 
 <!-- AUTO-DOC-INPUT:END -->
 
