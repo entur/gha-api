@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.3.0](https://github.com/entur/gha-api/compare/v6.2.3...v6.3.0) (2026-07-27)
+
+
+### Features
+
+* **ETU-74964:** Use pre-built executables to invoke spectral and redocly ([#151](https://github.com/entur/gha-api/issues/151)) ([c1e2804](https://github.com/entur/gha-api/commit/c1e280436fd5b4932eda433733b3b3a59adafb81))
+
 ## [6.2.3](https://github.com/entur/gha-api/compare/v6.2.2...v6.2.3) (2026-06-22)
 
 
