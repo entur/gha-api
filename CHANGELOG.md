@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.3.1](https://github.com/entur/gha-api/compare/v6.3.0...v6.3.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* Typo in workflow input description ([01692cd](https://github.com/entur/gha-api/commit/01692cd24e01446686fc292d46054dbeb305e82c))
+
 ## [6.3.0](https://github.com/entur/gha-api/compare/v6.2.3...v6.3.0) (2026-07-27)
 
 
