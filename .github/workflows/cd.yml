@@ -7,6 +7,8 @@ permissions:
   pull-requests: write
   contents: write
   issues: write
+  actions: read
+  id-token: write
 jobs:
   test-validate-file:
     uses: ./.github/workflows/validate.yml
