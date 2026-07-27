@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       path:
-        description: "Path to OpenAPI specfication"
+        description: "Path to OpenAPI specification"
         type: string
       artifact:
         description: "Artifact containing the OpenAPI specification."

@@ -16,31 +16,22 @@ jobs:
       path: fixture/openapi-good.json
   release:
     uses: entur/gha-meta/.github/workflows/release.yml@v1
-  update-lint-doc:
+  update-docs:
     needs: release
     if: needs.release.outputs.releases_created == 'false'
+    strategy:
+      max-parallel: 1 # Can't have them commit in parallel
+      matrix:
+        files:
+          - workflow: .github/workflows/lint.yml
+            readme: README-lint.md
+          - workflow: .github/workflows/validate.yml
+            readme: README-validate.md
+          - workflow: .github/workflows/publish.yml
+            readme: README-publish.md
     uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
     with:
       commit_default_author: 'github_actions'
       target_branch: 'release-please--branches--main'
-      workflow_file: .github/workflows/lint.yml
-      readme_file: README-lint.md
-
-  update-publish-doc:
-    needs: [release, update-lint-doc]
-    if: needs.release.outputs.releases_created == 'false'
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
-    with:
-      commit_default_author: 'github_actions'
-      target_branch: 'release-please--branches--main'
-      workflow_file: .github/workflows/publish.yml
-      readme_file: README-publish.md
-  update-validate-doc:
-    needs: [release, update-publish-doc]
-    if: needs.release.outputs.releases_created == 'false'
-    uses: entur/gha-meta/.github/workflows/auto-doc.yml@v1
-    with:
-      commit_default_author: 'github_actions'
-      target_branch: 'release-please--branches--main'
-      workflow_file: .github/workflows/validate.yml
-      readme_file: README-validate.md
+      workflow_file: ${{ matrix.files.workflow }}
+      readme_file: ${{ matrix.files.readme }}
