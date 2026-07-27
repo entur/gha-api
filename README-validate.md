@@ -9,7 +9,7 @@ Check that an OpenAPI specification is valid and ready to be published using [`g
 |                          INPUT                           |  TYPE  | REQUIRED | DEFAULT |                  DESCRIPTION                   |
 |----------------------------------------------------------|--------|----------|---------|------------------------------------------------|
 | <a name="input_artifact"></a>[artifact](#input_artifact) | string |  false   |         | Artifact containing the OpenAPI specification. |
-|       <a name="input_path"></a>[path](#input_path)       | string |  false   |         |          Path to OpenAPI specfication          |
+|       <a name="input_path"></a>[path](#input_path)       | string |  false   |         |         Path to OpenAPI specification          |
 
 <!-- AUTO-DOC-INPUT:END -->
 
