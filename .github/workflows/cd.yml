@@ -8,6 +8,10 @@ permissions:
   contents: write
   issues: write
 jobs:
+  test-validate-file:
+    uses: ./.github/workflows/validate.yml
+    with:
+      path: fixture/openapi-good.json
   release:
     uses: entur/gha-meta/.github/workflows/release.yml@v1
   update-lint-doc:
