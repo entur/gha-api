@@ -118,14 +118,10 @@ jobs:
           sparse-checkout: |
             .spectral*.yml
             functions/*.js
-      - uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 #v1.1.1
+      - uses: $/.github/actions/setup-spectral
         name: Setup spectral
-        with:
-          uses: ${{ job.workflow_repository }}/.github/actions/setup-spectral@${{ job.workflow_sha }}
-      - uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 #v1.1.1
+      - uses: $/.github/actions/setup-redocly
         name: Setup redocly
-        with:
-          uses: ${{ job.workflow_repository }}/.github/actions/setup-redocly@${{ job.workflow_sha }}
       - name: Lint OpenAPI
         shell: bash
         env:
