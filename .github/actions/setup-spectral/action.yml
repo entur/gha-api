@@ -13,15 +13,15 @@ runs:
       with:
         path: |
           ~/.local/bin/spectral
-        key: spectral-cli-bin_v1.1.6_linux-x64
+        key: spectral-cli-bin_v1.2.0_linux-x64
 
     # Download spectral-cli binary if not cached
     - name: Setup spectral-cli
       if: steps.restore-cache.outputs.cache-hit != 'true'
       env:
         GH_TOKEN: ${{ github.token }}
-        SPECTRAL_CLI_BIN_VERSION: v1.1.6
-        SPECTRAL_CLI_BIN_CHECKSUM: d05a6e8b729d5c6e20a476747bedb7f3f83f2a6cb9838ae28d986ee537fad371
+        SPECTRAL_CLI_BIN_VERSION: v1.2.0
+        SPECTRAL_CLI_BIN_CHECKSUM: 20e0ab632c7af03fcdc5b6bde2339ed88b728f0049bfabb86e2e4a464bda2b5f
       shell: bash
       run: |
         # Print every statement if debugging
