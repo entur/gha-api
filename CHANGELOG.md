@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.3.2](https://github.com/entur/gha-api/compare/v6.3.1...v6.3.2) (2026-08-06)
+
+
+### Bug Fixes
+
+* Use new syntax for referencing action in same repo ([#155](https://github.com/entur/gha-api/issues/155)) ([b2bbd7d](https://github.com/entur/gha-api/commit/b2bbd7dd8b2dedfb178c8b8cc3e028329c1c22a5))
+
 ## [6.3.1](https://github.com/entur/gha-api/compare/v6.3.0...v6.3.1) (2026-07-27)
 
 
