@@ -6,10 +6,11 @@ Check that an OpenAPI specification is valid and ready to be published using [`g
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-|                          INPUT                           |  TYPE  | REQUIRED | DEFAULT |                  DESCRIPTION                   |
-|----------------------------------------------------------|--------|----------|---------|------------------------------------------------|
-| <a name="input_artifact"></a>[artifact](#input_artifact) | string |  false   |         | Artifact containing the OpenAPI specification. |
-|       <a name="input_path"></a>[path](#input_path)       | string |  false   |         |         Path to OpenAPI specification          |
+|                          INPUT                           |  TYPE  | REQUIRED | DEFAULT |                          DESCRIPTION                           |
+|----------------------------------------------------------|--------|----------|---------|----------------------------------------------------------------|
+| <a name="input_artifact"></a>[artifact](#input_artifact) | string |  false   |         |         Artifact containing the OpenAPI specification.         |
+|        <a name="input_env"></a>[env](#input_env)         | string |  false   | `"prd"` | The environment to operate against. <br>dev|prd. Default: prd  |
+|       <a name="input_path"></a>[path](#input_path)       | string |  false   |         |                 Path to OpenAPI specification                  |
 
 <!-- AUTO-DOC-INPUT:END -->
 
