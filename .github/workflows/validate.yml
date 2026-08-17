@@ -9,6 +9,10 @@ on:
       artifact:
         description: "Artifact containing the OpenAPI specification."
         type: string
+      env:
+        description: "The environment to operate against. dev|prd. Default: prd"
+        type: string
+        default: prd
 
 jobs:
   validate-spec:
@@ -19,9 +23,10 @@ jobs:
       actions: read
       id-token: write
     env:
-      GHA_API_ARTIFACT:       ${{ inputs.artifact }}
-      GHA_API_PATH:           ${{ inputs.path }}
-      CLOUD_RUN_ENDPOINT:     https://europe-west1-ent-apidata-prd.cloudfunctions.net/publish-spec
+      GHA_API_ARTIFACT:           ${{ inputs.artifact }}
+      GHA_API_PATH:               ${{ inputs.path }}
+      GHA_API_ENV:                ${{ inputs.env }}
+      GHA_API_CLOUD_RUN_ENDPOINT: https://europe-west1-ent-apidata-${{ inputs.env }}.cloudfunctions.net/publish-spec
     steps:
       - name: Checkout repository (if spec provided)
         if: ${{ inputs.artifact == '' }}
@@ -32,6 +37,21 @@ jobs:
         with:
           pattern: ${{ inputs.artifact }}
           path: /tmp/artifacts
+      - name: Validate inputs
+        run: |
+          # Print every statement if debugging
+          [ -n "${{ runner.debug }}" ] && set -x
+          set -euo pipefail
+          
+          # Validate fail_threshold
+          case "$GHA_API_ENV" in
+            dev|prd) 
+              ;;  # OK
+            *) 
+              echo "::error::env must be one of: dev, prd"
+              exit 1
+              ;;
+          esac
       - name: Resolve spec path
         id: resolve-spec-path
         run: |
@@ -65,7 +85,7 @@ jobs:
           workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
           token_format: id_token
-          id_token_audience: ${{ env.CLOUD_RUN_ENDPOINT }}
+          id_token_audience: ${{ env.GHA_API_CLOUD_RUN_ENDPOINT }}
           id_token_include_email: true
           create_credentials_file: false
 
@@ -123,7 +143,7 @@ jobs:
             -H "Authorization: Bearer $ID_TOKEN" \
             -F "metadata=$METADATA;type=application/json" \
             -F "spec=@/tmp/specs/$filename" \
-            "$CLOUD_RUN_ENDPOINT?dryRun=true") || {
+            "$GHA_API_CLOUD_RUN_ENDPOINT?dryRun=true") || {
             DETAIL=$(echo "$RESPONSE" | jq -r '.detail')
             echo "::error file=$GHA_API_PATH,line=1::$DETAIL"
             exit 1
