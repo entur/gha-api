@@ -18,7 +18,7 @@ jobs:
     uses: entur/gha-meta/.github/workflows/release.yml@v1
   update-docs:
     needs: release
-    if: needs.release.outputs.releases_created == 'false'
+    if: needs.release.outputs.releases_created == 'false' && needs.release.outputs.prs_created == 'true'
     strategy:
       max-parallel: 1 # Can't have them commit in parallel
       matrix:
