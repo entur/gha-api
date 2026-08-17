@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.4.0](https://github.com/entur/gha-api/compare/v6.3.2...v6.4.0) (2026-08-17)
+
+
+### Features
+
+* **ETU-75553:** Add option to specify env ([#159](https://github.com/entur/gha-api/issues/159)) ([26e0d85](https://github.com/entur/gha-api/commit/26e0d85584ee4692986bb82af9c40983284e77fe))
+
 ## [6.3.2](https://github.com/entur/gha-api/compare/v6.3.1...v6.3.2) (2026-08-06)
 
 
