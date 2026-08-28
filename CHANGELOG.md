@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.5.0](https://github.com/entur/gha-api/compare/v6.4.0...v6.5.0) (2026-08-28)
+
+
+### Features
+
+* **ETU-75494:** Update api-guidelines to 3.1.1. This version adds lint rules for api lifecycle management. ([e2105a2](https://github.com/entur/gha-api/commit/e2105a2d836b33181202db82720e5bdb9eec612f))
+
 ## [6.4.0](https://github.com/entur/gha-api/compare/v6.3.2...v6.4.0) (2026-08-17)
 
 
