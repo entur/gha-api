@@ -93,11 +93,12 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: entur/api-guidelines
-          ref: v3.0.3
+          ref: v3.1.1
           path: rulesets
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             .spectral-required.yml
+            functions/*.js
       - uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 #v1.1.1
         name: Setup spectral
         with:
