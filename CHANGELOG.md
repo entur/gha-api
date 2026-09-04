@@ -1,6 +1,18 @@
 # Changelog
 
 
+## [6.6.0](https://github.com/entur/gha-api/compare/v6.5.0...v6.6.0) (2026-09-04)
+
+
+### Features
+
+* Upgrade api-guidelines to 3.3.0 ([#163](https://github.com/entur/gha-api/issues/163)) ([b5444e2](https://github.com/entur/gha-api/commit/b5444e242d5b0b9b778d454cfca5414391e27d63))
+
+
+### Bug Fixes
+
+* Use local action ref syntax ([#165](https://github.com/entur/gha-api/issues/165)) ([eeff2e3](https://github.com/entur/gha-api/commit/eeff2e39cc94a626f17eba117bd30cf8d7ea9159))
+
 ## [6.5.0](https://github.com/entur/gha-api/compare/v6.4.0...v6.5.0) (2026-08-28)
 
 
