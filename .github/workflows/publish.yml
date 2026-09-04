@@ -88,14 +88,10 @@ jobs:
           sparse-checkout: |
             .spectral-required.yml
             functions/*.js
-      - uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 #v1.1.1
+      - uses: $/.github/actions/setup-spectral
         name: Setup spectral
-        with:
-          uses: ${{ job.workflow_repository }}/.github/actions/setup-spectral@${{ job.workflow_sha }}
-      - uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 #v1.1.1
+      - uses: $/.github/actions/setup-redocly
         name: Setup redocly
-        with:
-          uses: ${{ job.workflow_repository }}/.github/actions/setup-redocly@${{ job.workflow_sha }}
       - name: Validate spec
         shell: bash
         env:
@@ -162,7 +158,7 @@ jobs:
           echo "Successfully published: $GHA_API_PATH"
       - name: Send analytics
         if: always()
-        uses: entur/gha-api/.github/actions/posthog@main
+        uses: $/.github/actions/posthog
         with:
           workflow_name:   publish
           workflow_inputs: ${{ toJSON(inputs) }}
