@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.7.0](https://github.com/entur/gha-api/compare/v6.6.0...v6.7.0) (2026-09-08)
+
+
+### Features
+
+* Upgrade api-guidelines to 3.4.0 ([#166](https://github.com/entur/gha-api/issues/166)) ([4307987](https://github.com/entur/gha-api/commit/4307987ee341c9e9892e5a5b4fe7300c68f16276))
+
 ## [6.6.0](https://github.com/entur/gha-api/compare/v6.5.0...v6.6.0) (2026-09-04)
 
 
