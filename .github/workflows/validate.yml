@@ -131,7 +131,7 @@ jobs:
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
 
           # Create metadata JSON
-          METADATA="{\"repository\": \"$REPO_NAME\"}"
+          METADATA="{\"repository\": \"$REPO_NAME\", \"github\": { \"sha\": \"$GITHUB_SHA\", \"ref\": \"$GITHUB_REF\", \"runId\": \"$GITHUB_RUN_ID\" }}"
 
           echo "Uploading to api-spec-registry with dryRun=true..."
 
