@@ -60,6 +60,11 @@ jobs:
   openapi-lint:
     uses: entur/gha-api/.github/workflows/lint.yml@v6
     secrets: inherit
+  openapi-publish-preview:
+    uses: entur/gha-api/.github/workflows/publish.yml@v6
+    secrets: inherit
+    with:
+      preview: true
 
   helm-deploy:
       uses: entur/gha-helm/.github/workflows/deploy.yml@v1
