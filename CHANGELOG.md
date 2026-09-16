@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.8.0](https://github.com/entur/gha-api/compare/v6.7.0...v6.8.0) (2026-09-16)
+
+
+### Features
+
+* **ETU-70565:** Send github metadata with upload ([#170](https://github.com/entur/gha-api/issues/170)) ([7d29f98](https://github.com/entur/gha-api/commit/7d29f985441cbc5a451b74ef5b634d6b63d70392))
+
 ## [6.7.0](https://github.com/entur/gha-api/compare/v6.6.0...v6.7.0) (2026-09-08)
 
 
