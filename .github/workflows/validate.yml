@@ -22,6 +22,7 @@ jobs:
       contents: read
       actions: read
       id-token: write
+      pull-requests: write # required for creating comments on pull requests
     env:
       GHA_API_ARTIFACT:           ${{ inputs.artifact }}
       GHA_API_PATH:               ${{ inputs.path }}
@@ -105,6 +106,7 @@ jobs:
         name: Setup redocly
       - name: Validate
         shell: bash
+        id: validate
         env:
           GHA_API_PATH: ${{ steps.resolve-spec-path.outputs.spec_path }}
           ID_TOKEN:     ${{ steps.auth.outputs.id_token }}
@@ -145,8 +147,17 @@ jobs:
             echo "::error file=$GHA_API_PATH,line=1::$DETAIL"
             exit 1
           }
+          
+          echo "result=$RESPONSE" >> "$GITHUB_OUTPUT"
 
           echo "Successfully validated: $GHA_API_PATH"
+      - name: Evaluate validation result
+        uses: $/.github/actions/evaluate-validation
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          validation_result: ${{ steps.validate.outputs.result }}
+          show_changes: ${{ inputs.show_changes }}
+
       - name: Send analytics
         if: always()
         uses: $/.github/actions/posthog
