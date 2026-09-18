@@ -1,0 +1,12 @@
+name: 'PR Comment Action for gha-api'
+description: 'Note: Only for use within gha-api.'
+inputs:
+#  token:
+#    description: "Github token"
+#    required: true
+  validate_response:
+    description: "Validate response from api-spec-registry"
+    required: true
+runs:
+  using: 'node24'
+  main: 'dist/index.cjs'

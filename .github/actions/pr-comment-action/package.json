@@ -1,0 +1,28 @@
+{
+  "name": "pr-comment-action",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -noEmit && yarn esbuild index.ts --bundle --outdir=dist --out-extension:.js=.cjs --platform=node --target=node24.0.0 --packages=bundle"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "EUPL",
+  "description": "",
+  "dependencies": {
+    "@actions/core": "3.0.1",
+    "@actions/github": "9.1.1",
+    "@octokit/core": "7.0.6",
+    "@octokit/plugin-throttling": "11.0.3",
+    "octokit": "5.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "26.0.0",
+    "esbuild": "0.28.1",
+    "typescript": "6.0.3"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

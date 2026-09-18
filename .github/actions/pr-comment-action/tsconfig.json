@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "NodeNext",
+		"moduleResolution": "nodenext",
+		"esModuleInterop": true,
+		"strict": true,
+		"outDir": "dist",
+		"types": ["node"]
+	},
+	"include": ["*"],
+	"exclude": ["node_modules"]
+}
