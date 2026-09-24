@@ -13,6 +13,10 @@ on:
         description: "The environment to operate against. dev|prd. Default: prd"
         type: string
         default: prd
+      show_changes:
+        description: "Should the workflow create a PR comment showing the changes made to the specification? Values: \"all\": Show all changes. \"breaking\": Only show breaking changes. \"none\": Don't show changes. Default: \"all\""
+        type: string
+        default: all
 
 jobs:
   validate-spec:
@@ -27,6 +31,7 @@ jobs:
       GHA_API_ARTIFACT:           ${{ inputs.artifact }}
       GHA_API_PATH:               ${{ inputs.path }}
       GHA_API_ENV:                ${{ inputs.env }}
+      GHA_API_SHOW_CHANGES:       ${{ inputs.show_changes }}
       GHA_API_CLOUD_RUN_ENDPOINT: https://europe-west1-ent-apidata-${{ inputs.env }}.cloudfunctions.net/publish-spec
     steps:
       - name: Checkout repository (if spec provided)
@@ -50,6 +55,16 @@ jobs:
               ;;  # OK
             *) 
               echo "::error::env must be one of: dev, prd"
+              exit 1
+              ;;
+          esac
+
+          # Validate show_changes
+          case "$GHA_API_SHOW_CHANGES" in
+            all|breaking|none) 
+              ;;  # OK
+            *) 
+              echo "::error::show_changes must be one of: all, breaking, none."
               exit 1
               ;;
           esac
