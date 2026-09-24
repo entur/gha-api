@@ -47,7 +47,9 @@ jobs:
     secrets: inherit
 ```
 
-Lint and publish the spec to the developer portal in the CD workflow:
+Lint, publish, and release the spec to the developer portal in the CD workflow.
+Run `publish.yml` with `release: false` before any manual approval gates,
+since the latest unreleased version of the specification can be used for [change detection in CI](../README-validate.md#api-change-detection) with `validate.yml`.
 
 ```yaml
 # cd.yml
@@ -60,14 +62,19 @@ jobs:
   openapi-lint:
     uses: entur/gha-api/.github/workflows/lint.yml@v6
     secrets: inherit
+  openapi-publish:
+    uses: entur/gha-api/.github/workflows/publish.yml@v6
+    secrets: inherit
+    with:
+      release: false # Publish specification without releasing, before deployment to production.
 
   helm-deploy:
-      uses: entur/gha-helm/.github/workflows/deploy.yml@v1
-      with:
-        environment: prd
+    uses: entur/gha-helm/.github/workflows/deploy.yml@v1
+    with:
+      environment: prd
 
-  openapi-publish:
-    needs: helm-deploy # Publish specification after deployment to production has suceeded
+  openapi-release:
+    needs: helm-deploy # Publish specification, making it visible in the developer portal, after deployment to production has suceeded
     uses: entur/gha-api/.github/workflows/publish.yml@v6
     secrets: inherit
 ```

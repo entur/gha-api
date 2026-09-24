@@ -1,6 +1,6 @@
 # `gha-api/publish`
 
-Publish an OpenAPI specification to [Enturs developer documentation](https://beta.developer.entur.no).
+Publish an OpenAPI specification to [Enturs developer documentation](https://developer.entur.no).
 
 
 > [!TIP]
@@ -63,3 +63,18 @@ jobs:
     with:
       artifact: myArtifactName
 ```
+
+## Publish without releasing
+
+You can set the `release` input to `false` if you want to upload your api specification without releasing it.
+The latest unreleased version of a specification is used as the base for change detection in [validate.yml](./README-validate.md#api-change-detection).
+
+```yml
+#cd.yml
+jobs:
+  openapi-publish:
+    uses: entur/gha-api/.github/workflows/publish.yml@v6
+    with:
+      release: false
+```
+
