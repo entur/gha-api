@@ -1,0 +1,15 @@
+name: 'Evaluate validation for gha-api'
+description: 'Note: Only for use within gha-api.'
+inputs:
+  token:
+    description: "Github token"
+    required: true
+  validation_result:
+    description: "The validation result from api-spec-registry"
+    required: true
+  show_changes:
+    description: "Which changes to show in comment."
+    required: true
+runs:
+  using: 'node24'
+  main: 'dist/index.cjs'

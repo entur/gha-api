@@ -96,3 +96,24 @@ jobs:
     with:
       artifact: "specs"
       path: "openapi-good.json"
+  
+  check-evaluate-validation-dist:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .github/actions/evaluate-validation
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+
+      - name: Compare the expected and actual dist directories
+        run: |
+          if [ "$(git diff --ignore-space-at-eol ./dist | wc -l)" -gt "0" ]; then
+            echo "Detected uncommitted changes in .github/actions/evaluate-validation/dist directory. Remember to run npm run build in the .github/actions/evaluate-validation directory and commit the changes, after making changes to the action source."
+            exit 1
+          fi

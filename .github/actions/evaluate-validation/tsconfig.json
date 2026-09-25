@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "NodeNext",
+		"moduleResolution": "nodenext",
+		"esModuleInterop": true,
+		"strict": true,
+		"outDir": "dist",
+		"types": ["node", "lodash"],
+		"skipLibCheck": true
+	},
+	"include": ["*"],
+	"exclude": ["node_modules"]
+}
