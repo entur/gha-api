@@ -10,3 +10,22 @@ updates:
       default-days: 5
       exclude:
         - "entur/*"
+  - package-ecosystem: npm
+    directory: .github/actions/evaluate-validation
+    schedule:
+      interval: "weekly"
+      time: "09:00"
+      timezone: "Europe/Oslo"
+    cooldown:
+      default-days: 5
+      exclude:
+        - "entur/*"
+    groups:
+      Minor-Updates:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+        exclude-patterns:
+          - "@entur/*"
+
