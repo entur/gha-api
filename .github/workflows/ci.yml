@@ -52,7 +52,7 @@ jobs:
       path: fixture/external-refs/openapi.yaml
 
   upload-artifact:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - name: Save spec to the artifact storage
@@ -72,7 +72,7 @@ jobs:
       fail_threshold: warn
 
   upload-artifact-all:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - name: Save all specs to the artifact storage
