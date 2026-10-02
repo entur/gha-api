@@ -3,6 +3,10 @@ name: Entur/API/Publish
 on:
   workflow_call:
     inputs:
+      release:
+        description: "Whether or not the specification should be released to consumers."
+        type: boolean
+        default: true
       path:
         description: "Path to OpenAPI specification"
         type: string
@@ -124,6 +128,7 @@ jobs:
       - name: Upload
         env:
           GHA_API_PATH:    ${{ steps.resolve-spec-path.outputs.spec_path }}
+          GHA_API_RELEASE: ${{ inputs.release }}
           ID_TOKEN:        ${{ steps.auth.outputs.id_token }}
         shell: bash
         run: |
@@ -149,7 +154,7 @@ jobs:
             -H "Authorization: Bearer $ID_TOKEN" \
             -F "metadata=$METADATA;type=application/json" \
             -F "spec=@/tmp/specs/$filename" \
-            "$GHA_API_CLOUD_RUN_ENDPOINT") || {
+            "$GHA_API_CLOUD_RUN_ENDPOINT?release=$GHA_API_RELEASE") || {
             DETAIL=$(echo "$RESPONSE" | jq -r '.detail')
             echo "::error file=$GHA_API_PATH,line=1::$DETAIL"
             exit 1
