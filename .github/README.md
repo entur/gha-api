@@ -1,15 +1,13 @@
 <h1 align="center">entur/gha-api</h1>
 
 [![Entur/API/CI](https://github.com/entur/gha-api/actions/workflows/ci.yml/badge.svg)](https://github.com/entur/gha-api/actions/workflows/ci.yml)
-[![Lint OpenAPI specs](https://github.com/entur/gha-api/actions/workflows/lint.yml/badge.svg)](https://github.com/entur/gha-api/actions/workflows/lint.yml)
-[![Publish OpenAPI specs](https://github.com/entur/gha-api/actions/workflows/publish.yml/badge.svg)](https://github.com/entur/gha-api/actions/workflows/publish.yml)
 [![License](https://img.shields.io/github/license/entur/gha-api)](https://github.com/entur/gha-api)
 
 Github reusable workflows to help Entur teams:
 
 - [Lint OpenAPI specs](../README-lint.md)
 - [Validate OpenAPI specs](../README-validate.md)
-- [Publish OpenAPI specs to the developer portal](../README-publish.md)
+- [Upload OpenAPI specs and publish to the developer portal](../README-upload.md)
 
 ## Golden Path
 
@@ -66,7 +64,7 @@ jobs:
       with:
         environment: prd
 
-  openapi-publish:
+  openapi-upload:
     needs: helm-deploy # Publish specification after deployment to production has suceeded
     uses: entur/gha-api/.github/workflows/publish.yml@v6
     secrets: inherit

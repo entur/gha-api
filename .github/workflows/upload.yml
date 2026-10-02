@@ -1,0 +1,171 @@
+name: Entur/API/Upload
+
+on:
+  workflow_call:
+    inputs:
+      path:
+        description: "Path to OpenAPI specification"
+        type: string
+      artifact:
+        description: "Artifact containing the OpenAPI specification."
+        type: string
+      environment:
+        description: "The environment to operate against. dev|prd. Default: prd"
+        type: string
+        default: prd
+      release:
+        description: "If true, the specification will be released to the developer portal. If false, it will only be uploaded as a draft."
+        type: boolean
+        required: true
+
+jobs:
+  upload:
+    name: OpenAPI Upload
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    env:
+      GHA_API_ARTIFACT:           ${{ inputs.artifact }}
+      GHA_API_PATH:               ${{ inputs.path }}
+      GHA_API_ENV:                ${{ inputs.env }}
+      GHA_API_CLOUD_RUN_ENDPOINT: https://europe-west1-ent-apidata-${{ inputs.env }}.cloudfunctions.net/publish-spec
+    steps:
+      - name: Checkout repository (if spec provided)
+        if: ${{ inputs.artifact == '' }}
+        uses: actions/checkout@v7
+      - name: Download artifact (if artifact provided)
+        if: ${{ inputs.artifact != '' }}
+        uses: actions/download-artifact@v8
+        with:
+          pattern: ${{ inputs.artifact }}
+          path: /tmp/artifacts
+      - name: Validate inputs
+        run: |
+          # Print every statement if debugging
+          [ -n "${{ runner.debug }}" ] && set -x
+          set -euo pipefail
+          
+          # Validate fail_threshold
+          case "$GHA_API_ENV" in
+            dev|prd) 
+              ;;  # OK
+            *) 
+              echo "::error::env must be one of: dev, prd"
+              exit 1
+              ;;
+          esac
+      - name: Resolve spec path
+        id: resolve-spec-path
+        run: |
+          # Resolve spec path based on inputs
+          if [ -n "$GHA_API_ARTIFACT" ]; then
+            if [ -n "$GHA_API_PATH" ]; then
+              spec_path="/tmp/artifacts/$GHA_API_PATH"
+            else
+              spec_path="/tmp/artifacts/openapi.yaml"
+            fi
+          else
+            if [ -n "$GHA_API_PATH" ]; then
+              spec_path="$GHA_API_PATH"
+            else
+              spec_path="specs/openapi.yaml"
+            fi
+          fi
+
+          echo "Path to spec resolved to $spec_path"
+          
+          if [ ! -f $spec_path ]; then
+            echo "File $spec_path not found."
+            exit 1
+          fi
+          
+          echo "spec_path=$spec_path" >> "$GITHUB_OUTPUT"
+      - name: Checkout linting rulesets
+        uses: actions/checkout@v7
+        with:
+          repository: entur/api-guidelines
+          ref: v3.4.0
+          path: rulesets
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .spectral-required.yml
+            functions/*.js
+      - uses: $/.github/actions/setup-spectral
+        name: Setup spectral
+      - uses: $/.github/actions/setup-redocly
+        name: Setup redocly
+      - name: Validate spec
+        shell: bash
+        env:
+          GHA_API_PATH:     ${{ steps.resolve-spec-path.outputs.spec_path }}
+        run: |
+          set -o errexit
+          set -o nounset
+          set -o pipefail          
+          shopt -s globstar
+
+          if ! spectral lint "$GHA_API_PATH" --ruleset "rulesets/.spectral-required.yml"; then
+            echo "::error::Spec validation failed. Failing workflow."
+            exit 1
+          fi  
+
+          if ! redocly bundle $GHA_API_PATH; then
+            echo "::error::Spec bundling failed. Failing workflow."
+            exit 1
+          fi  
+      - name: Authenticate with Google Cloud
+        id: auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+          token_format: id_token
+          id_token_audience: ${{ env.GHA_API_CLOUD_RUN_ENDPOINT }}
+          id_token_include_email: true
+          create_credentials_file: false
+      - name: Upload
+        env:
+          GHA_API_PATH:    ${{ steps.resolve-spec-path.outputs.spec_path }}
+          GHA_API_RELEASE: ${{ inputs.release }}
+          ID_TOKEN:        ${{ steps.auth.outputs.id_token }}
+        shell: bash
+        run: |
+          set -o errexit
+          set -o nounset
+          set -o pipefail
+          shopt -s globstar
+
+          filename=$(basename $GHA_API_PATH)
+          mkdir -p /tmp/specs
+          redocly bundle -o /tmp/specs/$filename $GHA_API_PATH
+
+          # Extract repository name (without owner)
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          
+          # Create metadata JSON
+          METADATA="{\"repository\": \"$REPO_NAME\", \"github\": { \"sha\": \"$GITHUB_SHA\", \"ref\": \"$GITHUB_REF\", \"runId\": \"$GITHUB_RUN_ID\" }}"
+
+          echo "Uploading spec: $GHA_API_PATH"
+
+          RESPONSE=$(curl --fail-with-body -sS \
+            -X PUT \
+            -H "Authorization: Bearer $ID_TOKEN" \
+            -F "metadata=$METADATA;type=application/json" \
+            -F "spec=@/tmp/specs/$filename" \
+            "$GHA_API_CLOUD_RUN_ENDPOINT?release=$GHA_API_RELEASE") || {
+            DETAIL=$(echo "$RESPONSE" | jq -r '.detail')
+            echo "::error file=$GHA_API_PATH,line=1::$DETAIL"
+            exit 1
+          }
+
+          echo "Successfully uploaded: $GHA_API_PATH"
+      - name: Send analytics
+        if: always()
+        uses: $/.github/actions/posthog
+        with:
+          workflow_name:   upload
+          workflow_inputs: ${{ toJSON(inputs) }}
+          api_key:         "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
+
