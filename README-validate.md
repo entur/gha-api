@@ -60,3 +60,23 @@ jobs:
     with:
       artifact: myArtifactName
 ```
+
+## API change detection
+The workflow detects and validates the changes that are made to a specification in the current PR, and summarizes the changes in a comment.
+To configure this functionality, use the input `show_changes`.
+
+```yml
+#ci.yml
+jobs:
+  openapi-validate:
+    uses: entur/gha-api/.github/workflows/validate.yml@v6
+    with:
+      show_changes: all
+```
+
+- `all` (default value): Creates a comment if there are changes in the API, breaking or non-breaking. Note that purely cosmetic changes, for example to `description` or `examples`, will not be shown.
+- `breaking`: Only show changes if they are breaking.
+- `none`: Never show the comment.
+
+> [!NOTE]
+> To use this functionality, you must also upload the specification as a draft in your CD pipeline, in order to have a base to compare with. See [README-publish.md](./README-publish.md#publish-as-draft).

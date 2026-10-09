@@ -47,27 +47,35 @@ jobs:
     secrets: inherit
 ```
 
-Lint and publish the spec to the developer portal in the CD workflow:
+Lint and publish the spec to the developer portal in the CD workflow.
+Run `publish.yml` with `draft: true` before any manual approval gates,
+since the latest draft version of the specification is used for [change detection in CI](../README-validate.md#api-change-detection) with `validate.yml`.
 
 ```yaml
 # cd.yml
 name: CD
 
 on:
-  pull_request:
+  push:
+    branches: [main]
 
 jobs:
   openapi-lint:
     uses: entur/gha-api/.github/workflows/lint.yml@v6
     secrets: inherit
+  openapi-publish-draft:
+    uses: entur/gha-api/.github/workflows/publish.yml@v6
+    secrets: inherit
+    with:
+      draft: true # Publish specification as draft, to have a base for change detection in ci.yml.
 
   helm-deploy:
-      uses: entur/gha-helm/.github/workflows/deploy.yml@v1
-      with:
-        environment: prd
+    uses: entur/gha-helm/.github/workflows/deploy.yml@v2
+    with:
+      environment: prd
 
   openapi-publish:
-    needs: helm-deploy # Publish specification after deployment to production has suceeded
+    needs: helm-deploy # Publish specification, making it visible in the developer portal, after deployment to production has suceeded
     uses: entur/gha-api/.github/workflows/publish.yml@v6
     secrets: inherit
 ```
