@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.10.0](https://github.com/entur/gha-api/compare/v6.9.0...v6.10.0) (2026-10-09)
+
+
+### Features
+
+* **ETU-75959:** Add support for showing API changes in PR comment ([#173](https://github.com/entur/gha-api/issues/173)) ([e2d17e4](https://github.com/entur/gha-api/commit/e2d17e44f21995f1436ee34f3713210785a40def))
+
 ## [6.9.0](https://github.com/entur/gha-api/compare/v6.8.0...v6.9.0) (2026-10-07)
 
 
