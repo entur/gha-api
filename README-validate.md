@@ -6,11 +6,12 @@ Check that an OpenAPI specification is valid and ready to be published using [`g
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-|                          INPUT                           |  TYPE  | REQUIRED | DEFAULT |                          DESCRIPTION                           |
-|----------------------------------------------------------|--------|----------|---------|----------------------------------------------------------------|
-| <a name="input_artifact"></a>[artifact](#input_artifact) | string |  false   |         |         Artifact containing the OpenAPI specification.         |
-|        <a name="input_env"></a>[env](#input_env)         | string |  false   | `"prd"` | The environment to operate against. <br>dev|prd. Default: prd  |
-|       <a name="input_path"></a>[path](#input_path)       | string |  false   |         |                 Path to OpenAPI specification                  |
+|                                INPUT                                 |  TYPE  | REQUIRED | DEFAULT |                                                                                                           DESCRIPTION                                                                                                           |
+|----------------------------------------------------------------------|--------|----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|       <a name="input_artifact"></a>[artifact](#input_artifact)       | string |  false   |         |                                                                                         Artifact containing the OpenAPI specification.                                                                                          |
+|              <a name="input_env"></a>[env](#input_env)               | string |  false   | `"prd"` |                                                                                 The environment to operate against. <br>dev|prd. Default: prd                                                                                   |
+|             <a name="input_path"></a>[path](#input_path)             | string |  false   |         |                                                                                                  Path to OpenAPI specification                                                                                                  |
+| <a name="input_show_changes"></a>[show_changes](#input_show_changes) | string |  false   | `"all"` | Should the workflow create a <br>PR comment showing the changes <br>made to the specification? Values: <br>"all": Show all changes. "breaking": <br>Only show breaking changes. "none": <br>Don't show changes. Default: "all"  |
 
 <!-- AUTO-DOC-INPUT:END -->
 
