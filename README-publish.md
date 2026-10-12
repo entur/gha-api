@@ -34,7 +34,6 @@ By default, the workflow looks for a specification at `specs/openapi.yaml`.
 jobs:
   openapi-publish:
     uses: entur/gha-api/.github/workflows/publish.yml@v6
-    secrets: inherit
 ```
 
 ## Specifying path to spec
@@ -48,7 +47,6 @@ jobs:
     uses: entur/gha-api/.github/workflows/publish.yml@v6
     with:
       path: specs/openapi.json
-    secrets: inherit
 ```
 
 ## Using a generated spec
