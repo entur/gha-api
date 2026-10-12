@@ -41,10 +41,8 @@ on:
 jobs:
   openapi-lint:
     uses: entur/gha-api/.github/workflows/lint.yml@v6
-    secrets: inherit
   openapi-validate:
     uses: entur/gha-api/.github/workflows/validate.yml@v6
-    secrets: inherit
 ```
 
 Lint and publish the spec to the developer portal in the CD workflow.
@@ -65,7 +63,6 @@ jobs:
     secrets: inherit
   openapi-publish-draft:
     uses: entur/gha-api/.github/workflows/publish.yml@v6
-    secrets: inherit
     with:
       draft: true # Publish specification as draft, to have a base for change detection in ci.yml.
 
@@ -77,7 +74,6 @@ jobs:
   openapi-publish:
     needs: helm-deploy # Publish specification, making it visible in the developer portal, after deployment to production has suceeded
     uses: entur/gha-api/.github/workflows/publish.yml@v6
-    secrets: inherit
 ```
 
 ## Migrating

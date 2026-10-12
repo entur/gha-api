@@ -33,7 +33,6 @@ By default, the workflow looks for a specification at `specs/openapi.yaml`.
 jobs:
   openapi-lint:
     uses: entur/gha-api/.github/workflows/lint.yml@v6
-    secrets: inherit
 ```
 
 ## Specifying path to spec
