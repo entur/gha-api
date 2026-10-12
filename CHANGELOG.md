@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [6.10.1](https://github.com/entur/gha-api/compare/v6.10.0...v6.10.1) (2026-10-12)
+
+
+### Bug Fixes
+
+* **ETU-78660:** Sanitize input strings before rendering markdown ([#184](https://github.com/entur/gha-api/issues/184)) ([0262ce7](https://github.com/entur/gha-api/commit/0262ce71edb0aa7ac1523a4c2db5b81f90f70739))
+* Upgrade versions of spectral and redocly binaries ([#182](https://github.com/entur/gha-api/issues/182)) ([6fd2d78](https://github.com/entur/gha-api/commit/6fd2d78deef0025bc66fdd63f72a05ddb42fd350))
+
 ## [6.10.0](https://github.com/entur/gha-api/compare/v6.9.0...v6.10.0) (2026-10-09)
 
 
