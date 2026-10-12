@@ -13,15 +13,15 @@ runs:
       with:
         path: |
           ~/.local/bin/redocly
-        key: redocly-cli-bin_v1.2.0_linux-x64
+        key: redocly-cli-bin_v1.3.0_linux-x64
 
     # Download redocly-cli binary if not cached
     - name: Setup redocly-cli
       if: steps.restore-cache.outputs.cache-hit != 'true'
       env:
         GH_TOKEN: ${{ github.token }}
-        REDOCLY_CLI_BIN_VERSION: v1.2.0
-        REDOCLY_CLI_BIN_CHECKSUM: 374763ec9beab4d2076ceb9a418bd9ba5b4b61fd6ee903c253142399689cc415
+        REDOCLY_CLI_BIN_VERSION: v1.3.0
+        REDOCLY_CLI_BIN_CHECKSUM: f7be780ba4ee49631b4fd29acea21fe532d9f3039d52fd6ff028549a6dcc9eca
       shell: bash
       run: |
         # Print every statement if debugging
