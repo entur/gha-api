@@ -55,7 +55,8 @@ name: CD
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   openapi-lint:
