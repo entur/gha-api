@@ -34,8 +34,10 @@ By default, the workflow looks for a specification at `specs/openapi.yaml`.
 jobs:
   openapi-publish:
     uses: entur/gha-api/.github/workflows/publish.yml@v6
-    secrets: inherit
 ```
+
+> [!TIP]
+> This workflow does not use any of your repository's secrets, so there is no need for `secrets: inherit`. Omitting it avoids granting this workflow (and its dependencies) unnecessary access to your repository's secrets.
 
 ## Specifying path to spec
 If your spec is in another file, you can specify it using the `path` input.
@@ -48,7 +50,6 @@ jobs:
     uses: entur/gha-api/.github/workflows/publish.yml@v6
     with:
       path: specs/openapi.json
-    secrets: inherit
 ```
 
 ## Using a generated spec

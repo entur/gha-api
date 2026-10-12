@@ -21,6 +21,10 @@ on:
         description: "Annotate files with lint problems. Accepted values: all (annotate all files), none (dont annotate any files)"
         type: string
         default: all
+    secrets:
+      ENTUR_API_DATA_SA:
+        description: "Google Cloud service account JSON key used to upload linted specs to the analytics GCS bucket. Required only when upload_to_bucket is true (the default)."
+        required: false
 
 
 jobs:

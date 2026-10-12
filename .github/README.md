@@ -41,11 +41,14 @@ on:
 jobs:
   openapi-lint:
     uses: entur/gha-api/.github/workflows/lint.yml@v6
-    secrets: inherit
+    secrets:
+      ENTUR_API_DATA_SA: ${{ secrets.ENTUR_API_DATA_SA }}
   openapi-validate:
     uses: entur/gha-api/.github/workflows/validate.yml@v6
-    secrets: inherit
 ```
+
+> [!TIP]
+> Only `lint.yml` uses a repository secret (`ENTUR_API_DATA_SA`, for bucket analytics). Pass it explicitly rather than using `secrets: inherit`, and omit `secrets:` for `validate.yml`/`publish.yml` entirely, so these workflows (and their dependencies) never gain access to the rest of your repository's secrets. See [README-lint.md](../README-lint.md#uploading-lint-results-to-gcs-bucket).
 
 Lint and publish the spec to the developer portal in the CD workflow.
 Run `publish.yml` with `draft: true` before any manual approval gates,
@@ -62,10 +65,10 @@ on:
 jobs:
   openapi-lint:
     uses: entur/gha-api/.github/workflows/lint.yml@v6
-    secrets: inherit
+    secrets:
+      ENTUR_API_DATA_SA: ${{ secrets.ENTUR_API_DATA_SA }}
   openapi-publish-draft:
     uses: entur/gha-api/.github/workflows/publish.yml@v6
-    secrets: inherit
     with:
       draft: true # Publish specification as draft, to have a base for change detection in ci.yml.
 
@@ -77,7 +80,6 @@ jobs:
   openapi-publish:
     needs: helm-deploy # Publish specification, making it visible in the developer portal, after deployment to production has suceeded
     uses: entur/gha-api/.github/workflows/publish.yml@v6
-    secrets: inherit
 ```
 
 ## Migrating

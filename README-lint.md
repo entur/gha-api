@@ -22,6 +22,16 @@ Lint an OpenAPI specification according to [Enturs API guidelines](https://githu
 No outputs.
 <!-- AUTO-DOC-OUTPUT:END -->
 
+## Secrets
+
+<!-- AUTO-DOC-SECRETS:START - Do not remove or modify this section -->
+
+|                        SECRET                        | REQUIRED |                                                     DESCRIPTION                                                      |
+|--------------------------------------------------------|----------|-----------------------------------------------------------------------------------------------------------------------|
+| <a name="secret_ENTUR_API_DATA_SA"></a>[ENTUR_API_DATA_SA](#secret_ENTUR_API_DATA_SA) |  false   | Google Cloud service account JSON key used to upload <br>linted specs to the analytics GCS bucket. Required only <br>when upload_to_bucket is true (the default). |
+
+<!-- AUTO-DOC-SECRETS:END -->
+
 # Usage
 
 Add the following step to your workflow configuration.
@@ -33,8 +43,12 @@ By default, the workflow looks for a specification at `specs/openapi.yaml`.
 jobs:
   openapi-lint:
     uses: entur/gha-api/.github/workflows/lint.yml@v6
-    secrets: inherit
+    secrets:
+      ENTUR_API_DATA_SA: ${{ secrets.ENTUR_API_DATA_SA }}
 ```
+
+> [!TIP]
+> Pass only the secret the workflow declares (`ENTUR_API_DATA_SA`), rather than `secrets: inherit`, so this workflow (and its dependencies) never gain access to the rest of your repository's secrets. If you don't need bucket analytics, set `upload_to_bucket: false` and omit `secrets:` entirely.
 
 ## Specifying path to spec
 If your spec is in another file, you can specify it using the `path` input.
@@ -47,7 +61,8 @@ jobs:
     uses: entur/gha-api/.github/workflows/lint.yml@v6
     with:
       path: specs/openapi.json
-    secrets: inherit
+    secrets:
+      ENTUR_API_DATA_SA: ${{ secrets.ENTUR_API_DATA_SA }}
 ```
 
 ## Using a generated spec
@@ -79,8 +94,9 @@ jobs:
 ## Uploading lint results to GCS bucket
 
 By default, the linting result is uploaded to a GCS bucket for statistics purposes,
-if the workflow detects that it is running on the main branch.
-To disable this behavior, set the `upload_to_bucket` input to `false`.
+if the workflow detects that it is running on the default branch (on push, or when a pull request targeting it is merged).
+This requires the `ENTUR_API_DATA_SA` secret to be passed to the workflow, as shown in [Usage](#usage) above.
+To disable this behavior (and skip passing the secret), set the `upload_to_bucket` input to `false`.
 
 ```yml
 jobs:

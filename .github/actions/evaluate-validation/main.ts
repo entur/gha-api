@@ -83,16 +83,24 @@ const createCommentContent = (res: ValidationResult, showChanges: ShowChanges): 
     const changelist = chain(changes)
         .orderBy(c => [c.level, c.id], ["desc", "asc"])
         .groupBy(c => c.operationId)
-        .map((changes) => `## ${changes[0].operation} ${changes[0].path}\n${changes.map(changeString).join("\n")}`)
+        .map((changes) => `## ${escapeMarkdown(changes[0].operation)} ${escapeMarkdown(changes[0].path)}\n${changes.map(changeString).join("\n")}`)
         .join("\n")
         .value()
     return `
-# API changes in ${res.apiInfo.title}\n
+# API changes in ${escapeMarkdown(res.apiInfo.title)}\n
 <details>
 <summary>${changesSummaryHeader(changes, showChanges)}</summary>\n
 ${changelist}\n
 </details>
 `
+}
+
+// Spec-derived strings (title, operation, path, change text) originate from the OpenAPI
+// spec submitted in the PR and are therefore untrusted. Escape Markdown/HTML metacharacters
+// before embedding them in a comment body posted as github-actions[bot], to prevent an
+// attacker-controlled spec from spoofing formatting or injecting links/markup.
+const escapeMarkdown = (text: string): string => {
+    return text.replace(/[\\`*_{}[\]()#+\-.!|<>]/g, (ch) => `\\${ch}`)
 }
 
 const changesSummaryHeader = (changes: Change[], showChanges: "all" | "breaking"): string => {
@@ -106,9 +114,10 @@ const changesSummaryHeader = (changes: Change[], showChanges: "all" | "breaking"
 }
 
 const changeString = (change: Change): string => {
+    const text = escapeMarkdown(change.text)
     switch(change.level) {
-        case 3: return `- :exclamation: **${change.text} (Breaking)**`
-        case 2: return `- :warning: ${change.text} (Potentially breaking)`
-        default: return `- ${change.text}`
+        case 3: return `- :exclamation: **${text} (Breaking)**`
+        case 2: return `- :warning: ${text} (Potentially breaking)`
+        default: return `- ${text}`
     }
 }
