@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import { context, getOctokit } from "@actions/github";
 import { sendIssueComment, removeIssueComment } from "./github-issues.js"
 import { chain, uniqBy } from "lodash";
+import {markdownEscape} from "./utils.js";
 
 type ValidationResult = {
     hasChanges: boolean;
@@ -83,11 +84,11 @@ const createCommentContent = (res: ValidationResult, showChanges: ShowChanges): 
     const changelist = chain(changes)
         .orderBy(c => [c.level, c.id], ["desc", "asc"])
         .groupBy(c => c.operationId)
-        .map((changes) => `## ${changes[0].operation} ${changes[0].path}\n${changes.map(changeString).join("\n")}`)
+        .map((changes) => `## ${markdownEscape(changes[0].operation)} ${markdownEscape(changes[0].path)}\n${changes.map(changeString).join("\n")}`)
         .join("\n")
         .value()
     return `
-# API changes in ${res.apiInfo.title}\n
+# API changes in ${markdownEscape(res.apiInfo.title)}\n
 <details>
 <summary>${changesSummaryHeader(changes, showChanges)}</summary>\n
 ${changelist}\n
@@ -107,8 +108,8 @@ const changesSummaryHeader = (changes: Change[], showChanges: "all" | "breaking"
 
 const changeString = (change: Change): string => {
     switch(change.level) {
-        case 3: return `- :exclamation: **${change.text} (Breaking)**`
-        case 2: return `- :warning: ${change.text} (Potentially breaking)`
-        default: return `- ${change.text}`
+        case 3: return `- :exclamation: **${markdownEscape(change.text)} (Breaking)**`
+        case 2: return `- :warning: ${markdownEscape(change.text)} (Potentially breaking)`
+        default: return `- ${markdownEscape(change.text)}`
     }
 }
