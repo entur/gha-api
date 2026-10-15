@@ -79,3 +79,19 @@ jobs:
 
 > [!NOTE]
 > To use this functionality, you must also upload the specification as a draft in your CD pipeline, in order to have a base to compare with. See [README-publish.md](./README-publish.md#publish-as-draft).
+
+### Fail on breaking changes
+You can choose to fail the workflow if there has been made breaking changes to the specification.
+To do so, set the input `fail_on_breaking_changes` to `true`.
+Note that this functionality works best together when `show_changes` has the value `all` or `breaking`,
+as the failing workflow can refer to the created comment.
+
+```yml
+#ci.yml
+jobs:
+  openapi-validate:
+    uses: entur/gha-api/.github/workflows/validate.yml@v6
+    with:
+      fail_on_breaking_changes: true
+```
+

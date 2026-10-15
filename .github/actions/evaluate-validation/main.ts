@@ -38,13 +38,19 @@ export async function run() {
 
     const validationResult = parseValidateResponse(core.getInput("validation_result"));
     const showChanges = SHOW_CHANGES_OPTIONS.find(x => x === core.getInput("show_changes"));
+    const failOnBreakingChanges = core.getBooleanInput("fail_on_breaking_changes")
 
     if (showChanges == null) {
         core.error(`show_changes has invalid value ${core.getInput("show_changes")}`)
         return;
     }
     
-    await updatePullRequestComment(validationResult, showChanges, octokit);
+    const comment = await updatePullRequestComment(validationResult, showChanges, octokit);
+
+    const anyBreakingChanges = validationResult?.pendingChanges.some(c => c.level > 1)
+    if (failOnBreakingChanges && anyBreakingChanges) {
+        core.setFailed(`Detected breaking changes in ${markdownEscape(validationResult?.apiInfo.title ?? validationResult?.enturMetadata.id ?? "your api")}.${comment != null ? ` See: ${comment.htmlUrl}` : ""}`)
+    }
 }
 
 const updatePullRequestComment = async (validationResult: ValidationResult | null, showChanges: ShowChanges, octokit: Octokit) => {
@@ -55,7 +61,7 @@ const updatePullRequestComment = async (validationResult: ValidationResult | nul
 
         const content = createCommentContent(validationResult, showChanges);
         if (content != null) {
-            await sendIssueComment({ marker: commentMarker, content }, context.issue, octokit);
+            return await sendIssueComment({ marker: commentMarker, content }, context.issue, octokit);
         } else {
             await removeIssueComment(commentMarker, context.issue, octokit);
         }
