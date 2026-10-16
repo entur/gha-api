@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.11.0](https://github.com/entur/gha-api/compare/v6.10.1...v6.11.0) (2026-10-16)
+
+
+### Features
+
+* Add option to fail validate on breaking change (See [README-validate.md](https://github.com/entur/gha-api/blob/main/README-validate.md#fail-on-breaking-changes)) ([f033c19](https://github.com/entur/gha-api/commit/f033c19e506d3926d40d408e021dd645217dde59))
+
 ## [6.10.1](https://github.com/entur/gha-api/compare/v6.10.0...v6.10.1) (2026-10-12)
 
 
