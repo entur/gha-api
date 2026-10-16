@@ -17,6 +17,9 @@ on:
         description: "Should the workflow create a PR comment showing the changes made to the specification? Values: \"all\": Show all changes. \"breaking\": Only show breaking changes. \"none\": Don't show changes. Default: \"all\""
         type: string
         default: all
+      fail_on_breaking_changes:
+        type: boolean
+        default: false
 
 jobs:
   validate-spec:
@@ -172,6 +175,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           validation_result: ${{ steps.validate.outputs.result }}
           show_changes: ${{ inputs.show_changes }}
+          fail_on_breaking_changes: ${{ inputs.fail_on_breaking_changes }}
 
       - name: Send analytics
         if: always()

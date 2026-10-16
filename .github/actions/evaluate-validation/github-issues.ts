@@ -10,21 +10,29 @@ export type IssueComment = {
     content: string
 }
 
+type SendIssueCommentResult = {
+	commentId: number
+	htmlUrl: string
+}
 
-export const sendIssueComment = async (comment: IssueComment, issue: GithubIssue, octokit: Octokit) => {
+export const sendIssueComment = async (comment: IssueComment, issue: GithubIssue, octokit: Octokit): Promise<SendIssueCommentResult | undefined> => {
 	const markedContent = comment.content + `\n <!-- ${comment.marker} -->`;
  
 	const existingComment = await findIssueComment(comment.marker, issue, octokit);
 	try {
 		if (existingComment != null) {
 			console.log(`Existing comment found, updating. (id=${existingComment?.id}), (repo=${issue.repo}, issue=${issue.number})`)
-			await octokit.rest.issues.updateComment({
+			const res = await octokit.rest.issues.updateComment({
 				comment_id: existingComment.id,
 				owner: issue.owner,
 				repo: issue.repo,
 				issue_number: issue.number,
 				body: markedContent
 			});
+			return {
+				commentId: res.data.id,
+				htmlUrl: res.data.html_url
+			}
 		} else {
 			console.log(`No existing comment found, creating new comment in (repo=${issue.repo}, issue=${issue.number}).`)
 			const res = await octokit.rest.issues.createComment({
@@ -34,6 +42,10 @@ export const sendIssueComment = async (comment: IssueComment, issue: GithubIssue
 				body: markedContent
 			});
 			console.log(`Comment created! (id=${res.data.id})`)
+			return {
+				commentId: res.data.id,
+				htmlUrl: res.data.html_url
+			}
 		}
 	} catch (error) {
 		if (!(error instanceof RequestError)) {

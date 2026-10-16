@@ -10,6 +10,9 @@ inputs:
   show_changes:
     description: "Which changes to show in comment."
     required: true
+  fail_on_breaking_changes:
+    description: "Should the workflow fail if there are breaking changes. true/false"
+    required: true
 runs:
   using: 'node24'
   main: 'dist/index.cjs'
