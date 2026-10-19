@@ -6,6 +6,9 @@ on:
       path:
         description: "Path to OpenAPI specification"
         type: string
+      changelog_dir:
+        description: "Path to the changelog entries for this API"
+        type: string
       artifact:
         description: "Artifact containing the OpenAPI specification."
         type: string
@@ -33,12 +36,12 @@ jobs:
     env:
       GHA_API_ARTIFACT:           ${{ inputs.artifact }}
       GHA_API_PATH:               ${{ inputs.path }}
+      GHA_API_CHANGELOG_DIR:      ${{ inputs.changelog_dir }}
       GHA_API_ENV:                ${{ inputs.env }}
       GHA_API_SHOW_CHANGES:       ${{ inputs.show_changes }}
       GHA_API_CLOUD_RUN_ENDPOINT: https://europe-west1-ent-apidata-${{ inputs.env }}.cloudfunctions.net/publish-spec
     steps:
-      - name: Checkout repository (if spec provided)
-        if: ${{ inputs.artifact == '' }}
+      - name: Checkout repository
         uses: actions/checkout@v7
       - name: Download artifact (if artifact provided)
         if: ${{ inputs.artifact != '' }}
@@ -97,6 +100,36 @@ jobs:
           fi
 
           echo "spec_path=$spec_path" >> "$GITHUB_OUTPUT"
+      - name: Resolve changelog dir
+        id: resolve-changelog-dir
+        run: |
+          # Resolve changelog dir based on inputs
+          if [ -n "$GHA_API_CHANGELOG_DIR" ]; then
+            changelog_dir=$GHA_API_CHANGELOG_DIR
+            if [ ! -d $changelog_dir ]; then
+              echo "Directory $changelog_dir not found."
+              exit 1
+            fi
+
+            echo "changelog_dir=$changelog_dir" >> "$GITHUB_OUTPUT"
+          else
+            if [ -n "$GHA_API_ARTIFACT" ]; then
+              changelog_dir="specs/changelog"
+            else
+              if [ -n "$GHA_API_PATH" ]; then
+                spec_dir=$(dirname $GHA_API_PATH)
+                changelog_dir="$spec_dir/changelog"
+              else
+                changelog_dir="specs/changelog"
+              fi
+            fi
+
+            echo "Path to changelogs resolved to $changelog_dir"
+
+            if [ -d $changelog_dir ]; then
+              echo "changelog_dir=$changelog_dir" >> "$GITHUB_OUTPUT"
+            fi
+          fi
       - name: Authenticate with Google Cloud
         id: auth
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
@@ -126,8 +159,9 @@ jobs:
         shell: bash
         id: validate
         env:
-          GHA_API_PATH: ${{ steps.resolve-spec-path.outputs.spec_path }}
-          ID_TOKEN:     ${{ steps.auth.outputs.id_token }}
+          GHA_API_PATH:          ${{ steps.resolve-spec-path.outputs.spec_path }}
+          GHA_API_CHANGELOG_DIR: ${{ steps.resolve-changelog-dir.outputs.changelog_dir }}
+          ID_TOKEN:              ${{ steps.auth.outputs.id_token }}
         run: |
           set -o errexit
           set -o nounset
@@ -153,6 +187,15 @@ jobs:
           # Create metadata JSON
           METADATA="{\"repository\": \"$REPO_NAME\", \"github\": { \"sha\": \"$GITHUB_SHA\", \"ref\": \"$GITHUB_REF\", \"runId\": \"$GITHUB_RUN_ID\" }}"
 
+          # Attach each .md file in the changelog dir as a "changelog" part
+          CHANGELOG_ARGS=()
+          if [ -n "$GHA_API_CHANGELOG_DIR" ] && [ -d "$GHA_API_CHANGELOG_DIR" ]; then
+            while IFS= read -r -d '' file; do
+              echo "Including changelog: $file"
+              CHANGELOG_ARGS+=(-F "changelog=@$file")
+            done < <(find "$GHA_API_CHANGELOG_DIR" -type f -name '*.md' -print0 | sort -z)
+          fi
+
           echo "Uploading to api-spec-registry with dryRun=true..."
 
           RESPONSE=$(curl --fail-with-body -sS \
@@ -160,6 +203,7 @@ jobs:
             -H "Authorization: Bearer $ID_TOKEN" \
             -F "metadata=$METADATA;type=application/json" \
             -F "spec=@/tmp/specs/$filename" \
+            "${CHANGELOG_ARGS[@]}" \
             "$GHA_API_CLOUD_RUN_ENDPOINT?dryRun=true") || {
             DETAIL=$(echo "$RESPONSE" | jq -r '.detail')
             echo "::error file=$GHA_API_PATH,line=1::$DETAIL"
