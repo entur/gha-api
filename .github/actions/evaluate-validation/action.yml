@@ -4,8 +4,14 @@ inputs:
   token:
     description: "Github token"
     required: true
+  validation_successful:
+    description: "If the validation call succeeded or not"
+    required: true
   validation_result:
     description: "The validation result from api-spec-registry"
+    required: true
+  changelog_dir:
+    description: "Changelog directory"
     required: true
   show_changes:
     description: "Which changes to show in comment."
