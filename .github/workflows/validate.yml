@@ -187,13 +187,13 @@ jobs:
           # Create metadata JSON
           METADATA="{\"repository\": \"$REPO_NAME\", \"github\": { \"sha\": \"$GITHUB_SHA\", \"ref\": \"$GITHUB_REF\", \"runId\": \"$GITHUB_RUN_ID\" }}"
 
-          # Attach each .md file in the changelog dir as a "changelog" part
+          # Attach each .md file in the top level of the changelog dir as a "changelog" part
           CHANGELOG_ARGS=()
           if [ -n "$GHA_API_CHANGELOG_DIR" ] && [ -d "$GHA_API_CHANGELOG_DIR" ]; then
             while IFS= read -r -d '' file; do
               echo "Including changelog: $file"
               CHANGELOG_ARGS+=(-F "changelog=@$file")
-            done < <(find "$GHA_API_CHANGELOG_DIR" -type f -name '*.md' -print0 | sort -z)
+            done < <(find "$GHA_API_CHANGELOG_DIR" -maxdepth 1 -type f -name '*.md' -print0 | sort -z)
           fi
 
           echo "Uploading to api-spec-registry with dryRun=true..."
@@ -205,11 +205,12 @@ jobs:
             -F "spec=@/tmp/specs/$filename" \
             "${CHANGELOG_ARGS[@]}" \
             "$GHA_API_CLOUD_RUN_ENDPOINT?dryRun=true") || {
-            DETAIL=$(echo "$RESPONSE" | jq -r '.detail')
-            echo "::error file=$GHA_API_PATH,line=1::$DETAIL"
-            exit 1
+              echo "successful=false" >> "$GITHUB_OUTPUT"
+              echo "result=$RESPONSE" >> "$GITHUB_OUTPUT"
+              exit 0
           }
           
+          echo "successful=true" >> "$GITHUB_OUTPUT"
           echo "result=$RESPONSE" >> "$GITHUB_OUTPUT"
 
           echo "Successfully validated: $GHA_API_PATH"
@@ -217,6 +218,8 @@ jobs:
         uses: $/.github/actions/evaluate-validation
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          changelog_dir: ${{ steps.resolve-changelog-dir.outputs.changelog_dir }}
+          validation_successful: ${{ steps.validate.outputs.successful }}
           validation_result: ${{ steps.validate.outputs.result }}
           show_changes: ${{ inputs.show_changes }}
           fail_on_breaking_changes: ${{ inputs.fail_on_breaking_changes }}

@@ -183,13 +183,13 @@ jobs:
           # Create metadata JSON
           METADATA="{\"repository\": \"$REPO_NAME\", \"github\": { \"sha\": \"$GITHUB_SHA\", \"ref\": \"$GITHUB_REF\", \"runId\": \"$GITHUB_RUN_ID\" }}"
 
-          # Attach each .md file in the changelog dir as a "changelog" part
+          # Attach each .md file in the top level of the changelog dir as a "changelog" part
           CHANGELOG_ARGS=()
           if [ -n "$GHA_API_CHANGELOG_DIR" ] && [ -d "$GHA_API_CHANGELOG_DIR" ]; then
             while IFS= read -r -d '' file; do
               echo "Including changelog: $file"
               CHANGELOG_ARGS+=(-F "changelog=@$file")
-            done < <(find "$GHA_API_CHANGELOG_DIR" -type f -name '*.md' -print0 | sort -z)
+            done < <(find "$GHA_API_CHANGELOG_DIR" -maxdepth 1 -type f -name '*.md' -print0 | sort -z)
           fi
 
           echo "Publishing spec: $GHA_API_PATH"
