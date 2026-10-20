@@ -205,11 +205,12 @@ jobs:
             -F "spec=@/tmp/specs/$filename" \
             "${CHANGELOG_ARGS[@]}" \
             "$GHA_API_CLOUD_RUN_ENDPOINT?dryRun=true") || {
-            DETAIL=$(echo "$RESPONSE" | jq -r '.detail')
-            echo "::error file=$GHA_API_PATH,line=1::$DETAIL"
-            exit 1
+              echo "successful=false" >> "$GITHUB_OUTPUT"
+              echo "result=$RESPONSE" >> "$GITHUB_OUTPUT"
+              exit 0
           }
           
+          echo "successful=true" >> "$GITHUB_OUTPUT"
           echo "result=$RESPONSE" >> "$GITHUB_OUTPUT"
 
           echo "Successfully validated: $GHA_API_PATH"
@@ -217,6 +218,8 @@ jobs:
         uses: $/.github/actions/evaluate-validation
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          changelog_dir: ${{ steps.resolve-changelog-dir.outputs.changelog_dir }}
+          validation_successful: ${{ steps.validate.outputs.successful }}
           validation_result: ${{ steps.validate.outputs.result }}
           show_changes: ${{ inputs.show_changes }}
           fail_on_breaking_changes: ${{ inputs.fail_on_breaking_changes }}
