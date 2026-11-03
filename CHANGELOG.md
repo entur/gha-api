@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.12.0](https://github.com/entur/gha-api/compare/v6.11.0...v6.12.0) (2026-11-03)
+
+
+### Features
+
+* **ETU-78738:** Add changelog_dir input (preview) ([#187](https://github.com/entur/gha-api/issues/187)) ([482dfe0](https://github.com/entur/gha-api/commit/482dfe077ec4613215fb49ea4f1d899992c8ccc9))
+
 ## [6.11.0](https://github.com/entur/gha-api/compare/v6.10.1...v6.11.0) (2026-10-16)
 
 
