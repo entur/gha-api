@@ -4,7 +4,7 @@ import { sendIssueComment, removeIssueComment } from "./github-issues.js"
 import { chain, uniqBy } from "lodash";
 import {markdownEscape} from "./utils.js";
 
-type ValidationResult = {
+type SuccessfulValidationResult = {
     hasChanges: boolean;
     enturMetadata: {
         id: string,
@@ -15,6 +15,19 @@ type ValidationResult = {
         title: string
     }
     pendingChanges: Change[]
+}
+
+type ErrorValidationResult = {
+    status: number
+    title?: string
+    type?: string
+    detail?: string
+    errors?: Array<{
+        message: string
+        filename?: string
+        startLine?: number
+        endLine?: number
+    }>
 }
 
 type Change = {
@@ -31,10 +44,16 @@ type ShowChanges = typeof SHOW_CHANGES_OPTIONS[number];
 
 export type Octokit = ReturnType<typeof getOctokit>
 
+
 export async function run() {
 	const TOKEN = core.getInput("token");
 
     const octokit = getOctokit(TOKEN, {})
+
+    if (!core.getBooleanInput("validation_successful")) {
+        handleValidationError();
+        return;
+    }
 
     const validationResult = parseValidateResponse(core.getInput("validation_result"));
     const showChanges = SHOW_CHANGES_OPTIONS.find(x => x === core.getInput("show_changes"));
@@ -53,7 +72,7 @@ export async function run() {
     }
 }
 
-const updatePullRequestComment = async (validationResult: ValidationResult | null, showChanges: ShowChanges, octokit: Octokit) => {
+const updatePullRequestComment = async (validationResult: SuccessfulValidationResult | null, showChanges: ShowChanges, octokit: Octokit) => {
 	if (context.eventName !== "pull_request") return;
 
     if (validationResult != null) {
@@ -68,10 +87,10 @@ const updatePullRequestComment = async (validationResult: ValidationResult | nul
     }
 };
 
-const parseValidateResponse = (responseString: string): ValidationResult | null => {
+const parseValidateResponse = (responseString: string): SuccessfulValidationResult | null => {
     if (responseString == null || responseString.trim().length === 0) return null
    
-    const res: ValidationResult = JSON.parse(responseString);
+    const res: SuccessfulValidationResult = JSON.parse(responseString);
 
     const validChanges = res.pendingChanges
         // Ensure that the changes we look at have all the fields we need
@@ -81,7 +100,7 @@ const parseValidateResponse = (responseString: string): ValidationResult | null 
     return { ...res, pendingChanges: validChanges }
 }
 
-const createCommentContent = (res: ValidationResult, showChanges: ShowChanges): string | null => {
+const createCommentContent = (res: SuccessfulValidationResult, showChanges: ShowChanges): string | null => {
     if (showChanges === 'none') return null;
 
     const changes = res.pendingChanges.filter(change => showChanges === 'all' || change.level > 1)
@@ -118,4 +137,21 @@ const changeString = (change: Change): string => {
         case 2: return `- :warning: ${markdownEscape(change.text)} (Potentially breaking)`
         default: return `- ${markdownEscape(change.text)}`
     }
+}
+
+const handleValidationError = () => {
+    const errorResponse: ErrorValidationResult = JSON.parse(core.getInput("validation_result"))
+
+    if (errorResponse.type === "/changelog-parse-error") {
+        const changelogDir = core.getInput("changelog_dir")
+
+        errorResponse.errors?.forEach(e => {
+            core.error(e.message, {
+                file: e.filename != null ? changelogDir + "/" + e.filename : undefined,
+                startLine: e.startLine,
+                endLine: e.endLine
+            })
+        })
+    }
+    core.setFailed(errorResponse.detail ?? errorResponse.title ?? "Validation failed");
 }
