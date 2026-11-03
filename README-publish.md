@@ -9,12 +9,13 @@ Publish an OpenAPI specification to [Enturs developer documentation](https://dev
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-|                          INPUT                           |  TYPE   | REQUIRED | DEFAULT |                          DESCRIPTION                           |
-|----------------------------------------------------------|---------|----------|---------|----------------------------------------------------------------|
-| <a name="input_artifact"></a>[artifact](#input_artifact) | string  |  false   |         |         Artifact containing the OpenAPI specification.         |
-|     <a name="input_draft"></a>[draft](#input_draft)      | boolean |  false   | `false` |       Publish as draft. [Read more.](#publish-as-draft)        |
-|        <a name="input_env"></a>[env](#input_env)         | string  |  false   | `"prd"` | The environment to operate against. <br>dev|prd. Default: prd  |
-|       <a name="input_path"></a>[path](#input_path)       | string  |  false   |         |                 Path to OpenAPI specification                  |
+|                                  INPUT                                  |  TYPE   | REQUIRED | DEFAULT |                                                   DESCRIPTION                                                    |
+|-------------------------------------------------------------------------|---------|----------|---------|------------------------------------------------------------------------------------------------------------------|
+|        <a name="input_artifact"></a>[artifact](#input_artifact)         | string  |  false   |         |                                  Artifact containing the OpenAPI specification.                                  |
+| <a name="input_changelog_dir"></a>[changelog_dir](#input_changelog_dir) | string  |  false   |         | Path to the changelog entries <br>for this API. Note: This <br>functionality is in preview, and <br>may change.  |
+|             <a name="input_draft"></a>[draft](#input_draft)             | boolean |  false   | `false` |                                Publish as draft. [Read more.](#publish-as-draft)                                 |
+|                <a name="input_env"></a>[env](#input_env)                | string  |  false   | `"prd"` |                          The environment to operate against. <br>dev|prd. Default: prd                           |
+|              <a name="input_path"></a>[path](#input_path)               | string  |  false   |         |                                          Path to OpenAPI specification                                           |
 
 <!-- AUTO-DOC-INPUT:END -->
 
