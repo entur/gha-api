@@ -78,6 +78,6 @@ jobs:
 ```
 
 > [!IMPORTANT]
-> This flag should not be confused with the value `draft` for `x-stability-level` ([See API lifecycle guidelines](https://github.com/entur/api-guidelines/blob/main/guidelines.md#25-lifecycle)).
+> This flag should not be confused with the value `draft` for `x-stability-level` ([See API lifecycle guidelines](https://entur.github.io/api-guidelines/#25-lifecycle)).
 > Setting `draft: true` here means that this version of the API specification is not released yet, not that the API itself is a draft.
 
