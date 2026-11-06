@@ -95,7 +95,7 @@ info:
     owner: team-api
     audience: partner
 ```
-See api-guidelines for more information: https://github.com/entur/api-guidelines/blob/main/guidelines.md#24-entur-metadata.
+See api-guidelines for more information: https://entur.github.io/api-guidelines/#24-entur-metadata.
 
 If you generate your spec from code with Springdoc, you can use [entur-springdoc-starter](https://github.com/entur/entur-springdoc-starter?tab=readme-ov-file#provide-x-entur-metadata) to supply the metadata.
 
