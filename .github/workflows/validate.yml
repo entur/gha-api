@@ -226,9 +226,8 @@ jobs:
 
       - name: Send analytics
         if: always()
-        uses: $/.github/actions/posthog
+        uses: entur/gha-meta/.github/actions/posthog@feat/ETU-80372_use-job-context
         with:
-          workflow_name:   validate
           workflow_inputs: ${{ toJSON(inputs) }}
           api_key:         "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
 
