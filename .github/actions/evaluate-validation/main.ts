@@ -52,6 +52,9 @@ export async function run() {
 
     if (!core.getBooleanInput("validation_successful")) {
         handleValidationError();
+        core.setOutput("changes_detected", false)
+        core.setOutput("breaking_changes_detected", false)
+        core.setOutput("comment_url", "")
         return;
     }
 
@@ -60,6 +63,9 @@ export async function run() {
     const failOnBreakingChanges = core.getBooleanInput("fail_on_breaking_changes")
 
     if (showChanges == null) {
+        core.setOutput("changes_detected", false)
+        core.setOutput("breaking_changes_detected", false)
+        core.setOutput("comment_url", "")
         core.error(`show_changes has invalid value ${core.getInput("show_changes")}`)
         return;
     }
@@ -70,6 +76,10 @@ export async function run() {
     if (failOnBreakingChanges && anyBreakingChanges) {
         core.setFailed(`Detected breaking changes in ${markdownEscape(validationResult?.apiInfo.title ?? validationResult?.enturMetadata.id ?? "your api")}.${comment != null ? ` See: ${comment.htmlUrl}` : ""}`)
     }
+
+    core.setOutput("changes_detected", validationResult?.hasChanges === true)
+    core.setOutput("breaking_changes_detected", anyBreakingChanges)
+    core.setOutput("comment_url", comment?.htmlUrl)
 }
 
 const updatePullRequestComment = async (validationResult: SuccessfulValidationResult | null, showChanges: ShowChanges, octokit: Octokit) => {
