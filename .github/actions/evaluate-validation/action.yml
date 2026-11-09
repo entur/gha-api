@@ -19,6 +19,14 @@ inputs:
   fail_on_breaking_changes:
     description: "Should the workflow fail if there are breaking changes. true/false"
     required: true
+outputs:
+  changes_detected:
+    description: "Did the run detect any changes"
+  breaking_changes_detected:
+    description: "Did the run detect any breaking changes"
+  comment_url:
+    description: "Url to created change comment, if any."
+
 runs:
   using: 'node24'
   main: 'dist/index.cjs'
