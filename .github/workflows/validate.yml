@@ -226,8 +226,9 @@ jobs:
 
       - name: Send analytics
         if: always()
-        uses: entur/gha-meta/.github/actions/posthog@feat/ETU-80372_use-job-context
+        uses: entur/gha-meta/.github/actions/posthog@feat/ETU-79970_custom-data
         with:
           workflow_inputs: ${{ toJSON(inputs) }}
           api_key:         "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
+          extra_properties: "{\"foo\": \"bar\", \"baz\": 10, \"lorem\": {\"nested\": \"data\"}}"
 
