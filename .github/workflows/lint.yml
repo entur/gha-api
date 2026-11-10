@@ -21,7 +21,9 @@ on:
         description: "Annotate files with lint problems. Accepted values: all (annotate all files), none (dont annotate any files)"
         type: string
         default: all
-
+    secrets:
+      ENTUR_API_DATA_SA:
+        description: "Secret required for uploading to GCS bucket for analytics."
 
 jobs:
   lint:
