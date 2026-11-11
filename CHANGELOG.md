@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.12.2](https://github.com/entur/gha-api/compare/v6.12.1...v6.12.2) (2026-11-11)
+
+
+### Bug Fixes
+
+* **ETU-80102:** Specify ENTUR_API_DATA_SA as a secret ([#193](https://github.com/entur/gha-api/issues/193)) ([16a35c3](https://github.com/entur/gha-api/commit/16a35c363b24a8867f5b0adcbdec3f3a384582ea))
+
 ## [6.12.1](https://github.com/entur/gha-api/compare/v6.12.0...v6.12.1) (2026-11-03)
 
 
