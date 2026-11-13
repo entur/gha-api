@@ -53,6 +53,8 @@ jobs:
 
   upload-artifact:
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
       - name: Save spec to the artifact storage
@@ -73,6 +75,8 @@ jobs:
 
   upload-artifact-all:
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
       - name: Save all specs to the artifact storage
@@ -99,6 +103,8 @@ jobs:
   
   check-evaluate-validation-dist:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: .github/actions/evaluate-validation
