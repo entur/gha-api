@@ -21,6 +21,8 @@ on:
         type: string
         default: prd
 
+permissions: {}
+
 jobs:
   publish:
     name: OpenAPI Publish

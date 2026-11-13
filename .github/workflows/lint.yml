@@ -25,6 +25,8 @@ on:
       ENTUR_API_DATA_SA:
         description: "Secret required for uploading to GCS bucket for analytics."
 
+permissions: {}
+
 jobs:
   lint:
     name: OpenAPI Lint
