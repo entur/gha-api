@@ -6,11 +6,6 @@ on:
 jobs:
   test-validate-file:
     uses: ./.github/workflows/validate.yml
-    permissions:
-      contents: read
-      actions: read
-      id-token: write
-      pull-requests: write
     with:
       path: fixture/openapi-good.json
   release:
