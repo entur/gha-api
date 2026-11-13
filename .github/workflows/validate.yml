@@ -218,6 +218,7 @@ jobs:
           echo "Successfully validated: $GHA_API_PATH"
       - name: Evaluate validation result
         uses: $/.github/actions/evaluate-validation
+        id: evaluate_validation
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           changelog_dir: ${{ steps.resolve-changelog-dir.outputs.changelog_dir }}
@@ -228,9 +229,8 @@ jobs:
 
       - name: Send analytics
         if: always()
-        uses: $/.github/actions/posthog
+        uses: entur/gha-meta/.github/actions/posthog@feat/ETU-79970_custom-data
         with:
-          workflow_name:   validate
           workflow_inputs: ${{ toJSON(inputs) }}
           api_key:         "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
-
+          extra_properties: ${{ toJSON(steps.evaluate_validation.outputs) }}
