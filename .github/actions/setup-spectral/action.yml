@@ -20,8 +20,8 @@ runs:
       if: steps.restore-cache.outputs.cache-hit != 'true'
       env:
         GH_TOKEN: ${{ github.token }}
-        SPECTRAL_CLI_BIN_VERSION: v1.4.0
-        SPECTRAL_CLI_BIN_CHECKSUM: 080e6b2d22ca4ee63027c9627633dcb043442548491d4782e2a9a043f10bb3c3
+        SPECTRAL_CLI_BIN_VERSION: v1.6.0
+        SPECTRAL_CLI_BIN_CHECKSUM: aa6473bed5c35d7f400ce2d908aaa8291fb8f229da9b81262841ad5da0373d10
       shell: bash
       run: |
         # Print every statement if debugging
