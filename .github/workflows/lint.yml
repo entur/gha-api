@@ -222,8 +222,7 @@ jobs:
           gcloud storage rsync /tmp/specs/ "gs://ent-gcs-api-specs-prd-001/${GITHUB_REPOSITORY#*/}"
       - name: Send analytics
         if: always()
-        uses: $/.github/actions/posthog
+        uses: entur/gha-meta/.github/actions/posthog@v1
         with:
-          workflow_name:   lint
           workflow_inputs: ${{ toJSON(inputs) }}
           api_key:         "phc_yhR5iXxjC2n6J7tqznFQURld147kruAy4HuYgjbyEyk"
