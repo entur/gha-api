@@ -20,8 +20,8 @@ runs:
       if: steps.restore-cache.outputs.cache-hit != 'true'
       env:
         GH_TOKEN: ${{ github.token }}
-        REDOCLY_CLI_BIN_VERSION: v1.3.0
-        REDOCLY_CLI_BIN_CHECKSUM: f7be780ba4ee49631b4fd29acea21fe532d9f3039d52fd6ff028549a6dcc9eca
+        REDOCLY_CLI_BIN_VERSION: v1.4.0
+        REDOCLY_CLI_BIN_CHECKSUM: 7e0e6e3a1851b695d90f6209a7b43cd823e736c6805d409843fb08bccd8e1ef1
       shell: bash
       run: |
         # Print every statement if debugging
