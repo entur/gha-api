@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [6.12.3](https://github.com/entur/gha-api/compare/v6.12.2...v6.12.3) (2026-11-17)
+
+
+### Bug Fixes
+
+* **ETU-80372:** Use posthog action from gha-meta ([d92d5bc](https://github.com/entur/gha-api/commit/d92d5bcd9ada4e5a30297f6113b5eeb46f4e2320))
+* Upgrade versions of spectral and redocly binaries ([#198](https://github.com/entur/gha-api/issues/198)) ([6752514](https://github.com/entur/gha-api/commit/67525144d60234378c5c0f5ff8b68ea10b386186))
+
 ## [6.12.2](https://github.com/entur/gha-api/compare/v6.12.1...v6.12.2) (2026-11-11)
 
 
