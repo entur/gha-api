@@ -123,7 +123,7 @@ const createCommentContent = (res: SuccessfulValidationResult, showChanges: Show
         .join("\n")
         .value()
     return `
-# API changes in ${markdownEscape(res.apiInfo.title)}\n
+### API changes in ${markdownEscape(res.apiInfo.title)}\n
 <details>
 <summary>${changesSummaryHeader(changes, showChanges)}</summary>\n
 ${changelist}\n

@@ -73,7 +73,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``)}fun
 ${o.map(G9).join(`
 `)}`).join(`
 `).value();return`
-# API changes in ${VA(e.apiInfo.title)}
+### API changes in ${VA(e.apiInfo.title)}
 
 <details>
 <summary>${N9(r,t)}</summary>
