@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.12.4](https://github.com/entur/gha-api/compare/v6.12.3...v6.12.4) (2026-11-25)
+
+
+### Bug Fixes
+
+* Use smaller heading in API change comment ([#199](https://github.com/entur/gha-api/issues/199)) ([b4b49f7](https://github.com/entur/gha-api/commit/b4b49f70a6fdc5aecd4acd2f13a6d72b10cea163))
+
 ## [6.12.3](https://github.com/entur/gha-api/compare/v6.12.2...v6.12.3) (2026-11-17)
 
 
