@@ -144,6 +144,8 @@ jobs:
           #Capture return code in $rc, and do not fail workflow.
           spectral lint "$GHA_API_PATH" --ruleset "rulesets/.spectral.yml" --show-documentation-url -F hint -f github-actions -o.github-actions "$annotations" -f markdown -o.markdown="$markdown" && rc=$? || rc=$?
           
+          # markdown=$(sed 's/[{}]/\\&/g' <<< "$markdown")
+          
           #Return code 2 means that spectral command failed to run (not linting errors), so fail workflow.
           if [ "$rc" -eq 2 ]; then
             echo "::error::Spectral execution error (exit code $rc)."

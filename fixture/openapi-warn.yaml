@@ -16,8 +16,16 @@ tags:
   - name: example
     description: "Tag for example operations"
 paths:
-  /example-api: #Warning for -api
+  /example-api/{fooId}: #Warning for -api
     get:
+      parameters:
+        - name: "fooId"
+          description: "The foo ID."
+          in: "path"
+          required: true
+          schema:
+            type: string
+          example: "100"
       description: "a good description"
       tags:
         - example
